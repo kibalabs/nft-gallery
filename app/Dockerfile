@@ -10,7 +10,7 @@ RUN npm ci
 
 # Build app
 COPY . .
-RUN npm run build-static
+RUN npm run build
 
 # Stage 2: Serve build files with nginx
 FROM ghcr.io/kibalabs/app-serve:latest
