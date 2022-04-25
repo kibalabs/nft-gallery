@@ -23,17 +23,17 @@ jobs:
     needs: deploy-app
     runs-on: ubuntu-latest
     env:
-      NAME: pfpkit-app
+      NAME: mdtp-gallery-app
       VERSION: ${{ github.sha }}
       DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
     steps:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.MDTPBOX_URL }}
-          username: ${{ secrets.MDTPBOX_USER }}
-          key: ${{ secrets.MDTPBOX_SSH_KEY }}
-          port: ${{ secrets.MDTPBOX_PORT }}
+          host: ${{ secrets.APIBOX_URL }}
+          username: ${{ secrets.APIBOX_USER }}
+          key: ${{ secrets.APIBOX_SSH_KEY }}
+          port: ${{ secrets.APIBOX_PORT }}
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
