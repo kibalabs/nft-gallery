@@ -34,7 +34,7 @@ export const HomePage = (): React.ReactElement => {
         tokenId: metadataObject.tokenId,
         name: metadataObject.name,
         description: metadataObject.description,
-        imageUrl: , // metadataObject['image'],
+        imageUrl: `https://mdtp-images.s3.eu-west-1.amazonaws.com/images/${metadataObject.tokenId}.png`, // metadataObject['image'],
         attributes: (metadataObject.attributes || []).map((attribute: object): TokenAttribute => {
           return {
             name: attribute.trait_type,
