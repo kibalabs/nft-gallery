@@ -71,11 +71,7 @@ export const HomePage = (): React.ReactElement => {
   return (
     <React.Fragment>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2} paddingHorizontal={PaddingSize.Wide2}>
-        <Text variant='header1'>
-          {tokenCollection ? tokenCollection.name : ''}
-          {' '}
-Gallery
-        </Text>
+        <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
             <Box width='300px' isFullHeight={true}>
