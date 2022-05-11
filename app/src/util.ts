@@ -70,7 +70,7 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
     bannerImageUrl: collectionMetadata.bannerImageUrl as string | null,
     doesSupportErc721: collectionMetadata.doesSupportErc721 as boolean,
     doesSupportErc1155: collectionMetadata.doesSupportErc1155 as boolean,
-    tokens: tokens,
+    tokens,
     attributes: tokenAttributes,
   };
 };
