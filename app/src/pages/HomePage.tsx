@@ -6,7 +6,8 @@ import { Alignment, Box, Direction, EqualGrid, LinkBase, LoadingSpinner, Padding
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
 import metadata from '../metadata_consolidated.json';
-import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from '../model';
+import { Token, TokenCollection } from '../model';
+import { loadTokenCollectionFromFile } from '../util';
 
 
 export const HomePage = (): React.ReactElement => {
@@ -29,60 +30,8 @@ export const HomePage = (): React.ReactElement => {
   useScrollListener(scrollingRef.current, onScrolled);
 
   useDeepCompareEffect((): void => {
-    const parsedTokens = (metadata as unknown as object[]).map((metadataObject: object): Token => {
-      return {
-        tokenId: metadataObject.tokenId,
-        name: metadataObject.name,
-        description: metadataObject.description,
-        imageUrl: `https://mdtp-images.s3.eu-west-1.amazonaws.com/images/${metadataObject.tokenId}.png`, // metadataObject['image'],
-        attributes: (metadataObject.attributes || []).map((attribute: object): TokenAttribute => {
-          return {
-            name: attribute.trait_type,
-            value: attribute.value ? attribute.value : null,
-          };
-        }),
-        attributeMap: (metadataObject.attributes || []).reduce((current: Record<string, string>, attribute: object): Record<string, string> => {
-          // eslint-disable-next-line no-param-reassign
-          current[attribute.trait_type] = attribute.value ? attribute.value : null;
-          return current;
-        }, {}),
-      };
-    });
-    parsedTokens.sort((token1: Token, token2: Token): number => token1.tokenId - token2.tokenId);
-
-    const tokenAttributes: Record<string, TokenCollectionAttribute> = {};
-    parsedTokens.forEach((token: Token): void => {
-      token.attributes.forEach((attribute: TokenAttribute): void => {
-        let tokenAttribute = tokenAttributes[attribute.name];
-        if (!tokenAttribute) {
-          tokenAttribute = {
-            name: attribute.name,
-            tokenIds: [],
-            values: {},
-          };
-          tokenAttributes[tokenAttribute.name] = tokenAttribute;
-        }
-        tokenAttribute.tokenIds.push(token.tokenId);
-        let tokenValue = tokenAttribute.values[attribute.value];
-        if (!tokenValue) {
-          tokenValue = {
-            name: attribute.value,
-            tokenIds: [],
-          };
-          tokenAttribute.values[tokenValue.name] = tokenValue;
-        }
-        tokenValue.tokenIds.push(token.tokenId);
-      });
-    });
-
-    setTokenCollection({
-      tokens: parsedTokens.reduce((current: Record<string, Token>, value: Token): Record<string, Token> => {
-        // eslint-disable-next-line no-param-reassign
-        current[value.tokenId] = value;
-        return current;
-      }, {}),
-      attributes: tokenAttributes,
-    });
+    const loadedTokenCollection = loadTokenCollectionFromFile();
+    setTokenCollection(loadedTokenCollection);
   }, [metadata]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string): void => {
@@ -122,7 +71,7 @@ export const HomePage = (): React.ReactElement => {
   return (
     <React.Fragment>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2} paddingHorizontal={PaddingSize.Wide2}>
-        <Text variant='header1'>MDTP NFT Gallery</Text>
+        <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
             <Box width='300px' isFullHeight={true}>

@@ -12,6 +12,7 @@ interface ITokenDialogProps {
 }
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
+  const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
   return (
     <Dialog
       isOpen={props.isOpen}
@@ -22,7 +23,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
         <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
           <Box maxHeight='30em' width='50%'>
-            <Image source={props.token.imageUrl} isLazyLoadable={true} />
+            <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
           </Box>
           <Spacing variant={PaddingSize.Wide2} />
           <Box width='50%'>
