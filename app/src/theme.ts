@@ -165,6 +165,17 @@ export const buildAppTheme = (): ITheme => {
         },
       },
     },
+    inputWrappers: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'background-color': '$colors.backgroundDark10',
+            },
+          },
+        },
+      },
+    },
   });
   return theme;
 };
