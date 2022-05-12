@@ -1,12 +1,12 @@
 import React from 'react';
 
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, EqualGrid, LinkBase, LoadingSpinner, PaddingSize, Pill, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, IOption, KibaIcon, LoadingSpinner, OptionSelect, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
 import metadata from '../metadata_consolidated.json';
-import { Token, TokenCollection } from '../model';
+import { Token, TokenCollection, TokenCollectionAttribute } from '../model';
 import { loadTokenCollectionFromFile } from '../util';
 
 
@@ -34,9 +34,9 @@ export const HomePage = (): React.ReactElement => {
     setTokenCollection(loadedTokenCollection);
   }, [metadata]);
 
-  const onAttributeValueClicked = (attributeName: string, attributeValue: string): void => {
+  const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
-    if (filtersCopy[attributeName] === attributeValue) {
+    if (filtersCopy[attributeName] === attributeValue || !attributeValue) {
       delete filtersCopy[attributeName];
     } else {
       filtersCopy[attributeName] = attributeValue;
@@ -63,6 +63,24 @@ export const HomePage = (): React.ReactElement => {
     navigator.navigateTo('/');
   };
 
+  const getOptions = (attribute: TokenCollectionAttribute): IOption[] => {
+    return Object.keys(attribute.values).map((valueKey: string): IOption => ({
+      text: attribute.values[valueKey].name,
+      itemKey: attribute.values[valueKey].name,
+      // listItemVariant?: string;
+      // textVariant?: string;
+      // isDisabled?: boolean;
+    }));
+  };
+
+  const onOptionSelected = (attribute: TokenCollectionAttribute, itemKey: string): void => {
+    onAttributeValueClicked(attribute.name, itemKey);
+  };
+
+  const getSelectedOptionKey = (attribute: TokenCollectionAttribute): string | undefined => {
+    return filters[attribute.name];
+  };
+
   // eslint-disable-next-line no-restricted-globals
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
   // eslint-disable-next-line no-restricted-globals
@@ -76,25 +94,30 @@ export const HomePage = (): React.ReactElement => {
           <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
             <Box width='300px' isFullHeight={true}>
               <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-                <Text variant='header3'>FILTER</Text>
+                {/* <Text variant='header3'>FILTER</Text> */}
                 {tokenCollection === undefined ? (
                   <LoadingSpinner />
                 ) : (
                   <React.Fragment>
                     {Object.keys(tokenCollection.attributes).map((attributeKey: string): React.ReactElement => (
-                      <Stack key={tokenCollection.attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start}>
+                      <Stack key={tokenCollection.attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
                         <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Fill} isFullWidth={true}>
                           <Text variant='bold-large'>{tokenCollection.attributes[attributeKey].name}</Text>
-                          <Text variant='note'>{tokenCollection.attributes[attributeKey].tokenIds.length}</Text>
+                          {/* <Text variant='note'>{tokenCollection.attributes[attributeKey].tokenIds.length}</Text> */}
                         </Stack>
-                        {Object.keys(tokenCollection.attributes[attributeKey].values).map((valueKey: string): React.ReactElement => (
+                        <OptionSelect
+                          options={getOptions(tokenCollection.attributes[attributeKey])}
+                          onItemClicked={(itemKey: string) => onOptionSelected(tokenCollection.attributes[attributeKey], itemKey)}
+                          selectedItemKey={getSelectedOptionKey(tokenCollection.attributes[attributeKey])}
+                        />
+                        {/* {Object.keys(tokenCollection.attributes[attributeKey].values).map((valueKey: string): React.ReactElement => (
                           <LinkBase key={valueKey} onClicked={(): void => onAttributeValueClicked(attributeKey, valueKey)} isFullWidth={true}>
                             <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Fill} isFullWidth={true}>
                               <Text>{tokenCollection.attributes[attributeKey].values[valueKey].name || 'none'}</Text>
                               <Text variant='note'>{tokenCollection.attributes[attributeKey].values[valueKey].tokenIds.length}</Text>
                             </Stack>
                           </LinkBase>
-                        ))}
+                        ))} */}
                       </Stack>
                     ))}
                   </React.Fragment>
@@ -106,7 +129,7 @@ export const HomePage = (): React.ReactElement => {
               <Stack direction={Direction.Vertical} shouldAddGutters={true}>
                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
                   {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                    <Pill key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} />
+                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
                   ))}
                 </Stack>
                 <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
