@@ -1,18 +1,49 @@
 import React from 'react';
 
+import { dateToString, isToday } from '@kibalabs/core';
 import { Alignment, Box, Dialog, Direction, EqualGrid, Image, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
+import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
-import { Token } from '../model';
+import { useGlobals } from '../globalsContext';
+import { Token, TokenCollection } from '../model';
 
 interface ITokenDialogProps {
   token: Token;
   isOpen: boolean;
   onCloseClicked: () => void;
+  collectionAddress: TokenCollection;
 }
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
+  const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const { notdClient } = useGlobals();
+
+  const updateTokenSales = React.useCallback(async (): Promise<void> => {
+    setTokenSales(undefined);
+    notdClient.getTokenRecentSales(props.collectionAddress.address, props.token.tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSales(tokenTransfers);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTokenSales(null);
+    });
+  }, [notdClient, props.collectionAddress.address, props.token.tokenId]);
+
+  React.useEffect((): void => {
+    updateTokenSales();
+  }, [updateTokenSales]);
+
+  const getTokenDateString = (tokenDate: Date): string => {
+    if (tokenDate !== null) {
+      if (isToday(tokenDate)) {
+        return dateToString(tokenDate, 'HH:mm');
+      }
+      return dateToString(tokenDate, 'dd-MMM-yyyy');
+    }
+    return '';
+  };
+
   return (
     <Dialog
       isOpen={props.isOpen}
@@ -35,6 +66,15 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
                 ))}
               </EqualGrid>
+              {tokenSales && tokenSales.length > 0 ? (
+                <React.Fragment>
+                  <Text variant='note'>owner:</Text>
+                  <Text variant='bold'>{tokenSales[0].toAddress}</Text>
+                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
+                </React.Fragment>
+              ) : (
+                <Text variant='note'>Not currently owned</Text>
+              )}
             </Stack>
           </Box>
         </Stack>
