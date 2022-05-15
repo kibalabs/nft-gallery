@@ -9,6 +9,7 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
       name: metadataObject.name as string,
       description: metadataObject.description as string,
       imageUrl: metadataObject.imageUrl as string,
+      frameImageUrl: metadataObject.frameImageUrl as string,
       attributes: (metadataObject.attributes as Record<string, unknown>[] || []).map((attribute: Record<string, unknown>): TokenAttribute => {
         return {
           name: attribute.trait_type as string,
@@ -72,5 +73,6 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
     doesSupportErc1155: collectionMetadata.doesSupportErc1155 as boolean,
     tokens,
     attributes: tokenAttributes,
+    frameImageUrl: collectionMetadata.frameImageUrl as string | null,
   };
 };

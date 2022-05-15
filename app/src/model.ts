@@ -11,6 +11,7 @@ export interface Token {
   imageUrl: string;
   attributes: TokenAttribute[];
   attributeMap: Record<string, string>;
+  frameImageUrl: string;
 }
 
 export interface TokenCollectionAttributeValue {
@@ -41,4 +42,5 @@ export interface TokenCollection {
   doesSupportErc1155: boolean;
   tokens: Record<number, Token>;
   attributes: Record<string, TokenCollectionAttribute>;
+  frameImageUrl: string | null;
 }
