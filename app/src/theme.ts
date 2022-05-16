@@ -57,6 +57,10 @@ export const buildAppTheme = (): ITheme => {
         'border-width': '0.20em',
         'border-color': '#FFFFFF',
       },
+      overlay: {
+        'background-color': '$colors.backgroundClear10',
+        'backdrop-filter': 'blur(3px)',
+      },
     },
     pills: {
       default: {
