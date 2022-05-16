@@ -3,13 +3,13 @@ import { transparentize } from 'polished';
 
 export const buildAppTheme = (): ITheme => {
   const baseTheme = buildTheme();
+  // const brandPrimary = 'rgb(119,187,149)';
   const brandPrimary = '#B3C7F8';
   const theme = buildTheme({
     colors: {
       brandPrimary,
       brandSecondary: '#2D86A3',
       background: '#000000',
-      text: '#ffffff',
     },
     fonts: {
       main: {
@@ -56,6 +56,10 @@ export const buildAppTheme = (): ITheme => {
         'border-style': 'dashed',
         'border-width': '0.20em',
         'border-color': '#FFFFFF',
+      },
+      overlay: {
+        'background-color': '$colors.backgroundClear10',
+        'backdrop-filter': 'blur(3px)',
       },
     },
     pills: {
@@ -170,7 +174,7 @@ export const buildAppTheme = (): ITheme => {
         normal: {
           default: {
             background: {
-              'background-color': '$colors.backgroundDark10',
+              'background-color': '$colors.backgroundDark05',
             },
           },
         },

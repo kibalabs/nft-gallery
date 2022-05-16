@@ -32,9 +32,9 @@ export const App = (props: IAppProps): React.ReactElement => {
   ];
 
   return (
-    <KibaApp theme={theme} background={{ linearGradient: 'rgb(0, 0, 0), rgb(25, 24, 37)' }} setHead={props.setHead} isFullPageApp={true}>
+    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true}>
       <Head headId='app'>
-        <title>MDTP Gallery</title>
+        <title>Token Gallery</title>
       </Head>
       <AccountControlProvider>
         <GlobalsProvider globals={globals}>

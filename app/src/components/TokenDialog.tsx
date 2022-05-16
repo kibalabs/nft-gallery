@@ -22,12 +22,14 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     >
       <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
         <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
-          <Box maxHeight='30em' width='50%'>
-            <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
-          </Box>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Box maxHeight='30em' maxWidth='50%' isFullWidth={false}>
+              <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
+            </Box>
+          </Stack.Item>
           <Spacing variant={PaddingSize.Wide2} />
-          <Box width='50%'>
-            <Stack direction={Direction.Vertical}>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} isFullHeight={true}>
               <Text variant='header2'>{props.token.name}</Text>
               <Spacing variant={PaddingSize.Wide} />
               <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
@@ -36,7 +38,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                 ))}
               </EqualGrid>
             </Stack>
-          </Box>
+          </Stack.Item>
         </Stack>
       </ResponsiveTextAlignmentView>
     </Dialog>
