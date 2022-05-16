@@ -1,4 +1,4 @@
-import metadata from './metadata_consolidated.json';
+import metadata from './metadata_consolidated_sprites.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
 export const loadTokenCollectionFromFile = (): TokenCollection => {
