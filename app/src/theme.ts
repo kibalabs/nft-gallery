@@ -1,13 +1,27 @@
-import { buildTheme, ITheme } from '@kibalabs/ui-react';
+import { buildTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
 import { transparentize } from 'polished';
+import { getProject } from './util';
+import { RecursivePartial } from '@kibalabs/core';
 
-export const buildAppTheme = (): ITheme => {
+export const buildProjectTheme = (): ITheme => {
+  const overrideTheme = buildOverrideTheme();
+  if (getProject() === 'sprites') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      colors: {
+        brandPrimary: 'rgb(119,187,149)',
+        background: '#ffffff',
+        text: '#111111',
+      }
+    }));
+  };
+  return buildTheme(overrideTheme);
+}
+
+export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
   const baseTheme = buildTheme();
-  // const brandPrimary = 'rgb(119,187,149)';
-  const brandPrimary = '#B3C7F8';
-  const theme = buildTheme({
+  return {
     colors: {
-      brandPrimary,
+      brandPrimary: '#B3C7F8',
       brandSecondary: '#2D86A3',
       background: '#000000',
     },
@@ -100,75 +114,6 @@ export const buildAppTheme = (): ITheme => {
         },
       },
     },
-    buttons: {
-      primary: {
-        normal: {
-          default: {
-            background: {
-              'border-color': transparentize(0.6, brandPrimary),
-              'border-width': '1px',
-              'background-color': 'transparent',
-              'box-shadow': `0px 0px 4px 4px ${transparentize(0.8, brandPrimary)}`,
-            },
-            text: {
-              color: '$colors.brandPrimary',
-              'text-shadow': `0px 0px 0.75em ${transparentize(0.5, brandPrimary)}`,
-            },
-          },
-          hover: {
-            background: {
-              'background-color': '$colors.brandPrimaryClear95',
-            },
-          },
-          press: {
-            background: {
-              'background-color': '$colors.brandPrimaryClear90',
-            },
-          },
-        },
-      },
-      large: {
-        normal: {
-          default: {
-            background: {
-              'border-radius': '1em',
-            },
-            text: {
-              'font-size': '1.2em',
-              'text-shadow': `0px 0px 0.75em ${transparentize(0.25, brandPrimary)}`,
-            },
-          },
-        },
-      },
-    },
-    selectableViews: {
-      default: {
-        normal: {
-          default: {
-            background: {
-            },
-            overlay: baseTheme.linkBases.default.normal.default.background,
-          },
-          hover: {
-            overlay: baseTheme.linkBases.default.normal.hover.background,
-          },
-          press: {
-            overlay: baseTheme.linkBases.default.normal.press.background,
-          },
-          focus: {
-            overlay: baseTheme.linkBases.default.normal.focus.background,
-          },
-        },
-        selected: {
-          default: {
-            overlay: {
-              'background-color': 'rgba(255, 255, 255, 0.1)',
-              padding: baseTheme.dimensions.padding,
-            },
-          },
-        },
-      },
-    },
     inputWrappers: {
       default: {
         normal: {
@@ -180,6 +125,5 @@ export const buildAppTheme = (): ITheme => {
         },
       },
     },
-  });
-  return theme;
+  };
 };
