@@ -21,11 +21,14 @@ export const HomePage = (): React.ReactElement => {
   const responsiveScreenSize = useResponsiveScreenSize();
 
   const onScrolled = React.useCallback((): void => {
+    console.log('onScrolled');
     if (!scrollingRef.current) {
       return;
     }
     const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
+    console.log('size', size);
     if (size - scrollingRef.current.scrollTop < 500) {
+      console.log('scrollingRef.current.scrollTop', scrollingRef.current.scrollTop);
       setTokenLimit(tokenLimit + 25);
     }
   }, [scrollingRef, tokenLimit]);
@@ -96,17 +99,19 @@ export const HomePage = (): React.ReactElement => {
               <Stack.Item growthFactor={1} shrinkFactor={1}>
                 <LayerContainer>
                   <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                    <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
+                    <Stack direction={Direction.Vertical} isScrollableVertically={false} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
                       <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
                         {Object.keys(filters).map((filterKey: string): React.ReactElement => (
                           <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
                         ))}
                       </Stack>
-                      <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} isFullHeight={true} shouldAddGutters={true}>
-                        {filteredTokens.map((token: Token): React.ReactElement => (
-                          <TokenCard key={String(token.tokenId)} token={token} />
-                        ))}
-                      </EqualGrid>
+                      <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+                          {filteredTokens.map((token: Token): React.ReactElement => (
+                            <TokenCard key={String(token.tokenId)} token={token} />
+                          ))}
+                        </EqualGrid>
+                      </Stack.Item>
                     </Stack>
                   </Box>
                   {isResponsiveFilterShowing && (responsiveScreenSize === ScreenSize.Base || responsiveScreenSize === ScreenSize.Small) && (
