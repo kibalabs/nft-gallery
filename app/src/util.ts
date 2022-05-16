@@ -12,7 +12,7 @@ declare global {
 
 export const getProject = (): string => {
   return window.KRT_PROJECT ?? 'mdtp';
-}
+};
 
 export const loadTokenCollectionFromFile = (): TokenCollection => {
   let collectionMetadata: Record<string, unknown>;

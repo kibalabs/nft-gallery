@@ -1,7 +1,7 @@
-import { buildTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
-import { transparentize } from 'polished';
-import { getProject } from './util';
 import { RecursivePartial } from '@kibalabs/core';
+import { buildTheme, ITheme, mergeThemePartial } from '@kibalabs/ui-react';
+
+import { getProject } from './util';
 
 export const buildProjectTheme = (): ITheme => {
   const overrideTheme = buildOverrideTheme();
@@ -11,14 +11,13 @@ export const buildProjectTheme = (): ITheme => {
         brandPrimary: 'rgb(119,187,149)',
         background: '#ffffff',
         text: '#111111',
-      }
+      },
     }));
-  };
+  }
   return buildTheme(overrideTheme);
-}
+};
 
 export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
-  const baseTheme = buildTheme();
   return {
     colors: {
       brandPrimary: '#B3C7F8',
