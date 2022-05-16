@@ -52,7 +52,7 @@ jobs:
               --env LETSENCRYPT_HOST=${url} \
               --env-file ${varsFile} \
               ${DOCKER_IMAGE}
-  run-app-sprite:
+  run-app-sprites:
     needs: deploy-app
     runs-on: ubuntu-latest
     env:
