@@ -96,17 +96,19 @@ export const HomePage = (): React.ReactElement => {
               <Stack.Item growthFactor={1} shrinkFactor={1}>
                 <LayerContainer>
                   <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                    <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
+                    <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
                       <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
                         {Object.keys(filters).map((filterKey: string): React.ReactElement => (
                           <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
                         ))}
                       </Stack>
-                      <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} isFullHeight={true} shouldAddGutters={true}>
-                        {filteredTokens.map((token: Token): React.ReactElement => (
-                          <TokenCard key={String(token.tokenId)} token={token} />
-                        ))}
-                      </EqualGrid>
+                      <Stack.Item growthFactor={1}>
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
+                          {filteredTokens.map((token: Token): React.ReactElement => (
+                            <TokenCard key={String(token.tokenId)} token={token} />
+                          ))}
+                        </EqualGrid>
+                      </Stack.Item>
                     </Stack>
                   </Box>
                   {isResponsiveFilterShowing && (responsiveScreenSize === ScreenSize.Base || responsiveScreenSize === ScreenSize.Small) && (
