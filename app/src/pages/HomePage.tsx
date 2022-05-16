@@ -80,7 +80,7 @@ export const HomePage = (): React.ReactElement => {
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
         <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
         <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-          <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter' : 'Show Filter'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
+          <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
         </ResponsiveHidingView>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           {tokenCollection === undefined ? (
