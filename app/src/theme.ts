@@ -3,13 +3,13 @@ import { transparentize } from 'polished';
 
 export const buildAppTheme = (): ITheme => {
   const baseTheme = buildTheme();
-  const brandPrimary = 'rgb(119,187,149)';
+  // const brandPrimary = 'rgb(119,187,149)';
+  const brandPrimary = '#B3C7F8';
   const theme = buildTheme({
     colors: {
       brandPrimary,
       brandSecondary: '#2D86A3',
-      background: '#ffffff',
-      text: '#111111',
+      background: '#000000',
     },
     fonts: {
       main: {
