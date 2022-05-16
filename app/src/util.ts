@@ -1,8 +1,26 @@
 import metadata from './metadata_consolidated.json';
+import spritesMetadata from './metadata_consolidated_sprites.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
+declare global {
+  export interface Window {
+    KRT_API_URL?: string;
+    KRT_ENV?: string;
+    KRT_PROJECT?: string;
+  }
+}
+
+export const getProject = (): string => {
+  return window.KRT_PROJECT ?? 'mdtp';
+};
+
 export const loadTokenCollectionFromFile = (): TokenCollection => {
-  const collectionMetadata = metadata as Record<string, unknown>;
+  let collectionMetadata: Record<string, unknown>;
+  if (getProject() === 'sprites') {
+    collectionMetadata = spritesMetadata as Record<string, unknown>;
+  } else {
+    collectionMetadata = metadata as Record<string, unknown>;
+  }
   const parsedTokens = (collectionMetadata.tokens as Record<string, unknown>[]).map((metadataObject: Record<string, unknown>): Token => {
     return {
       tokenId: metadataObject.tokenId as number,

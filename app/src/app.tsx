@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AccountControlProvider } from './AccountContext';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { HomePage } from './pages/HomePage';
-import { buildAppTheme } from './theme';
+import { buildProjectTheme } from './theme';
 
 declare global {
   export interface Window {
@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const theme = buildAppTheme();
+const theme = buildProjectTheme();
 
 const globals: IGlobals = {
 };
