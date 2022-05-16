@@ -21,14 +21,11 @@ export const HomePage = (): React.ReactElement => {
   const responsiveScreenSize = useResponsiveScreenSize();
 
   const onScrolled = React.useCallback((): void => {
-    console.log('onScrolled');
     if (!scrollingRef.current) {
       return;
     }
     const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
-    console.log('size', size);
     if (size - scrollingRef.current.scrollTop < 500) {
-      console.log('scrollingRef.current.scrollTop', scrollingRef.current.scrollTop);
       setTokenLimit(tokenLimit + 25);
     }
   }, [scrollingRef, tokenLimit]);
