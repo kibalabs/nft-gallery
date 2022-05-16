@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, IOption, KibaIcon, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, IOption, KibaIcon, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
@@ -93,6 +93,9 @@ export const HomePage = (): React.ReactElement => {
 
   return (
     <React.Fragment>
+      <Head>
+        <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
+      </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
         <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
