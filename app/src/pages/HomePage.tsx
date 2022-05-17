@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, EqualGrid, LinkBase, LoadingSpinner, PaddingSize, Pill, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
+import { Filter } from '../components/Filter';
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
 import metadata from '../metadata_consolidated.json';
@@ -15,7 +16,9 @@ export const HomePage = (): React.ReactElement => {
   const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(undefined);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
+  const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
+  const responsiveScreenSize = useResponsiveScreenSize();
 
   const onScrolled = React.useCallback((): void => {
     if (!scrollingRef.current) {
@@ -34,14 +37,15 @@ export const HomePage = (): React.ReactElement => {
     setTokenCollection(loadedTokenCollection);
   }, [metadata]);
 
-  const onAttributeValueClicked = (attributeName: string, attributeValue: string): void => {
+  const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
-    if (filtersCopy[attributeName] === attributeValue) {
+    if (filtersCopy[attributeName] === attributeValue || !attributeValue) {
       delete filtersCopy[attributeName];
     } else {
       filtersCopy[attributeName] = attributeValue;
     }
     setFilters(filtersCopy);
+    scrollingRef.current.scrollTop = 0;
   };
 
   const filteredTokens = React.useMemo((): Token[] | undefined => {
@@ -70,61 +74,54 @@ export const HomePage = (): React.ReactElement => {
 
   return (
     <React.Fragment>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2} paddingHorizontal={PaddingSize.Wide2}>
+      <Head>
+        <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
+      </Head>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
         <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+          <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
+        </ResponsiveHidingView>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-          <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullHeight={true} isFullWidth={true}>
-            <Box width='300px' isFullHeight={true}>
-              <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-                <Text variant='header3'>FILTER</Text>
-                {tokenCollection === undefined ? (
-                  <LoadingSpinner />
-                ) : (
-                  <React.Fragment>
-                    {Object.keys(tokenCollection.attributes).map((attributeKey: string): React.ReactElement => (
-                      <Stack key={tokenCollection.attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start}>
-                        <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Fill} isFullWidth={true}>
-                          <Text variant='bold-large'>{tokenCollection.attributes[attributeKey].name}</Text>
-                          <Text variant='note'>{tokenCollection.attributes[attributeKey].tokenIds.length}</Text>
-                        </Stack>
-                        {Object.keys(tokenCollection.attributes[attributeKey].values).map((valueKey: string): React.ReactElement => (
-                          <LinkBase key={valueKey} onClicked={(): void => onAttributeValueClicked(attributeKey, valueKey)} isFullWidth={true}>
-                            <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Fill} isFullWidth={true}>
-                              <Text>{tokenCollection.attributes[attributeKey].values[valueKey].name || 'none'}</Text>
-                              <Text variant='note'>{tokenCollection.attributes[attributeKey].values[valueKey].tokenIds.length}</Text>
-                            </Stack>
-                          </LinkBase>
+          {tokenCollection === undefined ? (
+            <LoadingSpinner />
+          ) : (
+            <Stack direction={Direction.Horizontal} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} isFullHeight={true} isFullWidth={true}>
+              <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                <Spacing variant={PaddingSize.Wide2} />
+                <Box width='300px' isFullHeight={true}>
+                  <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} tokenCollection={tokenCollection} />
+                </Box>
+              </ResponsiveHidingView>
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                <LayerContainer>
+                  <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                    <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
+                      <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
+                        {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                          <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
                         ))}
                       </Stack>
-                    ))}
-                  </React.Fragment>
-                )}
-              </Stack>
-            </Box>
-            <Spacing />
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Stack direction={Direction.Vertical} shouldAddGutters={true}>
-                <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
-                  {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                    <Pill key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} />
-                  ))}
-                </Stack>
-                <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                  <div ref={scrollingRef} style={{ overflowY: 'auto' }}>
-                    {tokenCollection === undefined ? (
-                      <LoadingSpinner />
-                    ) : (
-                      <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} isFullHeight={false} shouldAddGutters={true}>
-                        {filteredTokens.map((token: Token): React.ReactElement => (
-                          <TokenCard key={String(token.tokenId)} token={token} />
-                        ))}
-                      </EqualGrid>
-                    )}
-                  </div>
-                </Stack.Item>
-              </Stack>
-            </Stack.Item>
-          </Stack>
+                      <Stack.Item growthFactor={1}>
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
+                          {filteredTokens.map((token: Token): React.ReactElement => (
+                            <TokenCard key={String(token.tokenId)} token={token} />
+                          ))}
+                        </EqualGrid>
+                      </Stack.Item>
+                    </Stack>
+                  </Box>
+                  {isResponsiveFilterShowing && (responsiveScreenSize === ScreenSize.Base || responsiveScreenSize === ScreenSize.Small) && (
+                    <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                      <Box variant='overlay' isFullHeight={true} width='80%' maxWidth='350px'>
+                        <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} tokenCollection={tokenCollection} />
+                      </Box>
+                    </ResponsiveHidingView>
+                  )}
+                </LayerContainer>
+              </Stack.Item>
+            </Stack>
+          )}
         </Stack.Item>
       </Stack>
       {isTokenSubpageShowing && chosenToken && (

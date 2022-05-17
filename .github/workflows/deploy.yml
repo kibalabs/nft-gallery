@@ -52,3 +52,36 @@ jobs:
               --env LETSENCRYPT_HOST=${url} \
               --env-file ${varsFile} \
               ${DOCKER_IMAGE}
+  run-app-sprites:
+    needs: deploy-app
+    runs-on: ubuntu-latest
+    env:
+      NAME: sprites-gallery-app
+      VERSION: ${{ github.sha }}
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
+    steps:
+      - name: executing remote ssh commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.APIBOX_URL }}
+          username: ${{ secrets.APIBOX_USER }}
+          key: ${{ secrets.APIBOX_SSH_KEY }}
+          port: ${{ secrets.APIBOX_PORT }}
+          envs: DOCKER_IMAGE,NAME,VERSION
+          script_stop: true
+          script: |
+            url="sprites-gallery.kibalabs.com"
+            varsFile=~/.${NAME}.vars
+            docker pull ${DOCKER_IMAGE}
+            docker stop ${NAME} && docker rm ${NAME} || true
+            docker run \
+              --name ${NAME} \
+              --detach \
+              --publish-all \
+              --restart on-failure \
+              --env NAME=${NAME} \
+              --env VERSION=${VERSION} \
+              --env VIRTUAL_HOST=${url} \
+              --env LETSENCRYPT_HOST=${url} \
+              --env-file ${varsFile} \
+              ${DOCKER_IMAGE}

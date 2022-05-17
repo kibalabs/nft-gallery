@@ -10,7 +10,7 @@ import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { HomePage } from './pages/HomePage';
-import { buildAppTheme } from './theme';
+import { buildProjectTheme } from './theme';
 
 declare global {
   export interface Window {
@@ -23,7 +23,7 @@ const requester = new Requester(undefined, undefined, false);
 const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 
-const theme = buildAppTheme();
+const theme = buildProjectTheme();
 
 const globals: IGlobals = {
   requester,
@@ -41,9 +41,9 @@ export const App = (props: IAppProps): React.ReactElement => {
   ];
 
   return (
-    <KibaApp theme={theme} background={{ linearGradient: 'rgb(0, 0, 0), rgb(25, 24, 37)' }} setHead={props.setHead} isFullPageApp={true}>
+    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true}>
       <Head headId='app'>
-        <title>MDTP Gallery</title>
+        <title>Token Gallery</title>
       </Head>
       <AccountControlProvider>
         <GlobalsProvider globals={globals}>
