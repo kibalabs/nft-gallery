@@ -68,17 +68,22 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
                 ))}
               </EqualGrid>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingLeft={PaddingSize.Wide}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} paddingLeft={PaddingSize.Wide}>
                 {tokenSalesTransfers && tokenSalesTransfers.length > 0 ? (
                   <React.Fragment>
                     <Text variant='note'>owner</Text>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
-                        <Image source= {imageUrl} alternativeText='Avatar' />
+                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${tokenSalesTransfers[0].toAddress}/image`} alternativeText='Avatar' />
                       </Box>
                       <Text>{tokenSalesTransfers[0].toAddress}</Text>
                     </Stack>
-                    <Text>{`Last Bought for Ξ${tokenSalesTransfers[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSalesTransfers[0].blockDate)}`}</Text>
+                    <Spacing variant={PaddingSize.Wide} />
+                    <Text variant='note'>Last Buy Price</Text>
+                    <Text>{` Ξ${tokenSalesTransfers[0].value / 1000000000000000000.0}`}</Text>
+                    <Spacing variant={PaddingSize.Wide} />
+                    <Text variant='note'>Last Buy Date</Text>
+                    <Text>{getTokenDateString(tokenSalesTransfers[0].blockDate)}</Text>
                   </React.Fragment>
                 ) : (
                   <Text variant='note'>Not currently owned</Text>
