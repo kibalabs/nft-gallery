@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, LinkBase, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { KeyValue } from '../components/KeyValue';
 import { Token } from '../model';
@@ -38,12 +38,15 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
                 ))}
               </EqualGrid>
-              <React.Fragment>
-                <Text variant='note'>Frame Image Url</Text>
-                <LinkBase target={frameImageUrl}>
-                  <Text>{truncateMiddle(props.token.frameImageUrl, 25)}</Text>
-                </LinkBase>
-              </React.Fragment>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingLeft={PaddingSize.Wide}>
+                <Text variant='note'>Frame</Text>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+                  <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                    <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
+                  </Box>
+                  <Link text={truncateMiddle(props.token.frameImageUrl, 30)} target={frameImageUrl} />
+                </Stack>
+              </Stack>
             </Stack>
           </Box>
         </Stack>
