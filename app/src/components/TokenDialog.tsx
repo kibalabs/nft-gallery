@@ -17,16 +17,16 @@ interface ITokenDialogProps {
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
-  const [tokenSales, setTokenSales] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [tokenSalesTransfers, setTokenSalesTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const { notdClient } = useGlobals();
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    setTokenSales(undefined);
-    notdClient.getTokenRecentSales(props.collectionAddress.address, props.token.tokenId).then((tokenTransfers: TokenTransfer[]): void => {
-      setTokenSales(tokenTransfers);
+    setTokenSalesTransfers(undefined);
+    notdClient.getTokenRecentTransfers(props.collectionAddress.address, props.token.tokenId).then((tokenTransfers: TokenTransfer[]): void => {
+      setTokenSalesTransfers(tokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
-      setTokenSales(null);
+      setTokenSalesTransfers(null);
     });
   }, [notdClient, props.collectionAddress.address, props.token.tokenId]);
 
@@ -66,15 +66,22 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
                 ))}
               </EqualGrid>
-              {tokenSales && tokenSales.length > 0 ? (
-                <React.Fragment>
-                  <Text variant='note'>owner:</Text>
-                  <Text variant='bold'>{tokenSales[0].toAddress}</Text>
-                  <Text>{`Last Bought for Ξ${tokenSales[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSales[0].blockDate)}`}</Text>
-                </React.Fragment>
-              ) : (
-                <Text variant='note'>Not currently owned</Text>
-              )}
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingLeft={PaddingSize.Wide}>
+                {tokenSalesTransfers && tokenSalesTransfers.length > 0 ? (
+                  <React.Fragment>
+                    <Text variant='note'>owner</Text>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                        <Image source= {imageUrl} alternativeText='Avatar' />
+                      </Box>
+                      <Text>{tokenSalesTransfers[0].toAddress}</Text>
+                    </Stack>
+                    <Text>{`Last Bought for Ξ${tokenSalesTransfers[0].value / 1000000000000000000.0} on ${getTokenDateString(tokenSalesTransfers[0].blockDate)}`}</Text>
+                  </React.Fragment>
+                ) : (
+                  <Text variant='note'>Not currently owned</Text>
+                )}
+              </Stack>
             </Stack>
           </Box>
         </Stack>

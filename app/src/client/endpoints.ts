@@ -2,10 +2,9 @@ import { RequestData, ResponseData } from '@kibalabs/core';
 
 import * as Resources from './resources';
 
-export class GetTokenRecentSalesRequest extends RequestData {
+export class GetTokenRecentTransfersRequest extends RequestData {
 }
-
-export class GetTokenRecentSalesResponse extends ResponseData {
+export class GetTokenRecentTransfersResponse extends ResponseData {
   readonly tokenTransfers: Resources.TokenTransfer[];
 
   public constructor(TokenRecentSales: Resources.TokenTransfer[]) {
@@ -13,8 +12,8 @@ export class GetTokenRecentSalesResponse extends ResponseData {
     this.tokenTransfers = TokenRecentSales;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentSalesResponse => {
-    return new GetTokenRecentSalesResponse(
+  public static fromObject = (obj: Record<string, unknown>): GetTokenRecentTransfersResponse => {
+    return new GetTokenRecentTransfersResponse(
       (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
     );
   };
