@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { truncateMiddle } from '@kibalabs/core';
+import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { KeyValue } from '../components/KeyValue';
 import { Token } from '../model';
@@ -13,6 +14,8 @@ interface ITokenDialogProps {
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
+  const frameImageUrl = props.token.frameImageUrl.startsWith('ipfs://') ? props.token.frameImageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.frameImageUrl;
+
   return (
     <Dialog
       isOpen={props.isOpen}
@@ -37,6 +40,15 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
                 ))}
               </EqualGrid>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingLeft={PaddingSize.Wide}>
+                <Text variant='note'>Frame</Text>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+                  <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                    <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
+                  </Box>
+                  <Link text={truncateMiddle(props.token.frameImageUrl, 30)} target={frameImageUrl} />
+                </Stack>
+              </Stack>
             </Stack>
           </Stack.Item>
         </Stack>
