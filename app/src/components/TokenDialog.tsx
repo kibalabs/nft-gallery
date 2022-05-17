@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { dateToString, isToday } from '@kibalabs/core';
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { dateToString, isToday, truncateMiddle } from '@kibalabs/core';
+import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
@@ -17,6 +17,7 @@ interface ITokenDialogProps {
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
+  const frameImageUrl = props.token.frameImageUrl.startsWith('ipfs://') ? props.token.frameImageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.frameImageUrl;
   const [tokenSalesTransfers, setTokenSalesTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const { notdClient } = useGlobals();
 
@@ -88,6 +89,14 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                 ) : (
                   <Text variant='note'>Not currently owned</Text>
                 )}
+                <Spacing variant={PaddingSize.Wide} />
+                <Text variant='note'>Frame</Text>
+                <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+                  <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                    <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
+                  </Box>
+                  <Link text={truncateMiddle(props.token.frameImageUrl, 30)} target={frameImageUrl} />
+                </Stack>
               </Stack>
             </Stack>
           </Stack.Item>
