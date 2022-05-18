@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, isToday, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, LinkBase, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
@@ -77,7 +77,9 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                       <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
                         <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${tokenSalesTransfers[0].toAddress}/image`} alternativeText='Avatar' />
                       </Box>
-                      <Text>{tokenSalesTransfers[0].toAddress}</Text>
+                      <LinkBase target={`https://nft.tokenhunt.io/accounts/${tokenSalesTransfers[0].toAddress}`}>
+                        <Text>{truncateMiddle(tokenSalesTransfers[0].toAddress, 20)}</Text>
+                      </LinkBase>
                     </Stack>
                     <Spacing variant={PaddingSize.Wide} />
                     <Text variant='note'>Last Buy Price</Text>
