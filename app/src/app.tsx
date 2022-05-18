@@ -1,11 +1,13 @@
 import React from 'react';
 
-import { IRoute, Router } from '@kibalabs/core-react';
+import { LocalStorageClient, Requester } from '@kibalabs/core';
+import { IRoute, MockStorage, Router } from '@kibalabs/core-react';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { AccountControlProvider } from './AccountContext';
+import { NotdClient } from './client/client';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { HomePage } from './pages/HomePage';
 import { buildProjectTheme } from './theme';
@@ -17,9 +19,16 @@ declare global {
   }
 }
 
+const requester = new Requester(undefined, undefined, false);
+const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
+const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
+
 const theme = buildProjectTheme();
 
 const globals: IGlobals = {
+  requester,
+  notdClient,
+  localStorageClient,
 };
 
 export interface IAppProps extends IHeadRootProviderProps {

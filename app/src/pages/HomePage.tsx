@@ -129,6 +129,7 @@ export const HomePage = (): React.ReactElement => {
           token={chosenToken}
           isOpen={isTokenSubpageShowing}
           onCloseClicked={onCloseSubpageClicked}
+          collectionAddress={tokenCollection}
         />
       )}
     </React.Fragment>
