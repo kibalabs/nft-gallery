@@ -11,7 +11,7 @@ declare global {
 }
 
 export const getProject = (): string => {
-  return window.KRT_PROJECT ?? 'mdtp';
+  return window.KRT_PROJECT ?? 'sprites';
 };
 
 export const loadTokenCollectionFromFile = (): TokenCollection => {

@@ -5,7 +5,7 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
 import { toast } from 'react-toastify';
 
-export type Account = {
+type Account = {
   address: string;
   signer: ethers.Signer;
 }
@@ -22,11 +22,11 @@ interface IAccountControlProviderProps extends IMultiAnyChildProps {
 }
 
 export const AccountControlProvider = (props: IAccountControlProviderProps): React.ReactElement => {
-  const [accounts, setAccounts] = React.useState<Account[] | undefined | null>(undefined);
   const [web3, setWeb3] = React.useState<ethers.providers.Web3Provider | null | undefined>(undefined);
+  const [accounts, setAccounts] = React.useState<Account[] | undefined | null>(undefined);
 
   const loadWeb3 = async (): Promise<void> => {
-    const provider = await detectEthereumProvider();
+    const provider = await detectEthereumProvider() as ethers.providers.ExternalProvider;
     if (!provider) {
       setAccounts(null);
       return;
@@ -36,6 +36,9 @@ export const AccountControlProvider = (props: IAccountControlProviderProps): Rea
   };
 
   const onAccountsChanged = React.useCallback(async (accountAddresses: string[]): Promise<void> => {
+    if (!web3) {
+      return;
+    }
     // NOTE(krishan711): metamask only deals with one account at the moment but returns an array for future compatibility
     const linkedAccounts = accountAddresses.map((accountAddress: string): ethers.Signer => web3.getSigner(accountAddress));
     Promise.all(linkedAccounts.map((account: ethers.Signer): Promise<string> => account.getAddress())).then((retrievedAccountIds: string[]): void => {
@@ -49,7 +52,9 @@ export const AccountControlProvider = (props: IAccountControlProviderProps): Rea
     if (!web3) {
       return;
     }
+    // @ts-expect-error
     onAccountsChanged(await web3.provider.request({ method: 'eth_accounts' }));
+    // @ts-expect-error
     web3.provider.on('accountsChanged', onAccountsChanged);
   }, [web3, onAccountsChanged]);
 
@@ -58,17 +63,19 @@ export const AccountControlProvider = (props: IAccountControlProviderProps): Rea
   }, [loadAccounts]);
 
   const onLinkAccountsClicked = async (): Promise<void> => {
-    if (web3) {
-      web3.provider.request({ method: 'eth_requestAccounts', params: [] }).then(async (): Promise<void> => {
-        await loadWeb3();
-      }).catch((error: unknown): void => {
-        if (error.message?.includes('wallet_requestPermissions')) {
-          toast.error('You already have a MetaMask request window open, please find it!');
-        } else {
-          toast.error('Something went wrong connecting to MetaMask. Please try refresh the page / your browser and try again');
-        }
-      });
+    if (!web3) {
+      return;
     }
+    // @ts-expect-error
+    web3.provider.request({ method: 'eth_requestAccounts', params: [] }).then(async (): Promise<void> => {
+      await loadWeb3();
+    }).catch((error: unknown): void => {
+      if ((error as Error).message?.includes('wallet_requestPermissions')) {
+        toast.error('You already have a MetaMask request window open, please find it!');
+      } else {
+        toast.error('Something went wrong connecting to MetaMask. Please try refresh the page / your browser and try again');
+      }
+    });
   };
 
   useInitialization((): void => {

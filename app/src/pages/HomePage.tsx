@@ -3,6 +3,8 @@ import React from 'react';
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
+import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
+import { Account } from '../components/Account';
 import { Filter } from '../components/Filter';
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
@@ -13,12 +15,18 @@ import { loadTokenCollectionFromFile } from '../util';
 
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
+  const account = useAccount();
   const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(undefined);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const responsiveScreenSize = useResponsiveScreenSize();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+
+  const onConnectWalletClicked = async (): Promise<void> => {
+    await onLinkAccountsClicked();
+  };
 
   const onScrolled = React.useCallback((): void => {
     if (!scrollingRef.current) {
@@ -77,8 +85,15 @@ export const HomePage = (): React.ReactElement => {
       <Head>
         <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
-        <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
+        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
+          <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+          { !account ? (
+            <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
+          ) : (
+            <Account accountId={account.address} />
+          )}
+        </Stack>
         <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
           <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
         </ResponsiveHidingView>

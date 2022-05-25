@@ -20,7 +20,7 @@ declare global {
 }
 
 const requester = new Requester(undefined, undefined, false);
-const notdClient = new NotdClient(requester, typeof window !== 'undefined' ? window.KRT_API_URL : undefined);
+const notdClient = new NotdClient(requester, typeof window !== 'undefined' && window.KRT_API_URL ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 
 const theme = buildProjectTheme();
@@ -31,25 +31,26 @@ const globals: IGlobals = {
   localStorageClient,
 };
 
+const routes: IRoute<IGlobals>[] = [
+  { path: '/*', page: HomePage },
+];
+
 export interface IAppProps extends IHeadRootProviderProps {
   staticPath?: string;
+  pageData?: unknown | undefined | null;
 }
 
 export const App = (props: IAppProps): React.ReactElement => {
-  const routes: IRoute[] = [
-    { path: '/*', page: HomePage },
-  ];
-
   return (
     <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true}>
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>
-      <AccountControlProvider>
-        <GlobalsProvider globals={globals}>
+      <GlobalsProvider globals={globals}>
+        <AccountControlProvider>
           <Router staticPath={props.staticPath} routes={routes} />
-        </GlobalsProvider>
-      </AccountControlProvider>
+        </AccountControlProvider>
+      </GlobalsProvider>
       <ToastContainer />
     </KibaApp>
   );

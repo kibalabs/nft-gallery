@@ -1,4 +1,5 @@
 import { dateFromString } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
   readonly tokenTransferId: number;
@@ -7,7 +8,7 @@ export class TokenTransfer {
   readonly fromAddress: string;
   readonly toAddress: string;
   readonly tokenId: string;
-  readonly value: number;
+  readonly value: BigNumber;
   readonly gasLimit: number;
   readonly gasPrice: number;
   readonly gasUsed: number;
@@ -15,7 +16,7 @@ export class TokenTransfer {
   readonly blockHash: string;
   readonly blockDate: Date;
 
-  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: number, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date) {
+  public constructor(tokenTransferId: number, transactionHash: string, registryAddress: string, fromAddress: string, toAddress: string, tokenId: string, value: BigNumber, gasLimit: number, gasPrice: number, gasUsed: number, blockNumber: number, blockHash: string, blockDate: Date) {
     this.tokenTransferId = tokenTransferId;
     this.transactionHash = transactionHash;
     this.registryAddress = registryAddress;
@@ -39,7 +40,7 @@ export class TokenTransfer {
       String(obj.fromAddress),
       String(obj.toAddress),
       String(obj.tokenId),
-      Number(obj.value),
+      BigNumber.from(String(obj.value)),
       Number(obj.gasLimit),
       Number(obj.gasPrice),
       Number(obj.gasUsed),
