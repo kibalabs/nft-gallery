@@ -1,33 +1,41 @@
 import React from 'react';
 
 import { dateToString, isToday, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, LinkBase, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
+import { useAccount } from '../AccountContext';
+import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
 import { Token, TokenCollection } from '../model';
+import { truncateEnd } from '../stringUtil';
+import { resolveUrl } from '../urlUtil';
 
 interface ITokenDialogProps {
   token: Token;
   isOpen: boolean;
-  onCloseClicked: () => void;
   collectionAddress: TokenCollection;
+  onCloseClicked: () => void;
 }
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
-  const imageUrl = props.token.imageUrl.startsWith('ipfs://') ? props.token.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.imageUrl;
-  const frameImageUrl = props.token.frameImageUrl && props.token.frameImageUrl.startsWith('ipfs://') ? props.token.frameImageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/') : props.token.frameImageUrl;
-  const [tokenSalesTransfers, setTokenSalesTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const account = useAccount();
   const { notdClient } = useGlobals();
+  const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+
+  const imageUrl = resolveUrl(props.token.imageUrl);
+  const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
+  const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
+  const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    setTokenSalesTransfers(undefined);
-    notdClient.getTokenRecentTransfers(props.collectionAddress.address, props.token.tokenId).then((tokenTransfers: TokenTransfer[]): void => {
-      setTokenSalesTransfers(tokenTransfers);
+    setTokenTransfers(undefined);
+    notdClient.getTokenRecentTransfers(props.collectionAddress.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+      setTokenTransfers(retrievedTokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
-      setTokenSalesTransfers(null);
+      setTokenTransfers(null);
     });
   }, [notdClient, props.collectionAddress.address, props.token.tokenId]);
 
@@ -61,49 +69,46 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
           </Stack.Item>
           <Spacing variant={PaddingSize.Wide2} />
           <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} isFullHeight={true}>
+            <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullHeight={true}>
               <Text variant='header2'>{props.token.name}</Text>
               <Spacing variant={PaddingSize.Wide} />
-              <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Wide}>
-                {Object.keys(props.token.attributeMap).map((attributeKey: string): React.ReactElement => (
-                  <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='bold' />
-                ))}
-              </EqualGrid>
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} paddingLeft={PaddingSize.Wide}>
-                {tokenSalesTransfers && tokenSalesTransfers.length > 0 ? (
-                  <React.Fragment>
-                    <Text variant='note'>owner</Text>
+              { tokenTransfers === undefined ? (
+                <LoadingSpinner />
+              ) : tokenTransfers === null || !latestTransfer ? (
+                <Text variant='note'>Not currently owned</Text>
+              ) : (
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow}>
+                  <Text variant='note'>Owner</Text>
+                  <LinkBase target={`https://nft.tokenhunt.io/accounts/${latestTransfer.toAddress}`}>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
-                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${tokenSalesTransfers[0].toAddress}/image`} alternativeText='Avatar' />
+                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
                       </Box>
-                      <LinkBase target={`https://nft.tokenhunt.io/accounts/${tokenSalesTransfers[0].toAddress}`}>
-                        <Text>{truncateMiddle(tokenSalesTransfers[0].toAddress, 20)}</Text>
-                      </LinkBase>
+                      <Text>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
                     </Stack>
-                    <Spacing variant={PaddingSize.Wide} />
-                    <Text variant='note'>Last Buy Price</Text>
-                    <Text>{` Ξ${tokenSalesTransfers[0].value / 1000000000000000000.0}`}</Text>
-                    <Spacing variant={PaddingSize.Wide} />
-                    <Text variant='note'>Last Buy Date</Text>
-                    <Text>{getTokenDateString(tokenSalesTransfers[0].blockDate)}</Text>
-                  </React.Fragment>
-                ) : (
-                  <Text variant='note'>Not currently owned</Text>
-                )}
-              </Stack>
+                  </LinkBase>
+                  <Spacing variant={PaddingSize.Default} />
+                  <Text variant='note'>Last Transfer</Text>
+                  <Text>{`${shortFormatEther(latestTransfer.value)} on ${getTokenDateString(latestTransfer.blockDate)}`}</Text>
+                </Stack>
+              )}
               <Spacing variant={PaddingSize.Wide} />
               { frameImageUrl && (
-                <Stack direction={Direction.Vertical} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingLeft={PaddingSize.Wide}>
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
                   <Text variant='note'>Frame</Text>
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Start} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-                    <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                    <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
                       <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
                     </Box>
-                    <Link text={truncateMiddle(props.token.frameImageUrl, 30)} target={frameImageUrl} />
+                    <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
                   </Stack>
                 </Stack>
               )}
+              <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                {Object.keys(props.token.attributeMap).map((attributeKey: string): React.ReactElement => (
+                  <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='default' />
+                ))}
+              </EqualGrid>
             </Stack>
           </Stack.Item>
         </Stack>
