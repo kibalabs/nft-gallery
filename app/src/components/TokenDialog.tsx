@@ -33,7 +33,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
-  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId()
+  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId();
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);
@@ -65,7 +65,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     if (!account) {
       setIsTreasureHuntSubmitting(false);
       setTreasureHuntSubmittingError(Error('Please connect your wallet to submit'));
-      return
+      return;
     }
     const message = JSON.stringify({
       command: 'COMPLETE_TREASURE_HUNT',
@@ -85,7 +85,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     }
     setIsTreasureHuntSubmitted(true);
     setIsTreasureHuntSubmitting(false);
-  }
+  };
 
   return (
     <Dialog
@@ -147,7 +147,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   ) : (
                     <React.Fragment>
                       {isTreasureHuntSubmitted ? (
-                        <Text variant='success'>You're in, jump into the Sprites discord to find out if you won!</Text>
+                        <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
                       ) : !account ? (
                         <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
                       ) : (

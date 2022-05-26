@@ -19,7 +19,7 @@ export const getTreasureHuntTokenId = (): string | null => {
     return '101';
   }
   return null;
-}
+};
 
 export const loadTokenCollectionFromFile = (): TokenCollection => {
   let collectionMetadata: Record<string, unknown>;

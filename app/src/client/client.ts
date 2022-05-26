@@ -4,7 +4,6 @@ import * as Endpoints from './endpoints';
 import * as Resources from './resources';
 
 export class NotdClient extends ServiceClient {
-
   public constructor(requester: Requester, baseUrl?: string) {
     super(requester, baseUrl || 'https://notd-api.kibalabs.com');
   }

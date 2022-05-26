@@ -39,8 +39,8 @@ export class SubmitTreasureHuntForCollectionTokenRequest extends RequestData {
 }
 
 export class SubmitTreasureHuntForCollectionTokenResponse extends ResponseData {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   public static fromObject = (obj: Record<string, unknown>): SubmitTreasureHuntForCollectionTokenResponse => {
-    return new SubmitTreasureHuntForCollectionTokenResponse(
-    );
-  }
+    return new SubmitTreasureHuntForCollectionTokenResponse();
+  };
 }
