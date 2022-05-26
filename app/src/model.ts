@@ -5,23 +5,23 @@ export interface TokenAttribute {
 }
 
 export interface Token {
-  tokenId: number;
+  tokenId: string;
   name: string;
-  description: string;
+  description: string| null;
   imageUrl: string;
+  frameImageUrl: string | null;
   attributes: TokenAttribute[];
   attributeMap: Record<string, string>;
-  frameImageUrl: string;
 }
 
 export interface TokenCollectionAttributeValue {
   name: string;
-  tokenIds: number[];
+  tokenIds: string[];
 }
 
 export interface TokenCollectionAttribute {
   name: string;
-  tokenIds: number[];
+  tokenIds: string[];
   values: Record<string, TokenCollectionAttributeValue>;
 }
 

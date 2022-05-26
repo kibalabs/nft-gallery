@@ -1,4 +1,4 @@
-import metadata from './metadata_consolidated.json';
+import metadata from './metadata_consolidated_mdtp.json';
 import spritesMetadata from './metadata_consolidated_sprites.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
@@ -14,6 +14,13 @@ export const getProject = (): string => {
   return window.KRT_PROJECT ?? 'sprites';
 };
 
+export const getTreasureHuntTokenId = (): string | null => {
+  if (getProject() === 'sprites') {
+    return '101';
+  }
+  return null;
+};
+
 export const loadTokenCollectionFromFile = (): TokenCollection => {
   let collectionMetadata: Record<string, unknown>;
   if (getProject() === 'sprites') {
@@ -23,15 +30,15 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
   }
   const parsedTokens = (collectionMetadata.tokens as Record<string, unknown>[]).map((metadataObject: Record<string, unknown>): Token => {
     return {
-      tokenId: metadataObject.tokenId as number,
-      name: metadataObject.name as string,
-      description: metadataObject.description as string,
-      imageUrl: metadataObject.imageUrl as string,
-      frameImageUrl: metadataObject.frameImageUrl as string,
+      tokenId: String(metadataObject.tokenId),
+      name: String(metadataObject.name),
+      description: metadataObject.description ? String(metadataObject.description) : null,
+      imageUrl: String(metadataObject.imageUrl),
+      frameImageUrl: metadataObject.frameImageUrl ? String(metadataObject.frameImageUrl) : null,
       attributes: (metadataObject.attributes as Record<string, unknown>[] || []).map((attribute: Record<string, unknown>): TokenAttribute => {
         return {
-          name: attribute.trait_type as string,
-          value: attribute.value ? attribute.value as string : 'None',
+          name: String(attribute.trait_type),
+          value: attribute.value ? String(attribute.value) : 'None',
         };
       }),
       attributeMap: (metadataObject.attributes as Record<string, unknown>[] || []).reduce((current: Record<string, string>, attribute: Record<string, unknown>): Record<string, string> => {
@@ -41,7 +48,7 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
       }, {}),
     };
   });
-  parsedTokens.sort((token1: Token, token2: Token): number => token1.tokenId - token2.tokenId);
+  // parsedTokens.sort((token1: Token, token2: Token): number => token1.tokenId - token2.tokenId);
 
   const tokenAttributes: Record<string, TokenCollectionAttribute> = {};
   parsedTokens.forEach((token: Token): void => {

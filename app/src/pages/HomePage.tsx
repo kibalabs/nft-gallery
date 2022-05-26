@@ -8,7 +8,6 @@ import { Account } from '../components/Account';
 import { Filter } from '../components/Filter';
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
-import metadata from '../metadata_consolidated.json';
 import { Token, TokenCollection } from '../model';
 import { loadTokenCollectionFromFile } from '../util';
 
@@ -16,13 +15,13 @@ import { loadTokenCollectionFromFile } from '../util';
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const account = useAccount();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(undefined);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const responsiveScreenSize = useResponsiveScreenSize();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
 
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
@@ -43,7 +42,7 @@ export const HomePage = (): React.ReactElement => {
   useDeepCompareEffect((): void => {
     const loadedTokenCollection = loadTokenCollectionFromFile();
     setTokenCollection(loadedTokenCollection);
-  }, [metadata]);
+  }, []);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -124,7 +123,7 @@ export const HomePage = (): React.ReactElement => {
                       <Stack.Item growthFactor={1}>
                         <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
                           {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard key={String(token.tokenId)} token={token} />
+                            <TokenCard key={token.tokenId} token={token} />
                           ))}
                         </EqualGrid>
                       </Stack.Item>
@@ -150,9 +149,9 @@ export const HomePage = (): React.ReactElement => {
       {isTokenSubpageShowing && chosenToken && (
         <TokenDialog
           token={chosenToken}
+          tokenCollection={tokenCollection}
           isOpen={isTokenSubpageShowing}
           onCloseClicked={onCloseSubpageClicked}
-          collectionAddress={tokenCollection}
         />
       )}
     </React.Fragment>
