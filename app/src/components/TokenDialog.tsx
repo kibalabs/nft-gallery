@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { dateToString, isToday, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { useAccount } from '../AccountContext';
+import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
@@ -11,33 +11,39 @@ import { useGlobals } from '../globalsContext';
 import { Token, TokenCollection } from '../model';
 import { truncateEnd } from '../stringUtil';
 import { resolveUrl } from '../urlUtil';
+import { getTreasureHuntTokenId } from '../util';
 
 interface ITokenDialogProps {
   token: Token;
   isOpen: boolean;
-  collectionAddress: TokenCollection;
+  tokenCollection: TokenCollection;
   onCloseClicked: () => void;
 }
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const account = useAccount();
   const { notdClient } = useGlobals();
+  const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
+  const [isTreasureHuntSubmitted, setIsTreasureHuntSubmitted] = React.useState<boolean>(false);
+  const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
 
   const imageUrl = resolveUrl(props.token.imageUrl);
   const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
+  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId()
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);
-    notdClient.getTokenRecentTransfers(props.collectionAddress.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+    notdClient.getTokenRecentTransfers(props.tokenCollection.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
       setTokenTransfers(retrievedTokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenTransfers(null);
     });
-  }, [notdClient, props.collectionAddress.address, props.token.tokenId]);
+  }, [notdClient, props.tokenCollection.address, props.token.tokenId]);
 
   React.useEffect((): void => {
     updateTokenSales();
@@ -52,6 +58,34 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     }
     return '';
   };
+
+  const onSubmitClicked = async (): Promise<void> => {
+    setTreasureHuntSubmittingError(null);
+    setIsTreasureHuntSubmitting(true);
+    if (!account) {
+      setIsTreasureHuntSubmitting(false);
+      setTreasureHuntSubmittingError(Error('Please connect your wallet to submit'));
+      return
+    }
+    const message = JSON.stringify({
+      command: 'COMPLETE_TREASURE_HUNT',
+      message: {
+        registryAddress: props.tokenCollection.address,
+        tokenId: props.token.tokenId,
+      },
+    });
+    let signature;
+    try {
+      signature = await account.signer.signMessage(message);
+      await notdClient.submitTreasureHuntForCollectionToken(props.tokenCollection.address, props.token.tokenId, account.address, signature);
+    } catch (error: unknown) {
+      setIsTreasureHuntSubmitting(false);
+      setTreasureHuntSubmittingError(error as Error);
+      return;
+    }
+    setIsTreasureHuntSubmitted(true);
+    setIsTreasureHuntSubmitting(false);
+  }
 
   return (
     <Dialog
@@ -102,6 +136,28 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                     </Box>
                     <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
                   </Stack>
+                </Stack>
+              )}
+              { isTreasureHuntToken && (
+                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
+                  <Text variant='note'>Treasure Hunt</Text>
+                  <Text>You found the chosen Sprite!</Text>
+                  {isTreasureHuntSubmitting ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <React.Fragment>
+                      {isTreasureHuntSubmitted ? (
+                        <Text variant='success'>You're in, jump into the Sprites discord to find out if you won!</Text>
+                      ) : !account ? (
+                        <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
+                      ) : (
+                        <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
+                      )}
+                      {treasureHuntSubmittingError && (
+                        <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
+                      )}
+                    </React.Fragment>
+                  )}
                 </Stack>
               )}
               <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
