@@ -18,6 +18,7 @@ export const buildProjectTheme = (): ITheme => {
 };
 
 export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
+  const baseTheme = buildTheme();
   return {
     colors: {
       brandPrimary: '#B3C7F8',
@@ -57,6 +58,10 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       },
     },
     boxes: {
+      notification: {
+        "background-color": '$colors.brandPrimaryClear90',
+        padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide2}`,
+      },
       card: {
         margin: '0',
       },

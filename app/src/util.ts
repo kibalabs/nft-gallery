@@ -11,7 +11,7 @@ declare global {
 }
 
 export const getProject = (): string => {
-  return window.KRT_PROJECT ?? 'sprites';
+  return window.KRT_PROJECT ?? 'mdtp';
 };
 
 export const getTreasureHuntTokenId = (): string | null => {

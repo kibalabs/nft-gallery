@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, PaddingView, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from '../components/Account';
@@ -9,7 +9,7 @@ import { Filter } from '../components/Filter';
 import { TokenCard } from '../components/TokenCard';
 import { TokenDialog } from '../components/TokenDialog';
 import { Token, TokenCollection } from '../model';
-import { loadTokenCollectionFromFile } from '../util';
+import { getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../util';
 
 
 export const HomePage = (): React.ReactElement => {
@@ -85,14 +85,23 @@ export const HomePage = (): React.ReactElement => {
         <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
-          <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2} shouldWrapItems={true}>
+          <Stack.Item shrinkFactor={1} growthFactor={1}>
+            <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+          </Stack.Item>
           { !account ? (
             <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
           ) : (
             <Account accountId={account.address} />
           )}
         </Stack>
+        { getTreasureHuntTokenId() && (
+          <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
+            <Box variant='notification'>
+              <Text variant='success'>🕵️‍♂️🕵️‍♀️ The hunt is on, find the Sprite to win a prize! Here's your clue: "The tokenId is the beginner class in school"</Text>
+            </Box>
+          </Stack>
+        )}
         <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
           <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
         </ResponsiveHidingView>
