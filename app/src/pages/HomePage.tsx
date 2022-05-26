@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, PaddingSize, PaddingView, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Account } from '../components/Account';
@@ -98,7 +98,7 @@ export const HomePage = (): React.ReactElement => {
         { getTreasureHuntTokenId() && (
           <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
             <Box variant='notification'>
-              <Text variant='success'>🕵️‍♂️🕵️‍♀️ The hunt is on, find the Sprite to win a prize! Here's your clue: "The tokenId is the beginner class in school"</Text>
+              <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
             </Box>
           </Stack>
         )}
