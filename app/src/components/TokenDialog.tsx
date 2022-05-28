@@ -127,7 +127,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                 </Stack>
               )}
               <Spacing variant={PaddingSize.Wide} />
-              { frameImageUrl && (
+              { props.token.frameImageUrl && frameImageUrl && (
                 <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
                   <Text variant='note'>Frame</Text>
                   <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>

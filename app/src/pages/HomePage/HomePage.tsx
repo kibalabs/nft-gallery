@@ -1,22 +1,27 @@
 import React from 'react';
 
-import { useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
+import { useDeepCompareCallback, useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
-import { Account } from '../components/Account';
-import { Filter } from '../components/Filter';
-import { TokenCard } from '../components/TokenCard';
-import { TokenDialog } from '../components/TokenDialog';
-import { Token, TokenCollection } from '../model';
-import { getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../util';
+import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
+import { CollectionToken } from '../../client';
+import { Account } from '../../components/Account';
+import { Filter } from '../../components/Filter';
+import { TokenCard } from '../../components/TokenCard';
+import { TokenDialog } from '../../components/TokenDialog';
+import { useGlobals } from '../../globalsContext';
+import { Token, TokenCollection } from '../../model';
+import { getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../../util';
 
 
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const account = useAccount();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
+  const { notdClient } = useGlobals();
   const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(undefined);
+  const [ownedTokens, setOwnedTokens] = React.useState<Token[] | undefined | null>(undefined);
+  const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
@@ -44,6 +49,33 @@ export const HomePage = (): React.ReactElement => {
     setTokenCollection(loadedTokenCollection);
   }, []);
 
+  const getCollectionHoldings = useDeepCompareCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setOwnedTokens(undefined);
+    }
+    if (!account) {
+      setOwnedTokens(null);
+      return;
+    }
+    if (!tokenCollection) {
+      setOwnedTokens(undefined);
+      return;
+    }
+    notdClient.getCollectionHoldings(tokenCollection.address, account.address).then((collectionTokens: CollectionToken[]): void => {
+      const newOwnedTokens = collectionTokens.map((collectionToken: CollectionToken): Token => {
+        return tokenCollection.tokens[collectionToken.tokenId];
+      });
+      setOwnedTokens(newOwnedTokens);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setOwnedTokens(null);
+    });
+  }, [notdClient, tokenCollection, account]);
+
+  React.useEffect((): void => {
+    getCollectionHoldings();
+  }, [getCollectionHoldings]);
+
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
     if (filtersCopy[attributeName] === attributeValue || !attributeValue) {
@@ -52,15 +84,24 @@ export const HomePage = (): React.ReactElement => {
       filtersCopy[attributeName] = attributeValue;
     }
     setFilters(filtersCopy);
-    scrollingRef.current.scrollTop = 0;
+    if (scrollingRef.current) {
+      scrollingRef.current.scrollTop = 0;
+    }
   };
 
   const filteredTokens = React.useMemo((): Token[] | undefined => {
     if (!tokenCollection || !tokenCollection.tokens) {
       return undefined;
     }
+    let tokens = Object.values(tokenCollection.tokens);
+    if (showOwnedTokensOnly) {
+      if (!ownedTokens) {
+        return undefined;
+      }
+      tokens = ownedTokens;
+    }
     const validFilterKeys = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] != null);
-    const innerFilteredTokens = Object.values(tokenCollection.tokens).filter((token: Token): boolean => {
+    const innerFilteredTokens = tokens.filter((token: Token): boolean => {
       let match = true;
       validFilterKeys.forEach((filterKey: string): void => {
         match = match && token.attributeMap[filterKey] === filters[filterKey];
@@ -68,7 +109,7 @@ export const HomePage = (): React.ReactElement => {
       return match;
     });
     return innerFilteredTokens.slice(0, tokenLimit);
-  }, [tokenCollection, filters, tokenLimit]);
+  }, [tokenCollection, filters, tokenLimit, showOwnedTokensOnly, ownedTokens]);
 
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
@@ -92,7 +133,7 @@ export const HomePage = (): React.ReactElement => {
           { !account ? (
             <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
           ) : (
-            <Account accountId={account.address} />
+            <Account accountId={account.address} target={`https://nft.tokenhunt.io/accounts/${account.address}`} />
           )}
         </Stack>
         { getTreasureHuntTokenId() && (
@@ -113,14 +154,14 @@ export const HomePage = (): React.ReactElement => {
                 {tokenCollection === undefined ? (
                   <LoadingSpinner />
                 ) : (
-                  <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} tokenCollection={tokenCollection} />
+                  <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} account={account} showOwnedTokensOnly={showOwnedTokensOnly} setShowOwnedTokensOnly={setShowOwnedTokensOnly} tokenCollection={tokenCollection} />
                 )}
               </Box>
             </ResponsiveHidingView>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <LayerContainer>
                 <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                  {tokenCollection === undefined ? (
+                  {tokenCollection === undefined || filteredTokens === undefined ? (
                     <LoadingSpinner />
                   ) : (
                     <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
@@ -130,11 +171,15 @@ export const HomePage = (): React.ReactElement => {
                         ))}
                       </Stack>
                       <Stack.Item growthFactor={1}>
-                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
-                          {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard key={token.tokenId} token={token} />
-                          ))}
-                        </EqualGrid>
+                        {filteredTokens.length > 0 ? (
+                          <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
+                            {filteredTokens.map((token: Token): React.ReactElement => (
+                              <TokenCard key={token.tokenId} token={token} />
+                            ))}
+                          </EqualGrid>
+                        ) : (
+                          <Text>No tokens match filter</Text>
+                        )}
                       </Stack.Item>
                     </Stack>
                   )}
@@ -145,7 +190,7 @@ export const HomePage = (): React.ReactElement => {
                       {tokenCollection === undefined ? (
                         <LoadingSpinner />
                       ) : (
-                        <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} tokenCollection={tokenCollection} />
+                        <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} account={account} showOwnedTokensOnly={showOwnedTokensOnly} setShowOwnedTokensOnly={setShowOwnedTokensOnly} tokenCollection={tokenCollection} />
                       )}
                     </Box>
                   </ResponsiveHidingView>
