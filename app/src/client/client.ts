@@ -16,10 +16,13 @@ export class NotdClient extends ServiceClient {
     return response.tokenTransfers;
   };
 
-  // @router.post('/collections/{registryAddress}/tokens/{tokenId}/submit-treasure-hunt')
-  // async def submit_treasure_hunt_for_collection_token(registryAddress: str, tokenId: str, request: SubmitTreasureHuntForCollectionTokenRequest):
-  //     await notdManager.submit_treasure_hunt_for_collection_token(registryAddress=registryAddress, tokenId=tokenId, userAddress=request.userAddress, signature=request.signature)
-  //     return SubmitTreasureHuntForCollectionTokenResponse()
+  public getCollectionHoldings = async (address: string, ownerAddress: string): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/tokens/owner/${ownerAddress}`;
+    const request = new Endpoints.GetCollectionHoldingsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionHoldingsResponse);
+    return response.tokens;
+  };
 
   public submitTreasureHuntForCollectionToken = async (registryAddress: string, tokenId: string, userAddress: string, signature: string): Promise<void> => {
     const method = RestMethod.POST;

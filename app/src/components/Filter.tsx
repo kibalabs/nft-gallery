@@ -1,14 +1,18 @@
 import React from 'react';
 
-import { Alignment, Direction, IOption, OptionSelect, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Checkbox, Direction, IOption, OptionSelect, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
 
+import { Account } from '../AccountContext';
 import { TokenCollection, TokenCollectionAttribute } from '../model';
 
 
 export interface IFilterProps {
+  account: Account | null | undefined;
   tokenCollection: TokenCollection;
   filters: Record<string, string>;
   onAttributeValueClicked: (attributeName: string, attributeValue: string | null | undefined) => void;
+  showOwnedTokensOnly: boolean;
+  setShowOwnedTokensOnly: (newShowOwnedTokensOnly: boolean) => void;
 }
 
 export const Filter = (props: IFilterProps): React.ReactElement => {
@@ -26,8 +30,15 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     return props.filters[attribute.name];
   };
 
+  const onShowOwnedTokensOnlyToggled = (): void => {
+    props.setShowOwnedTokensOnly(!props.showOwnedTokensOnly);
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingRight={PaddingSize.Default}>
+      {props.account && (
+        <Checkbox text='Show owned tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
+      )}
       {Object.keys(props.tokenCollection.attributes).map((attributeKey: string): React.ReactElement => (
         <Stack key={props.tokenCollection.attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
           <Text variant='bold-large'>{props.tokenCollection.attributes[attributeKey].name}</Text>
