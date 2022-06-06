@@ -1,16 +1,13 @@
 import React from 'react';
 
-import { dateToString, isToday, truncateMiddle } from '@kibalabs/core';
+import { dateToString, isToday, resolveUrl, shortFormatEther, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Button, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
-import { shortFormatEther } from '../chainUtil';
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
 import { Token, TokenCollection } from '../model';
-import { truncateEnd } from '../stringUtil';
-import { resolveUrl } from '../urlUtil';
 import { getTreasureHuntTokenId } from '../util';
 
 interface ITokenDialogProps {
