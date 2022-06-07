@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useDeepCompareCallback, useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { CollectionToken } from '../../client';
@@ -11,7 +11,7 @@ import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { Token, TokenCollection } from '../../model';
-import { getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../../util';
+import { getBackgroundMusic, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../../util';
 
 
 export const HomePage = (): React.ReactElement => {
@@ -25,8 +25,24 @@ export const HomePage = (): React.ReactElement => {
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
+  const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(true);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const responsiveScreenSize = useResponsiveScreenSize();
+  const logoImageUrl = getLogoImageUrl();
+  const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
+    return getBackgroundMusic() ? new Audio(getBackgroundMusic()) : null;
+  }, []);
+
+  React.useEffect((): void => {
+    if (!backgroundMusic) {
+      return;
+    }
+    if (shouldPlayMusic && backgroundMusic) {
+      backgroundMusic.play();
+    } else {
+      backgroundMusic.pause();
+    }
+  }, [backgroundMusic, shouldPlayMusic]);
 
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
@@ -126,9 +142,15 @@ export const HomePage = (): React.ReactElement => {
         <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2} shouldWrapItems={true}>
+        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
           <Stack.Item shrinkFactor={1} growthFactor={1}>
-            <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+            {logoImageUrl ? (
+              <Box height='2em'>
+                <Image source={logoImageUrl} alternativeText={`${tokenCollection ? tokenCollection.name : ''} Gallery`} />
+              </Box>
+            ) : (
+              <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
+            )}
           </Stack.Item>
           { !account ? (
             <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
@@ -154,7 +176,17 @@ export const HomePage = (): React.ReactElement => {
                 {tokenCollection === undefined ? (
                   <LoadingSpinner />
                 ) : (
-                  <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} account={account} showOwnedTokensOnly={showOwnedTokensOnly} setShowOwnedTokensOnly={setShowOwnedTokensOnly} tokenCollection={tokenCollection} />
+                  <Filter
+                    filters={filters}
+                    onAttributeValueClicked={onAttributeValueClicked}
+                    account={account}
+                    showOwnedTokensOnly={showOwnedTokensOnly}
+                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                    shouldShowMusicOption={backgroundMusic != null}
+                    shouldPlayMusic={shouldPlayMusic}
+                    setShouldPlayMusic={setShouldPlayMusic}
+                    tokenCollection={tokenCollection}
+                  />
                 )}
               </Box>
             </ResponsiveHidingView>
@@ -190,7 +222,17 @@ export const HomePage = (): React.ReactElement => {
                       {tokenCollection === undefined ? (
                         <LoadingSpinner />
                       ) : (
-                        <Filter filters={filters} onAttributeValueClicked={onAttributeValueClicked} account={account} showOwnedTokensOnly={showOwnedTokensOnly} setShowOwnedTokensOnly={setShowOwnedTokensOnly} tokenCollection={tokenCollection} />
+                        <Filter
+                          filters={filters}
+                          onAttributeValueClicked={onAttributeValueClicked}
+                          account={account}
+                          showOwnedTokensOnly={showOwnedTokensOnly}
+                          setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                          shouldShowMusicOption={backgroundMusic != null}
+                          shouldPlayMusic={shouldPlayMusic}
+                          setShouldPlayMusic={setShouldPlayMusic}
+                          tokenCollection={tokenCollection}
+                        />
                       )}
                     </Box>
                   </ResponsiveHidingView>
