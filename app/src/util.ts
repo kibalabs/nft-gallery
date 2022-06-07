@@ -1,6 +1,6 @@
+import goblintownMetadata from './metadata_consolidated_goblintown.json';
 import metadata from './metadata_consolidated_mdtp.json';
 import spritesMetadata from './metadata_consolidated_sprites.json';
-import goblintownMetadata from './metadata_consolidated_goblintown.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
 declare global {
