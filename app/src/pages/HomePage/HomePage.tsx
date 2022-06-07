@@ -30,7 +30,8 @@ export const HomePage = (): React.ReactElement => {
   const responsiveScreenSize = useResponsiveScreenSize();
   const logoImageUrl = getLogoImageUrl();
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
-    return getBackgroundMusic() ? new Audio(getBackgroundMusic()) : null;
+    const backgroundMusicSource = getBackgroundMusic();
+    return backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, []);
 
   React.useEffect((): void => {
