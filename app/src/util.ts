@@ -1,5 +1,6 @@
 import metadata from './metadata_consolidated_mdtp.json';
 import spritesMetadata from './metadata_consolidated_sprites.json';
+import goblintownMetadata from './metadata_consolidated_goblintown.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
 declare global {
@@ -25,6 +26,8 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
   let collectionMetadata: Record<string, unknown>;
   if (getProject() === 'sprites') {
     collectionMetadata = spritesMetadata as Record<string, unknown>;
+  } else if (getProject() === 'goblintown') {
+    collectionMetadata = goblintownMetadata as Record<string, unknown>;
   } else {
     collectionMetadata = metadata as Record<string, unknown>;
   }
