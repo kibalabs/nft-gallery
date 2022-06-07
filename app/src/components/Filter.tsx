@@ -13,6 +13,9 @@ export interface IFilterProps {
   onAttributeValueClicked: (attributeName: string, attributeValue: string | null | undefined) => void;
   showOwnedTokensOnly: boolean;
   setShowOwnedTokensOnly: (newShowOwnedTokensOnly: boolean) => void;
+  shouldShowMusicOption: boolean;
+  shouldPlayMusic: boolean;
+  setShouldPlayMusic: (newShouldPlayMusic: boolean) => void;
 }
 
 export const Filter = (props: IFilterProps): React.ReactElement => {
@@ -34,8 +37,15 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     props.setShowOwnedTokensOnly(!props.showOwnedTokensOnly);
   };
 
+  const onShouldPlayMusicToggled = (): void => {
+    props.setShouldPlayMusic(!props.shouldPlayMusic);
+  };
+
   return (
     <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingRight={PaddingSize.Default}>
+      {props.shouldShowMusicOption && (
+        <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
+      )}
       {props.account && (
         <Checkbox text='Show owned tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}

@@ -13,6 +13,29 @@ export const buildProjectTheme = (): ITheme => {
         text: '#111111',
       },
     }));
+  } if (getProject() === 'goblintown') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      colors: {
+        brandPrimary: 'rgb(245, 91, 32)',
+        background: '#333',
+      },
+      fonts: {
+        main: {
+          // url: 'https://fonts.googleapis.com/css2?family=Square+Peg&display=swap',
+          url: 'https://fonts.googleapis.com/css2?family=Sunshiney&display=swap',
+        },
+      },
+      texts: {
+        default: {
+          // 'font-family': "'Square Peg', cursive, sans-serif",
+          'font-family': "'Sunshiney', cursive, sans-serif",
+          'font-size': '20px',
+        },
+        note: {
+          'font-size': '0.8em',
+        },
+      },
+    }));
   }
   return buildTheme(overrideTheme);
 };

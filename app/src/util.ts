@@ -1,3 +1,5 @@
+import { IBackgroundConfig } from '@kibalabs/ui-react';
+
 import goblintownMetadata from './metadata_consolidated_goblintown.json';
 import metadata from './metadata_consolidated_mdtp.json';
 import spritesMetadata from './metadata_consolidated_sprites.json';
@@ -18,6 +20,39 @@ export const getProject = (): string => {
 export const getTreasureHuntTokenId = (): string | null => {
   if (getProject() === 'sprites') {
     return '101';
+  }
+  return null;
+};
+
+export const getBackground = (): IBackgroundConfig | null => {
+  if (getProject() === 'goblintown') {
+    return {
+      layers: [
+        { imageUrl: '/assets/goblintown/background.png' },
+        { color: 'rgba(0, 0, 0, 0.75)' },
+      ],
+    };
+  }
+  return null;
+};
+
+export const getLogoImageUrl = (): string | null => {
+  if (getProject() === 'goblintown') {
+    return '/assets/goblintown/logo-animated-inverse.gif';
+  }
+  return null;
+};
+
+export const getBackgroundMusic = (): string | null => {
+  if (getProject() === 'goblintown') {
+    return '/assets/goblintown/music.mp3';
+  }
+  return null;
+};
+
+export const getIcon = (): string | null => {
+  if (getProject() === 'goblintown') {
+    return '/assets/goblintown/icon.png';
   }
   return null;
 };

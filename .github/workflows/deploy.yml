@@ -30,14 +30,14 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.APIBOX_URL }}
-          username: ${{ secrets.APIBOX_USER }}
-          key: ${{ secrets.APIBOX_SSH_KEY }}
-          port: ${{ secrets.APIBOX_PORT }}
+          host: ${{ secrets.MDTPBOX_URL }}
+          username: ${{ secrets.MDTPBOX_USER }}
+          key: ${{ secrets.MDTPBOX_SSH_KEY }}
+          port: ${{ secrets.MDTPBOX_PORT }}
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="mdtp-gallery.kibalabs.com"
+            url="mdtp-gallery.tokenpage.xyz"
             varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
@@ -63,14 +63,14 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.APIBOX_URL }}
-          username: ${{ secrets.APIBOX_USER }}
-          key: ${{ secrets.APIBOX_SSH_KEY }}
-          port: ${{ secrets.APIBOX_PORT }}
+          host: ${{ secrets.MDTPBOX_URL }}
+          username: ${{ secrets.MDTPBOX_USER }}
+          key: ${{ secrets.MDTPBOX_SSH_KEY }}
+          port: ${{ secrets.MDTPBOX_PORT }}
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="sprites-gallery.kibalabs.com"
+            url="sprites-gallery.tokenpage.xyz"
             varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
@@ -96,14 +96,14 @@ jobs:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.APIBOX_URL }}
-          username: ${{ secrets.APIBOX_USER }}
-          key: ${{ secrets.APIBOX_SSH_KEY }}
-          port: ${{ secrets.APIBOX_PORT }}
+          host: ${{ secrets.MDTPBOX_URL }}
+          username: ${{ secrets.MDTPBOX_USER }}
+          key: ${{ secrets.MDTPBOX_SSH_KEY }}
+          port: ${{ secrets.MDTPBOX_PORT }}
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="goblintown-gallery.kibalabs.com"
+            url="goblintown-gallery.tokenpage.xyz"
             varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
