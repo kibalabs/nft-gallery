@@ -1,11 +1,9 @@
 import { RecursivePartial } from '@kibalabs/core';
 import { buildTheme, ITheme, mergeThemePartial } from '@kibalabs/ui-react';
 
-import { getProject } from './util';
-
-export const buildProjectTheme = (): ITheme => {
+export const buildProjectTheme = (projectId: string): ITheme => {
   const overrideTheme = buildOverrideTheme();
-  if (getProject() === 'sprites') {
+  if (projectId === 'sprites') {
     return buildTheme(mergeThemePartial(overrideTheme, {
       colors: {
         brandPrimary: 'rgb(119,187,149)',
@@ -13,7 +11,8 @@ export const buildProjectTheme = (): ITheme => {
         text: '#111111',
       },
     }));
-  } if (getProject() === 'goblintown') {
+  }
+  if (projectId === 'goblintown') {
     return buildTheme(mergeThemePartial(overrideTheme, {
       colors: {
         brandPrimary: 'rgb(245, 91, 32)',

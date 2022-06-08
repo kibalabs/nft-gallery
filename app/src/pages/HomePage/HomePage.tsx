@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { useDeepCompareCallback, useDeepCompareEffect, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { RestMethod } from '@kibalabs/core';
+import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { CollectionToken } from '../../client';
@@ -10,16 +11,20 @@ import { Filter } from '../../components/Filter';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
+import { usePageData } from '../../PageDataContext';
 import { Token, TokenCollection } from '../../model';
-import { getBackgroundMusic, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollectionFromFile } from '../../util';
+import { getBackgroundMusic, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
+import { IHomePageData } from './getHomePageData';
 
 
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
+  const location = useLocation();
   const account = useAccount();
+  const { data } = usePageData<IHomePageData>();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
-  const { notdClient } = useGlobals();
-  const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(undefined);
+  const { notdClient, requester, projectId } = useGlobals();
+  const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(data?.tokenCollection || undefined);
   const [ownedTokens, setOwnedTokens] = React.useState<Token[] | undefined | null>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
@@ -27,12 +32,11 @@ export const HomePage = (): React.ReactElement => {
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(true);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
-  const responsiveScreenSize = useResponsiveScreenSize();
-  const logoImageUrl = getLogoImageUrl();
+  const logoImageUrl = getLogoImageUrl(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
-    const backgroundMusicSource = getBackgroundMusic();
-    return backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
-  }, []);
+    const backgroundMusicSource = getBackgroundMusic(projectId);
+    return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
+  }, [projectId]);
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
@@ -61,10 +65,15 @@ export const HomePage = (): React.ReactElement => {
 
   useScrollListener(scrollingRef.current, onScrolled);
 
-  useDeepCompareEffect((): void => {
-    const loadedTokenCollection = loadTokenCollectionFromFile();
+  const loadMetadata = React.useCallback(async (): Promise<void> => {
+    const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
+    const loadedTokenCollection = loadTokenCollection(JSON.parse(metadataResponse.content) as Record<string, unknown>);
     setTokenCollection(loadedTokenCollection);
-  }, []);
+  }, [requester, projectId]);
+
+  React.useEffect((): void => {
+    loadMetadata();
+  }, [loadMetadata]);
 
   const getCollectionHoldings = useDeepCompareCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -159,7 +168,7 @@ export const HomePage = (): React.ReactElement => {
             <Account accountId={account.address} target={`https://nft.tokenhunt.io/accounts/${account.address}`} />
           )}
         </Stack>
-        { getTreasureHuntTokenId() && (
+        { getTreasureHuntTokenId(projectId) && (
           <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
             <Box variant='notification'>
               <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
@@ -217,27 +226,29 @@ export const HomePage = (): React.ReactElement => {
                     </Stack>
                   )}
                 </Box>
-                {isResponsiveFilterShowing && (responsiveScreenSize === ScreenSize.Base || responsiveScreenSize === ScreenSize.Small) && (
-                  <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                    <Box variant='overlay' isFullHeight={true} width='80%' maxWidth='350px'>
-                      {tokenCollection === undefined ? (
-                        <LoadingSpinner />
-                      ) : (
-                        <Filter
-                          filters={filters}
-                          onAttributeValueClicked={onAttributeValueClicked}
-                          account={account}
-                          showOwnedTokensOnly={showOwnedTokensOnly}
-                          setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                          shouldShowMusicOption={backgroundMusic != null}
-                          shouldPlayMusic={shouldPlayMusic}
-                          setShouldPlayMusic={setShouldPlayMusic}
-                          tokenCollection={tokenCollection}
-                        />
-                      )}
-                    </Box>
-                  </ResponsiveHidingView>
-                )}
+                <LayerContainer.Layer shouldPassThroughTouches={true}>
+                  {isResponsiveFilterShowing && (
+                    <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                      <Box variant='overlay' isFullHeight={true} width='80%' maxWidth='350px' shouldCaptureTouches={true}>
+                        {tokenCollection === undefined ? (
+                          <LoadingSpinner />
+                        ) : (
+                          <Filter
+                            filters={filters}
+                            onAttributeValueClicked={onAttributeValueClicked}
+                            account={account}
+                            showOwnedTokensOnly={showOwnedTokensOnly}
+                            setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                            shouldShowMusicOption={backgroundMusic != null}
+                            shouldPlayMusic={shouldPlayMusic}
+                            setShouldPlayMusic={setShouldPlayMusic}
+                            tokenCollection={tokenCollection}
+                          />
+                        )}
+                      </Box>
+                    </ResponsiveHidingView>
+                  )}
+                </LayerContainer.Layer>
               </LayerContainer>
             </Stack.Item>
           </Stack>

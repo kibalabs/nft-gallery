@@ -13,11 +13,13 @@ import { GlobalsProvider, IGlobals } from './globalsContext';
 import { HomePage } from './pages/HomePage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getEveryviewCode, getIcon } from './util';
+import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { PageDataProvider } from './PageDataContext';
 
 declare global {
   export interface Window {
     KRT_API_URL?: string;
-    KRT_WEB3STORAGE_API_KEY?: string;
+    KRT_PROJECT?: string;
   }
 }
 
@@ -25,16 +27,18 @@ const requester = new Requester(undefined, undefined, false);
 const notdClient = new NotdClient(requester, typeof window !== 'undefined' && window.KRT_API_URL ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
 
-const theme = buildProjectTheme();
+const projectId = typeof window !== 'undefined' ? window.KRT_PROJECT : process.env.KRT_PROJECT ?? 'mdtp';
+const theme = buildProjectTheme(projectId);
 
-const globals: IGlobals = {
+export const globals: IGlobals = {
+  projectId,
   requester,
   notdClient,
   localStorageClient,
 };
 
-const routes: IRoute<IGlobals>[] = [
-  { path: '/*', page: HomePage },
+export const routes: IRoute<IGlobals>[] = [
+  { path: '/*', page: HomePage, getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
@@ -43,10 +47,10 @@ export interface IAppProps extends IHeadRootProviderProps {
 }
 
 export const App = (props: IAppProps): React.ReactElement => {
-  useFavicon(getIcon() || undefined);
+  useFavicon(getIcon(projectId) || undefined);
 
   useInitialization((): void => {
-    const everyviewCode = getEveryviewCode();
+    const everyviewCode = getEveryviewCode(projectId);
     if (everyviewCode) {
       const tracker = new EveryviewTracker(everyviewCode);
       tracker.initialize();
@@ -55,15 +59,17 @@ export const App = (props: IAppProps): React.ReactElement => {
   });
 
   return (
-    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true} background={getBackground()}>
+    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true} background={getBackground(projectId)}>
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>
-      <GlobalsProvider globals={globals}>
-        <AccountControlProvider>
-          <Router staticPath={props.staticPath} routes={routes} />
-        </AccountControlProvider>
-      </GlobalsProvider>
+        <PageDataProvider initialData={props.pageData}>
+        <GlobalsProvider globals={globals}>
+          <AccountControlProvider>
+            <Router staticPath={props.staticPath} routes={routes} />
+          </AccountControlProvider>
+        </GlobalsProvider>
+      </PageDataProvider>
       <ToastContainer />
     </KibaApp>
   );

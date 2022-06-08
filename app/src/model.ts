@@ -42,5 +42,4 @@ export interface TokenCollection {
   doesSupportErc1155: boolean;
   tokens: Record<string, Token>;
   attributes: Record<string, TokenCollectionAttribute>;
-  frameImageUrl: string | null;
 }
