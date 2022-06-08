@@ -57,6 +57,16 @@ export const getIcon = (): string | null => {
   return null;
 };
 
+export const getEveryviewCode = (): string | null => {
+  if (getProject() === 'mdtp') {
+    return '54fa4b47b0b3431884b64a549d46ffd7';
+  }
+  if (getProject() === 'goblintown') {
+    return 'eb42bb3312374c8982d92c3eb38f84e7';
+  }
+  return null;
+};
+
 export const loadTokenCollectionFromFile = (): TokenCollection => {
   let collectionMetadata: Record<string, unknown>;
   if (getProject() === 'sprites') {

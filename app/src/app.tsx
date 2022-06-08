@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { LocalStorageClient, Requester } from '@kibalabs/core';
-import { IRoute, MockStorage, Router, useFavicon } from '@kibalabs/core-react';
+import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,7 +11,8 @@ import { NotdClient } from './client/client';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { HomePage } from './pages/HomePage';
 import { buildProjectTheme } from './theme';
-import { getBackground, getIcon } from './util';
+import { getBackground, getEveryviewCode, getIcon } from './util';
+import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 
 declare global {
   export interface Window {
@@ -43,6 +44,16 @@ export interface IAppProps extends IHeadRootProviderProps {
 
 export const App = (props: IAppProps): React.ReactElement => {
   useFavicon(getIcon() || undefined);
+
+  useInitialization((): void => {
+    const everyviewCode = getEveryviewCode();
+    if (everyviewCode) {
+      const tracker = new EveryviewTracker(everyviewCode);
+      tracker.initialize();
+      tracker.trackApplicationOpen();
+    }
+  });
+
   return (
     <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true} background={getBackground()}>
       <Head headId='app'>
