@@ -40,6 +40,6 @@ export interface TokenCollection {
   bannerImageUrl: string | null;
   doesSupportErc721: boolean;
   doesSupportErc1155: boolean;
-  tokens: Record<string, Token>;
-  attributes: Record<string, TokenCollectionAttribute>;
+  tokens: Record<string, Token> | undefined;
+  attributes: Record<string, TokenCollectionAttribute> | undefined;
 }

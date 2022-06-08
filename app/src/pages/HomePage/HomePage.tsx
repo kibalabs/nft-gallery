@@ -11,8 +11,8 @@ import { Filter } from '../../components/Filter';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
-import { usePageData } from '../../PageDataContext';
 import { Token, TokenCollection } from '../../model';
+import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
 
@@ -30,19 +30,19 @@ export const HomePage = (): React.ReactElement => {
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenLimit, setTokenLimit] = React.useState<number>(50);
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
-  const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(true);
+  const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const logoImageUrl = getLogoImageUrl(projectId);
+  const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
-    const backgroundMusicSource = getBackgroundMusic(projectId);
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
-  }, [projectId]);
+  }, [backgroundMusicSource]);
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
       return;
     }
-    if (shouldPlayMusic && backgroundMusic) {
+    if (shouldPlayMusic) {
       backgroundMusic.play();
     } else {
       backgroundMusic.pause();
@@ -83,13 +83,15 @@ export const HomePage = (): React.ReactElement => {
       setOwnedTokens(null);
       return;
     }
-    if (!tokenCollection) {
+    if (!tokenCollection || !tokenCollection.tokens) {
       setOwnedTokens(undefined);
       return;
     }
+    // NOTE(krishan711): not sure why but this re-aliasing fixes some type checks
+    const tokens = tokenCollection.tokens;
     notdClient.getCollectionHoldings(tokenCollection.address, account.address).then((collectionTokens: CollectionToken[]): void => {
       const newOwnedTokens = collectionTokens.map((collectionToken: CollectionToken): Token => {
-        return tokenCollection.tokens[collectionToken.tokenId];
+        return tokens[collectionToken.tokenId];
       });
       setOwnedTokens(newOwnedTokens);
     }).catch((error: unknown): void => {
@@ -141,15 +143,21 @@ export const HomePage = (): React.ReactElement => {
     navigator.navigateTo('/');
   };
 
-  // eslint-disable-next-line no-restricted-globals
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  // eslint-disable-next-line no-restricted-globals
-  const chosenToken = tokenCollection?.tokens[Number(location.pathname.replace('/tokens/', ''))];
+  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
 
   return (
     <React.Fragment>
       <Head>
         <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
+        {tokenCollection?.description ? (
+          <meta name='description' content={`A gallery of ${tokenCollection.name} built by https://tokenpage.xyz. ${tokenCollection.description}`} />
+        ) : tokenCollection && (
+          <meta name='description' content={`A gallery of ${tokenCollection.name} built by https://tokenpage.xyz`} />
+        )}
+        {tokenCollection?.bannerImageUrl && (
+          <meta property='og:image' content={tokenCollection?.bannerImageUrl} />
+        )}
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
         <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
@@ -239,7 +247,7 @@ export const HomePage = (): React.ReactElement => {
                             account={account}
                             showOwnedTokensOnly={showOwnedTokensOnly}
                             setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                            shouldShowMusicOption={backgroundMusic != null}
+                            shouldShowMusicOption={backgroundMusicSource != null}
                             shouldPlayMusic={shouldPlayMusic}
                             setShouldPlayMusic={setShouldPlayMusic}
                             tokenCollection={tokenCollection}
@@ -254,7 +262,7 @@ export const HomePage = (): React.ReactElement => {
           </Stack>
         </Stack.Item>
       </Stack>
-      {isTokenSubpageShowing && chosenToken && (
+      {isTokenSubpageShowing && chosenToken && tokenCollection && (
         <TokenDialog
           token={chosenToken}
           tokenCollection={tokenCollection}

@@ -52,13 +52,29 @@ jobs:
               --env LETSENCRYPT_HOST=${url} \
               --env-file ${varsFile} \
               ${DOCKER_IMAGE}
+  deploy-app-sprites:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+    env:
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app-sprites:latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Login to GitHub container registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: docker build --tag $DOCKER_IMAGE --build-arg KRT_PROJECT=sprites .
+      - name: Push to container registry
+        run: docker push $DOCKER_IMAGE
   run-app-sprites:
-    needs: deploy-app
+    needs: deploy-app-sprites
     runs-on: ubuntu-latest
     env:
       NAME: sprites-gallery-app
       VERSION: ${{ github.sha }}
-      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app-sprites:latest
     steps:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master
@@ -85,13 +101,29 @@ jobs:
               --env LETSENCRYPT_HOST=${url} \
               --env-file ${varsFile} \
               ${DOCKER_IMAGE}
+  deploy-app-goblintown:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+    env:
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app-goblintown:latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Login to GitHub container registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: docker build --tag $DOCKER_IMAGE --build-arg KRT_PROJECT=goblintown .
+      - name: Push to container registry
+        run: docker push $DOCKER_IMAGE
   run-app-goblintown:
-    needs: deploy-app
+    needs: deploy-app-goblintown
     runs-on: ubuntu-latest
     env:
       NAME: goblintown-gallery-app
       VERSION: ${{ github.sha }}
-      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app:latest
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app-goblintown:latest
     steps:
       - name: executing remote ssh commands
         uses: appleboy/ssh-action@master

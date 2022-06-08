@@ -41,3 +41,15 @@ jobs:
           check-name: type-app
           fail-on-error: false
           path-prefix: ./app/
+  build-app-sprites:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    env:
+      DOCKER_IMAGE: build
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Build docker image
+        run: docker build --build-arg KRT_PROJECT=sprites .

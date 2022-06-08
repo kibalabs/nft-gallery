@@ -10,11 +10,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { GlobalsProvider, IGlobals } from './globalsContext';
+import { PageDataProvider } from './PageDataContext';
 import { HomePage } from './pages/HomePage';
+import { getHomePageData } from './pages/HomePage/getHomePageData';
 import { buildProjectTheme } from './theme';
 import { getBackground, getEveryviewCode, getIcon } from './util';
-import { getHomePageData } from './pages/HomePage/getHomePageData';
-import { PageDataProvider } from './PageDataContext';
 
 declare global {
   export interface Window {
@@ -63,7 +63,7 @@ export const App = (props: IAppProps): React.ReactElement => {
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>
-        <PageDataProvider initialData={props.pageData}>
+      <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
           <AccountControlProvider>
             <Router staticPath={props.staticPath} routes={routes} />
