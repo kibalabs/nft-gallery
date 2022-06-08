@@ -30,4 +30,12 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.SubmitTreasureHuntForCollectionTokenRequest(userAddress, signature);
     await this.makeRequest(method, path, request, Endpoints.SubmitTreasureHuntForCollectionTokenResponse);
   };
+
+  public getOwnerTokens = async (accountAddress: string): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/accounts/${accountAddress}/tokens`;
+    const request = new Endpoints.GetOwnerTokensRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetOwnerTokensResponse);
+    return response.tokens;
+  };
 }
