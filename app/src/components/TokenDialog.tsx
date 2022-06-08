@@ -19,7 +19,7 @@ interface ITokenDialogProps {
 
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const account = useAccount();
-  const { notdClient } = useGlobals();
+  const { notdClient, projectId } = useGlobals();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
@@ -30,7 +30,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
-  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId();
+  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId(projectId);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);

@@ -41,6 +41,9 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     props.setShouldPlayMusic(!props.shouldPlayMusic);
   };
 
+  // NOTE(krishan711): not sure why but this re-aliasing fixes some type checks
+  const attributes = props.tokenCollection.attributes;
+
   return (
     <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingRight={PaddingSize.Default}>
       {props.shouldShowMusicOption && (
@@ -49,13 +52,13 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       {props.account && (
         <Checkbox text='Show owned tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}
-      {Object.keys(props.tokenCollection.attributes).map((attributeKey: string): React.ReactElement => (
-        <Stack key={props.tokenCollection.attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
-          <Text variant='bold-large'>{props.tokenCollection.attributes[attributeKey].name}</Text>
+      {attributes && Object.keys(attributes).map((attributeKey: string): React.ReactElement => (
+        <Stack key={attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
+          <Text variant='bold-large'>{attributes[attributeKey].name}</Text>
           <OptionSelect
-            options={getOptions(props.tokenCollection.attributes[attributeKey])}
-            onItemClicked={(itemKey: string) => props.onAttributeValueClicked(props.tokenCollection.attributes[attributeKey].name, itemKey)}
-            selectedItemKey={getSelectedOptionKey(props.tokenCollection.attributes[attributeKey])}
+            options={getOptions(attributes[attributeKey])}
+            onItemClicked={(itemKey: string) => props.onAttributeValueClicked(attributes[attributeKey].name, itemKey)}
+            selectedItemKey={getSelectedOptionKey(attributes[attributeKey])}
           />
           {/* {Object.keys(tokenCollection.attributes[attributeKey].values).map((valueKey: string): React.ReactElement => (
             <LinkBase key={valueKey} onClicked={(): void => onAttributeValueClicked(attributeKey, valueKey)} isFullWidth={true}>

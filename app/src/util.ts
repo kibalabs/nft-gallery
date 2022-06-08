@@ -1,31 +1,21 @@
 import { IBackgroundConfig } from '@kibalabs/ui-react';
 
-import goblintownMetadata from './metadata_consolidated_goblintown.json';
-import metadata from './metadata_consolidated_mdtp.json';
-import spritesMetadata from './metadata_consolidated_sprites.json';
 import { Token, TokenAttribute, TokenCollection, TokenCollectionAttribute } from './model';
 
-declare global {
-  export interface Window {
-    KRT_API_URL?: string;
-    KRT_ENV?: string;
-    KRT_PROJECT?: string;
-  }
+export interface IProjectConfig {
+  projectId: string;
+  name: string;
 }
 
-export const getProject = (): string => {
-  return window.KRT_PROJECT ?? 'mdtp';
-};
-
-export const getTreasureHuntTokenId = (): string | null => {
-  if (getProject() === 'sprites') {
+export const getTreasureHuntTokenId = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
     return '101';
   }
   return null;
 };
 
-export const getBackground = (): IBackgroundConfig | null => {
-  if (getProject() === 'goblintown') {
+export const getBackground = (projectId: string): IBackgroundConfig | null => {
+  if (projectId === 'goblintown') {
     return {
       layers: [
         { imageUrl: '/assets/goblintown/background.png' },
@@ -36,46 +26,38 @@ export const getBackground = (): IBackgroundConfig | null => {
   return null;
 };
 
-export const getLogoImageUrl = (): string | null => {
-  if (getProject() === 'goblintown') {
+export const getLogoImageUrl = (projectId: string): string | null => {
+  if (projectId === 'goblintown') {
     return '/assets/goblintown/logo-animated-inverse.gif';
   }
   return null;
 };
 
-export const getBackgroundMusic = (): string | null => {
-  if (getProject() === 'goblintown') {
+export const getBackgroundMusic = (projectId: string): string | null => {
+  if (projectId === 'goblintown') {
     return '/assets/goblintown/music.mp3';
   }
   return null;
 };
 
-export const getIcon = (): string | null => {
-  if (getProject() === 'goblintown') {
+export const getIcon = (projectId: string): string | null => {
+  if (projectId === 'goblintown') {
     return '/assets/goblintown/icon.png';
   }
   return null;
 };
 
-export const getEveryviewCode = (): string | null => {
-  if (getProject() === 'mdtp') {
+export const getEveryviewCode = (projectId: string): string | null => {
+  if (projectId === 'mdtp') {
     return '54fa4b47b0b3431884b64a549d46ffd7';
   }
-  if (getProject() === 'goblintown') {
+  if (projectId === 'goblintown') {
     return 'eb42bb3312374c8982d92c3eb38f84e7';
   }
   return null;
 };
 
-export const loadTokenCollectionFromFile = (): TokenCollection => {
-  let collectionMetadata: Record<string, unknown>;
-  if (getProject() === 'sprites') {
-    collectionMetadata = spritesMetadata as Record<string, unknown>;
-  } else if (getProject() === 'goblintown') {
-    collectionMetadata = goblintownMetadata as Record<string, unknown>;
-  } else {
-    collectionMetadata = metadata as Record<string, unknown>;
-  }
+export const loadTokenCollection = (collectionMetadata: Record<string, unknown>): TokenCollection => {
   const parsedTokens = (collectionMetadata.tokens as Record<string, unknown>[]).map((metadataObject: Record<string, unknown>): Token => {
     return {
       tokenId: String(metadataObject.tokenId),
@@ -146,6 +128,5 @@ export const loadTokenCollectionFromFile = (): TokenCollection => {
     doesSupportErc1155: collectionMetadata.doesSupportErc1155 as boolean,
     tokens,
     attributes: tokenAttributes,
-    frameImageUrl: collectionMetadata.frameImageUrl as string | null,
   };
 };

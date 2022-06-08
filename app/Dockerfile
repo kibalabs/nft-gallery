@@ -10,7 +10,11 @@ RUN npm ci
 
 # Build app
 COPY . .
-RUN npm run build
+
+ARG KRT_PROJECT
+ENV OWNER=${KRT_PROJECT:-mdtp}
+
+RUN npm run build-static
 
 # Stage 2: Serve build files with nginx
 FROM ghcr.io/kibalabs/app-serve:latest
