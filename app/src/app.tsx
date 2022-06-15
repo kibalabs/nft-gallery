@@ -13,6 +13,7 @@ import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { UserPage } from './pages/UserPage/UserPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getEveryviewCode, getIcon } from './util';
 
@@ -39,6 +40,7 @@ export const globals: IGlobals = {
 
 export const routes: IRoute<IGlobals>[] = [
   { path: '/*', page: HomePage, getPageData: getHomePageData },
+  { path: '/accounts/:accountAddress', page: UserPage },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {

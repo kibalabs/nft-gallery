@@ -9,9 +9,9 @@ export interface Token {
   name: string;
   description: string| null;
   imageUrl: string;
-  frameImageUrl: string | null;
+  frameImageUrl?: string | null;
   attributes: TokenAttribute[];
-  attributeMap: Record<string, string>;
+  attributeMap?: Record<string, string>;
 }
 
 export interface TokenCollectionAttributeValue {
