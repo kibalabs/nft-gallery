@@ -13,7 +13,7 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
   return (
     <LinkBase target={`/tokens/${props.token.tokenId}`} isFullWidth={true}>
       <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center} paddingBottom={PaddingSize.Default}>
-        <Box maxHeight='20em' minHeight='5em' maxWidth='20em' shouldClipContent={true}>
+        <Box maxHeight='20em' minHeight='5em'shouldClipContent={true}>
           <Image source={imageUrl} fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
         </Box>
         <Text variant='note'>{props.token.name}</Text>

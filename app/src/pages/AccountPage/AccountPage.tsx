@@ -2,7 +2,7 @@ import React from 'react';
 
 import { RestMethod, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, EqualGrid, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
@@ -65,14 +65,16 @@ export const AccountPage = (): React.ReactElement => {
         </Stack>
       )}
       <Spacing variant={PaddingSize.Wide} />
-      <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Center} childAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true}>
-        {holdings && holdings.map((ownerToken: Token, index: number) : React.ReactElement => (
-          <TokenCard
-            key={index}
-            token={ownerToken}
-          />
-        ))}
-      </Stack>
+      <Stack.Item growthFactor={1}>
+        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
+          {holdings && holdings.map((ownerToken: Token, index: number) : React.ReactElement => (
+            <TokenCard
+              key={index}
+              token={ownerToken}
+            />
+          ))}
+        </EqualGrid>
+      </Stack.Item>
     </Stack>
   );
 };
