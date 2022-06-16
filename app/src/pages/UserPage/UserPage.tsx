@@ -1,31 +1,41 @@
 import React from 'react';
 
-import { truncateMiddle } from '@kibalabs/core';
+import { RestMethod, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Direction, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { useAccount } from '../../AccountContext';
 import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
-import { Token } from '../../model';
+import { Token, TokenCollection } from '../../model';
+import { usePageData } from '../../PageDataContext';
+import { loadTokenCollection } from '../../util';
+import { IHomePageData } from '../HomePage/getHomePageData';
 
 export const UserPage = (): React.ReactElement => {
-  const account = useAccount();
-  const { notdClient } = useGlobals();
-  const address = useStringRouteParam('address');
+  const { notdClient, requester, projectId } = useGlobals();
+  const { data } = usePageData<IHomePageData>();
   const accountAddress = useStringRouteParam('accountAddress');
   const [holdings, setHoldings] = React.useState<Token[] | undefined | null>(undefined);
+  const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(data?.tokenCollection || undefined);
+  const loadMetadata = React.useCallback(async (): Promise<void> => {
+    const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
+    const loadedTokenCollection = loadTokenCollection(JSON.parse(metadataResponse.content) as Record<string, unknown>);
+    setTokenCollection(loadedTokenCollection);
+  }, [requester, projectId]);
+  React.useEffect((): void => {
+    loadMetadata();
+  }, [loadMetadata]);
 
   const getCollectionHoldings = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
       setHoldings(undefined);
     }
-    if (!account) {
+    if (!accountAddress) {
       setHoldings(null);
       return;
     }
-    notdClient.getCollectionHoldings(address, account.address).then((tokenTransfers: CollectionToken[]): void => {
+    notdClient.getCollectionHoldings(tokenCollection?.address, accountAddress).then((tokenTransfers: CollectionToken[]): void => {
       const newOwnedTokens: Token[] = tokenTransfers.map((tokenTransfer: CollectionToken) => {
         return {
           tokenId: tokenTransfer.tokenId,
@@ -40,7 +50,7 @@ export const UserPage = (): React.ReactElement => {
       console.error(error);
       setHoldings(null);
     });
-  }, [notdClient, address, account]);
+  }, [notdClient, tokenCollection?.address, accountAddress]);
 
   React.useEffect((): void => {
     getCollectionHoldings();
@@ -63,6 +73,7 @@ export const UserPage = (): React.ReactElement => {
             key={index}
             token={ownerToken}
           />
+
         ))}
       </Stack>
     </Stack>
