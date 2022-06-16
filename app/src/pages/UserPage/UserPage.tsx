@@ -35,7 +35,7 @@ export const UserPage = (): React.ReactElement => {
       setHoldings(null);
       return;
     }
-    if (!tokenCollection || !tokenCollection.tokens) {
+    if (!tokenCollection) {
       setHoldings(undefined);
       return;
     }
@@ -77,7 +77,6 @@ export const UserPage = (): React.ReactElement => {
             key={index}
             token={ownerToken}
           />
-
         ))}
       </Stack>
     </Stack>
