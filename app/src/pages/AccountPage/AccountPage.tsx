@@ -12,7 +12,7 @@ import { usePageData } from '../../PageDataContext';
 import { loadTokenCollection } from '../../util';
 import { IHomePageData } from '../HomePage/getHomePageData';
 
-export const UserPage = (): React.ReactElement => {
+export const AccountPage = (): React.ReactElement => {
   const { notdClient, requester, projectId } = useGlobals();
   const { data } = usePageData<IHomePageData>();
   const accountAddress = useStringRouteParam('accountAddress');
