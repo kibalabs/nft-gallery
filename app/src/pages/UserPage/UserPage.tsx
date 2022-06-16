@@ -35,7 +35,11 @@ export const UserPage = (): React.ReactElement => {
       setHoldings(null);
       return;
     }
-    notdClient.getCollectionHoldings(tokenCollection?.address, accountAddress).then((tokenTransfers: CollectionToken[]): void => {
+    if (!tokenCollection || !tokenCollection.tokens) {
+      setHoldings(undefined);
+      return;
+    }
+    notdClient.getCollectionHoldings(tokenCollection.address, accountAddress).then((tokenTransfers: CollectionToken[]): void => {
       const newOwnedTokens: Token[] = tokenTransfers.map((tokenTransfer: CollectionToken) => {
         return {
           tokenId: tokenTransfer.tokenId,
@@ -50,7 +54,7 @@ export const UserPage = (): React.ReactElement => {
       console.error(error);
       setHoldings(null);
     });
-  }, [notdClient, tokenCollection?.address, accountAddress]);
+  }, [notdClient, tokenCollection, accountAddress]);
 
   React.useEffect((): void => {
     getCollectionHoldings();
