@@ -110,7 +110,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
               ) : (
                 <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow}>
                   <Text variant='note'>Owner</Text>
-                  <LinkBase target={`https://nft.tokenhunt.io/accounts/${latestTransfer.toAddress}`}>
+                  <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
                         <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
