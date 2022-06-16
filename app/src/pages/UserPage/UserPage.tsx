@@ -35,19 +35,14 @@ export const UserPage = (): React.ReactElement => {
       setHoldings(null);
       return;
     }
-    if (!tokenCollection) {
+    if (!tokenCollection || !tokenCollection.tokens) {
       setHoldings(undefined);
       return;
     }
-    notdClient.getCollectionHoldings(tokenCollection.address, accountAddress).then((tokenTransfers: CollectionToken[]): void => {
-      const newOwnedTokens: Token[] = tokenTransfers.map((tokenTransfer: CollectionToken) => {
-        return {
-          tokenId: tokenTransfer.tokenId,
-          name: tokenTransfer.name,
-          description: tokenTransfer.description,
-          imageUrl: tokenTransfer.imageUrl,
-          attributes: [],
-        };
+    const tokens = tokenCollection.tokens;
+    notdClient.getCollectionHoldings(tokenCollection.address, accountAddress).then((collectionTokens: CollectionToken[]): void => {
+      const newOwnedTokens = collectionTokens.map((collectionToken: CollectionToken): Token => {
+        return tokens[collectionToken.tokenId];
       });
       setHoldings(newOwnedTokens);
     }).catch((error: unknown): void => {
@@ -55,7 +50,6 @@ export const UserPage = (): React.ReactElement => {
       setHoldings(null);
     });
   }, [notdClient, tokenCollection, accountAddress]);
-
   React.useEffect((): void => {
     getCollectionHoldings();
   }, [getCollectionHoldings]);
