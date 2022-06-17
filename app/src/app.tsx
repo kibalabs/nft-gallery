@@ -11,6 +11,7 @@ import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
+import { AccountPage } from './pages/AccountPage/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
 import { buildProjectTheme } from './theme';
@@ -39,6 +40,7 @@ export const globals: IGlobals = {
 
 export const routes: IRoute<IGlobals>[] = [
   { path: '/*', page: HomePage, getPageData: getHomePageData },
+  { path: '/accounts/:accountAddress', page: AccountPage, getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
