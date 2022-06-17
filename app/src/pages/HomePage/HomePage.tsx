@@ -173,7 +173,7 @@ export const HomePage = (): React.ReactElement => {
           { !account ? (
             <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
           ) : (
-            <Account accountId={account.address} target={`https://nft.tokenhunt.io/accounts/${account.address}`} />
+            <Account accountId={account.address} target={`/accounts/${account.address}`} />
           )}
         </Stack>
         { getTreasureHuntTokenId(projectId) && (
