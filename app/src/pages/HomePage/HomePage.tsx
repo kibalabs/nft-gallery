@@ -44,6 +44,7 @@ export const HomePage = (): React.ReactElement => {
     }
     if (shouldPlayMusic) {
       backgroundMusic.play();
+      backgroundMusic.loop = true;
     } else {
       backgroundMusic.pause();
     }
