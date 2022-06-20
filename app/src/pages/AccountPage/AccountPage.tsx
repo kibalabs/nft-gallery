@@ -2,7 +2,7 @@ import React from 'react';
 
 import { RestMethod, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, EqualGrid, Image, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, EqualGrid, Image, LoadingSpinner, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
@@ -55,24 +55,25 @@ export const AccountPage = (): React.ReactElement => {
   }, [getCollectionHoldings]);
 
   return (
-    <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} shouldAddGutters={true} paddingVertical={PaddingSize.Wide2}>
+    <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
       { accountAddress && (
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide2}>
           <Box variant='rounded' shouldClipContent={true} height='40px' width='40px'>
             <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${accountAddress}/image`} alternativeText='Avatar' />
           </Box>
           <Text variant='header2'>{truncateMiddle(accountAddress, 15)}</Text>
         </Stack>
       )}
-      <Spacing variant={PaddingSize.Wide} />
       <Stack.Item growthFactor={1}>
-        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
-          {holdings && holdings.map((ownerToken: Token, index: number) : React.ReactElement => (
-            <TokenCard
-              key={index}
-              token={ownerToken}
-            />
-          ))}
+        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+          { holdings === undefined ? (
+            <LoadingSpinner />) : (
+            holdings && holdings.map((ownerToken: Token, index: number) : React.ReactElement => (
+              <TokenCard
+                key={index}
+                token={ownerToken}
+              />
+            )))}
         </EqualGrid>
       </Stack.Item>
     </Stack>
