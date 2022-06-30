@@ -9,6 +9,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
+import { FloatingView } from './components/FloatingView';
+import { Footer } from './components/Footer';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
@@ -73,6 +75,9 @@ export const App = (props: IAppProps): React.ReactElement => {
         </GlobalsProvider>
       </PageDataProvider>
       <ToastContainer />
+      <FloatingView>
+        <Footer isSmall={true} tokenPageReferral={`gallery-${projectId}`} />
+      </FloatingView>
     </KibaApp>
   );
 };
