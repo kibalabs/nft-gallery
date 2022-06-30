@@ -5,10 +5,11 @@ import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kib
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
+import 'react-toastify/dist/ReactToastify.css';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
+import { FloatingView } from './components/FloatingView';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
@@ -69,6 +70,7 @@ export const App = (props: IAppProps): React.ReactElement => {
         <GlobalsProvider globals={globals}>
           <AccountControlProvider>
             <Router staticPath={props.staticPath} routes={routes} />
+            <FloatingView />
           </AccountControlProvider>
         </GlobalsProvider>
       </PageDataProvider>
