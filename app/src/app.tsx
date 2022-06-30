@@ -5,12 +5,12 @@ import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kib
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
-
 import 'react-toastify/dist/ReactToastify.css';
+
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
-import { Footer } from './components/FooterView';
+import { Footer } from './components/Footer';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';

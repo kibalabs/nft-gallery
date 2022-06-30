@@ -86,9 +86,6 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       },
       card: {
         margin: '0',
-        padding: '0',
-        'border-width': '0.20em',
-        'border-color': '#363636',
       },
       wideBorder: {
         margin: '0',

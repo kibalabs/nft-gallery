@@ -1,23 +1,21 @@
 import React from 'react';
 
 import { IMultiAnyChildProps } from '@kibalabs/core-react';
-import { ITheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 interface IStyledFloatingViewProps {
-  theme: ITheme;
 }
 
 interface IFloatingViewProps extends IMultiAnyChildProps {
 }
 
 const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-  `;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+`;
 
-export const FloatingView = (props : IFloatingViewProps): React.ReactElement => {
+export const FloatingView = (props: IFloatingViewProps): React.ReactElement => {
   return (
     <StyledFloatingView>
       {props.children}
