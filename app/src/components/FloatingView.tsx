@@ -1,12 +1,14 @@
 import React from 'react';
 
+import { IMultiAnyChildProps } from '@kibalabs/core-react';
 import { ITheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
-import { Footer } from './FooterView';
-
 interface IStyledFloatingViewProps {
   theme: ITheme;
+}
+
+interface IFloatingViewProps extends IMultiAnyChildProps {
 }
 
 const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
@@ -14,10 +16,11 @@ const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
     bottom: 20px;
     right: 20px;
   `;
-export const FloatingView = (): React.ReactElement => {
+
+export const FloatingView = (props : IFloatingViewProps): React.ReactElement => {
   return (
     <StyledFloatingView>
-      <Footer />
+      {props.children}
     </StyledFloatingView>
   );
 };

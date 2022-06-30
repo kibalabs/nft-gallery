@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
+import { Footer } from './components/FooterView';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
@@ -70,11 +71,13 @@ export const App = (props: IAppProps): React.ReactElement => {
         <GlobalsProvider globals={globals}>
           <AccountControlProvider>
             <Router staticPath={props.staticPath} routes={routes} />
-            <FloatingView />
           </AccountControlProvider>
         </GlobalsProvider>
       </PageDataProvider>
       <ToastContainer />
+      <FloatingView>
+        <Footer />
+      </FloatingView>
     </KibaApp>
   );
 };
