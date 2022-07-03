@@ -75,7 +75,7 @@ export const App = (props: IAppProps): React.ReactElement => {
         </GlobalsProvider>
       </PageDataProvider>
       <ToastContainer />
-      <FloatingView>
+      <FloatingView positionBottom='20px' positionRight='20px'>
         <Footer isSmall={true} tokenPageReferral={`gallery-${projectId}`} />
       </FloatingView>
     </KibaApp>

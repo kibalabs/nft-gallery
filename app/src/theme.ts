@@ -12,6 +12,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         spriteGreen: 'rgb(89,190,144)',
         spritePink: 'rgb(211,163,181)',
         spriteOrange: 'rgb(220,137,117)',
+        textInverse: '#222222',
       },
       alternateColors: {
         dialog: {
@@ -42,6 +43,9 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         footer: {
           color: '$colors.text',
         },
+        dark: {
+          color: '$colors.textInverse',
+        },
       },
       buttons: {
         default: {
@@ -64,6 +68,18 @@ export const buildProjectTheme = (projectId: string): ITheme => {
               },
             },
           },
+        },
+      },
+      boxes: {
+        footer: {
+          'background-color': '$colors.backgroundClear25',
+          'border-color': '$colors.backgroundClear05',
+          'backdrop-filter': 'blur(3px)',
+        },
+      },
+      dividers: {
+        default: {
+          color: 'white',
         },
       },
     }));
@@ -100,6 +116,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       brandPrimary: '#B3C7F8',
       brandSecondary: '#2D86A3',
       background: '#000000',
+      backdrop: 'rgba(0, 0, 0, 0.3)',
     },
     alternateColors: {
       dialog: {
@@ -157,9 +174,14 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'border-width': '0.20em',
         'border-color': '#FFFFFF',
       },
-      overlay: {
+      filterOverlay: {
         'background-color': '$colors.backgroundClear10',
         'backdrop-filter': 'blur(3px)',
+        'border-radius': '0 1em 1em 0',
+      },
+      backdrop: {
+        'border-radius': '0',
+        'background-color': '$colors.backdrop',
       },
     },
     pills: {

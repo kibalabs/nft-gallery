@@ -2,12 +2,13 @@ import React from 'react';
 
 import { RestMethod } from '@kibalabs/core';
 import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { CollectionToken } from '../../client';
 import { Account } from '../../components/Account';
 import { Filter } from '../../components/Filter';
+import { FloatingView } from '../../components/FloatingView';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
@@ -190,7 +191,6 @@ export const HomePage = (): React.ReactElement => {
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           <Stack direction={Direction.Horizontal} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} isFullHeight={true} isFullWidth={true}>
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Spacing variant={PaddingSize.Wide2} />
               <Box width='300px' isFullHeight={true}>
                 {tokenCollection === undefined ? (
                   <LoadingSpinner />
@@ -210,35 +210,38 @@ export const HomePage = (): React.ReactElement => {
               </Box>
             </ResponsiveHidingView>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <LayerContainer>
-                <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                  {tokenCollection === undefined || filteredTokens === undefined ? (
-                    <LoadingSpinner />
-                  ) : (
-                    <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
-                      <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
-                        {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                          <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                        ))}
-                      </Stack>
-                      <Stack.Item growthFactor={1}>
-                        {filteredTokens.length > 0 ? (
-                          <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
-                            {filteredTokens.map((token: Token): React.ReactElement => (
-                              <TokenCard key={token.tokenId} token={token} />
-                            ))}
-                          </EqualGrid>
-                        ) : (
-                          <Text>No tokens match filter</Text>
-                        )}
-                      </Stack.Item>
+              <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                {tokenCollection === undefined || filteredTokens === undefined ? (
+                  <LoadingSpinner />
+                ) : (
+                  <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
+                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
+                      {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                        <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                      ))}
                     </Stack>
-                  )}
-                </Box>
-                <LayerContainer.Layer shouldPassThroughTouches={true}>
-                  {isResponsiveFilterShowing && (
-                    <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                      <Box variant='overlay' isFullHeight={true} width='80%' maxWidth='350px' shouldCaptureTouches={true}>
+                    <Stack.Item growthFactor={1}>
+                      {filteredTokens.length > 0 ? (
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
+                          {filteredTokens.map((token: Token): React.ReactElement => (
+                            <TokenCard key={token.tokenId} token={token} />
+                          ))}
+                        </EqualGrid>
+                      ) : (
+                        <Text>No tokens match filter</Text>
+                      )}
+                    </Stack.Item>
+                  </Stack>
+                )}
+              </Box>
+              {isResponsiveFilterShowing && (
+                <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                  <FloatingView isFullHeight={true} isFullWidth={true} positionLeft={'0px'} positionRight={'0px'}>
+                    <Box isFullHeight={true} isFullWidth={true} variant='backdrop' shouldCaptureTouches={true} />
+                  </FloatingView>
+                  <FloatingView isFullHeight={true} positionLeft={'0px'} positionRight={'0px'}>
+                    <ColorSettingView variant='dialog'>
+                      <Box variant='filterOverlay' isFullHeight={true} width='80%' maxWidth='350px' shouldClipContent={true}>
                         {tokenCollection === undefined ? (
                           <LoadingSpinner />
                         ) : (
@@ -255,10 +258,10 @@ export const HomePage = (): React.ReactElement => {
                           />
                         )}
                       </Box>
-                    </ResponsiveHidingView>
-                  )}
-                </LayerContainer.Layer>
-              </LayerContainer>
+                    </ColorSettingView>
+                  </FloatingView>
+                </ResponsiveHidingView>
+              )}
             </Stack.Item>
           </Stack>
         </Stack.Item>
