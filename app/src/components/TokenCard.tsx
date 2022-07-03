@@ -16,7 +16,7 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
         <Box maxHeight='20em' minHeight='5em' shouldClipContent={true}>
           <Image source={imageUrl} fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
         </Box>
-        <Text variant='note'>{props.token.name}</Text>
+        <Text variant='note-tokenCardName'>{props.token.name}</Text>
       </Stack>
     </LinkBase>
   );

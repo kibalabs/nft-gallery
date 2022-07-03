@@ -152,9 +152,9 @@ export const HomePage = (): React.ReactElement => {
       <Head>
         <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
         {tokenCollection?.description ? (
-          <meta name='description' content={`A gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz. ${tokenCollection.description}`} />
+          <meta name='description' content={`The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz`} />
         ) : tokenCollection && (
-          <meta name='description' content={`A gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz`} />
+          <meta name='description' content={`The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz`} />
         )}
         {tokenCollection?.bannerImageUrl && (
           <meta property='og:image' content={tokenCollection?.bannerImageUrl} />

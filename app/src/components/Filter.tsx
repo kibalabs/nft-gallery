@@ -56,6 +56,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
         <Stack key={attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
           <Text variant='bold-large'>{attributes[attributeKey].name}</Text>
           <OptionSelect
+            placeholderText='Select'
             options={getOptions(attributes[attributeKey])}
             onItemClicked={(itemKey: string) => props.onAttributeValueClicked(attributes[attributeKey].name, itemKey)}
             selectedItemKey={getSelectedOptionKey(attributes[attributeKey])}

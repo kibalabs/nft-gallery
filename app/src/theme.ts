@@ -6,9 +6,65 @@ export const buildProjectTheme = (projectId: string): ITheme => {
   if (projectId === 'sprites') {
     return buildTheme(mergeThemePartial(overrideTheme, {
       colors: {
-        brandPrimary: 'rgb(119,187,149)',
-        background: '#ffffff',
-        text: '#111111',
+        brandPrimary: '#ffffff',
+        background: 'rgb(220,137,117)',
+        text: '#ffffff',
+        spriteGreen: 'rgb(89,190,144)',
+        spritePink: 'rgb(211,163,181)',
+        spriteOrange: 'rgb(220,137,117)',
+      },
+      alternateColors: {
+        dialog: {
+          background: '#ffffff',
+          text: '#222222',
+        },
+      },
+      dimensions: {
+        borderRadius: '1em',
+      },
+      fonts: {
+        main: {
+          // url: 'https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
+          // url: 'https://fonts.googleapis.com/css2?family=Varela+Round&display=swap',
+          url: 'https://fonts.googleapis.com/css2?family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap',
+        },
+      },
+      texts: {
+        default: {
+          // 'font-family': "'Rubik', sans-serif",
+          // 'font-family': "'Varela Round', sans-serif",
+          'font-family': "'Kodchasan', sans-serif",
+          'font-weight': '500',
+        },
+        tokenCardName: {
+          color: '$colors.text',
+        },
+        footer: {
+          color: '$colors.text',
+        },
+      },
+      buttons: {
+        default: {
+          normal: {
+            default: {
+              background: {
+                'border-radius': '2em',
+              },
+            },
+          },
+        },
+      },
+      inputWrappers: {
+        default: {
+          normal: {
+            default: {
+              background: {
+                'background-color': 'rgba(255, 255, 255, 0.3)',
+                'border-color': 'rgba(255, 255, 255, 0.4)',
+              },
+            },
+          },
+        },
       },
     }));
   }
@@ -20,14 +76,12 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
       fonts: {
         main: {
-          // url: 'https://fonts.googleapis.com/css2?family=Square+Peg&display=swap',
           url: 'https://fonts.googleapis.com/css2?family=Sunshiney&display=swap',
         },
       },
       texts: {
         default: {
-          // 'font-family': "'Square Peg', cursive, sans-serif",
-          'font-family': "'Sunshiney', cursive, sans-serif",
+          'font-family': "'Sunshiney', sans-serif",
           'font-size': '20px',
         },
         note: {
@@ -46,6 +100,10 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       brandPrimary: '#B3C7F8',
       brandSecondary: '#2D86A3',
       background: '#000000',
+    },
+    alternateColors: {
+      dialog: {
+      },
     },
     fonts: {
       main: {
@@ -67,6 +125,8 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       wrapped: {
         'overflow-wrap': 'anywhere',
       },
+      tokenCardName: {},
+      footer: {},
     },
     prettyTexts: {
       header3: {
@@ -146,6 +206,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             background: {
               'background-color': '$colors.backgroundDark05',
+              'border-color': '$colors.backgroundDark10',
             },
           },
         },
