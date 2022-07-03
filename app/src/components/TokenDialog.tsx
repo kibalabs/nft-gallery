@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { dateToString, isToday, resolveUrl, shortFormatEther, truncateEnd, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Button, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { TokenTransfer } from '../client';
@@ -85,87 +85,89 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   };
 
   return (
-    <Dialog
-      isOpen={props.isOpen}
-      onCloseClicked={props.onCloseClicked}
-      maxWidth='1000px'
-      maxHeight='90%'
-    >
-      <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
-        <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
-          <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Box maxHeight='30em' maxWidth='50%' isFullWidth={false}>
-              <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
-            </Box>
-          </Stack.Item>
-          <Spacing variant={PaddingSize.Wide2} />
-          <Stack.Item growthFactor={1} shrinkFactor={1}>
-            <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullHeight={true}>
-              <Text variant='header2'>{props.token.name}</Text>
-              <Spacing variant={PaddingSize.Wide} />
-              { tokenTransfers === undefined ? (
-                <LoadingSpinner />
-              ) : tokenTransfers === null || !latestTransfer ? (
-                <Text variant='note'>Not currently owned</Text>
-              ) : (
-                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow}>
-                  <Text variant='note'>Owner</Text>
-                  <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                      <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
-                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
-                      </Box>
-                      <Text>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
-                    </Stack>
-                  </LinkBase>
-                  <Spacing variant={PaddingSize.Default} />
-                  <Text variant='note'>Last Transfer</Text>
-                  <Text>{`${shortFormatEther(latestTransfer.value)} on ${getTokenDateString(latestTransfer.blockDate)}`}</Text>
-                </Stack>
-              )}
-              <Spacing variant={PaddingSize.Wide} />
-              { props.token.frameImageUrl && frameImageUrl && (
-                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
-                  <Text variant='note'>Frame</Text>
-                  <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                    <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                      <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
-                    </Box>
-                    <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
+    <ColorSettingView variant='dialog'>
+      <Dialog
+        isOpen={props.isOpen}
+        onCloseClicked={props.onCloseClicked}
+        maxWidth='1000px'
+        maxHeight='90%'
+      >
+        <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
+            <Stack.Item growthFactor={1} shrinkFactor={1}>
+              <Box maxHeight='30em' maxWidth='50%' isFullWidth={false}>
+                <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
+              </Box>
+            </Stack.Item>
+            <Spacing variant={PaddingSize.Wide2} />
+            <Stack.Item growthFactor={1} shrinkFactor={1}>
+              <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
+                <Text variant='header2'>{props.token.name}</Text>
+                <Spacing variant={PaddingSize.Wide} />
+                { tokenTransfers === undefined ? (
+                  <LoadingSpinner />
+                ) : tokenTransfers === null || !latestTransfer ? (
+                  <Text variant='note'>Not currently owned</Text>
+                ) : (
+                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow}>
+                    <Text variant='note'>Owner</Text>
+                    <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
+                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                        <Box variant='rounded' shouldClipContent={true} height='20px' width='20px'>
+                          <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
+                        </Box>
+                        <Text>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
+                      </Stack>
+                    </LinkBase>
+                    <Spacing variant={PaddingSize.Default} />
+                    <Text variant='note'>Last Transfer</Text>
+                    <Text>{`${shortFormatEther(latestTransfer.value)} on ${getTokenDateString(latestTransfer.blockDate)}`}</Text>
                   </Stack>
-                </Stack>
-              )}
-              { isTreasureHuntToken && (
-                <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
-                  <Text variant='note'>Treasure Hunt</Text>
-                  <Text>You found the chosen Sprite!</Text>
-                  {isTreasureHuntSubmitting ? (
-                    <LoadingSpinner />
-                  ) : (
-                    <React.Fragment>
-                      {isTreasureHuntSubmitted ? (
-                        <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
-                      ) : !account ? (
-                        <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
-                      ) : (
-                        <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
-                      )}
-                      {treasureHuntSubmittingError && (
-                        <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
-                      )}
-                    </React.Fragment>
-                  )}
-                </Stack>
-              )}
-              <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                {Object.keys(props.token.attributeMap).map((attributeKey: string): React.ReactElement => (
-                  <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='default' />
-                ))}
-              </EqualGrid>
-            </Stack>
-          </Stack.Item>
-        </Stack>
-      </ResponsiveTextAlignmentView>
-    </Dialog>
+                )}
+                <Spacing variant={PaddingSize.Wide} />
+                { props.token.frameImageUrl && frameImageUrl && (
+                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
+                    <Text variant='note'>Frame</Text>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
+                        <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
+                      </Box>
+                      <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
+                    </Stack>
+                  </Stack>
+                )}
+                { isTreasureHuntToken && (
+                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
+                    <Text variant='note'>Treasure Hunt</Text>
+                    <Text>You found the chosen Sprite!</Text>
+                    {isTreasureHuntSubmitting ? (
+                      <LoadingSpinner />
+                    ) : (
+                      <React.Fragment>
+                        {isTreasureHuntSubmitted ? (
+                          <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
+                        ) : !account ? (
+                          <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
+                        ) : (
+                          <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
+                        )}
+                        {treasureHuntSubmittingError && (
+                          <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
+                        )}
+                      </React.Fragment>
+                    )}
+                  </Stack>
+                )}
+                <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                  {Object.keys(props.token.attributeMap).map((attributeKey: string): React.ReactElement => (
+                    <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='default' />
+                  ))}
+                </EqualGrid>
+              </Stack>
+            </Stack.Item>
+          </Stack>
+        </ResponsiveTextAlignmentView>
+      </Dialog>
+    </ColorSettingView>
   );
 };

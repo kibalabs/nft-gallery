@@ -23,9 +23,6 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     return Object.keys(attribute.values).map((valueKey: string): IOption => ({
       text: attribute.values[valueKey].name,
       itemKey: attribute.values[valueKey].name,
-      // listItemVariant?: string;
-      // textVariant?: string;
-      // isDisabled?: boolean;
     }));
   };
 
@@ -45,7 +42,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
   const attributes = props.tokenCollection.attributes;
 
   return (
-    <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} paddingRight={PaddingSize.Default}>
+    <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
       {props.shouldShowMusicOption && (
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
@@ -56,6 +53,8 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
         <Stack key={attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
           <Text variant='bold-large'>{attributes[attributeKey].name}</Text>
           <OptionSelect
+            placeholderText='Select'
+            optionTextVariant='dark'
             options={getOptions(attributes[attributeKey])}
             onItemClicked={(itemKey: string) => props.onAttributeValueClicked(attributes[attributeKey].name, itemKey)}
             selectedItemKey={getSelectedOptionKey(attributes[attributeKey])}

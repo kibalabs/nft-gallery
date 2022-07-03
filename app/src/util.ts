@@ -7,14 +7,17 @@ export interface IProjectConfig {
   name: string;
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 export const getTreasureHuntTokenId = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return '101';
-  }
   return null;
 };
 
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
+  if (projectId === 'sprites') {
+    return {
+      linearGradient: '180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%',
+    };
+  }
   if (projectId === 'goblintown') {
     return {
       layers: [
@@ -27,6 +30,9 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
 };
 
 export const getLogoImageUrl = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
+    return '/assets/sprites/logo.png';
+  }
   if (projectId === 'goblintown') {
     return '/assets/goblintown/logo-animated-inverse.gif';
   }
@@ -41,8 +47,14 @@ export const getBackgroundMusic = (projectId: string): string | null => {
 };
 
 export const getIcon = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
+    return '/assets/sprites/icon.png';
+  }
   if (projectId === 'goblintown') {
     return '/assets/goblintown/icon.png';
+  }
+  if (projectId === 'mdtp') {
+    return '/assets/mdtp/icon.png';
   }
   return null;
 };

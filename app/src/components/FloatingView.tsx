@@ -1,24 +1,61 @@
 import React from 'react';
 
-import { IMultiAnyChildProps } from '@kibalabs/core-react';
+import { getClassName } from '@kibalabs/core';
+import { ISingleAnyChildProps } from '@kibalabs/core-react';
+import { defaultComponentProps, IBoxTheme, IComponentProps } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
-interface IStyledFloatingViewProps {
+// TODO(krishan711): add theming to this
+// TODO(krishan711): move to ui-react
+
+interface IFloatingViewProps extends IComponentProps<IBoxTheme>, ISingleAnyChildProps {
+  isFullHeight?: boolean;
+  isFullWidth?: boolean;
+  positionLeft?: string;
+  positionTop?: string;
+  positionRight?: string;
+  positionBottom?: string;
 }
 
-interface IFloatingViewProps extends IMultiAnyChildProps {
+interface IStyledFloatingViewProps {
+  $positionLeft?: string;
+  $positionTop?: string;
+  $positionRight?: string;
+  $positionBottom?: string;
 }
 
 const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  left: ${(props: IStyledFloatingViewProps): string => props.$positionLeft || 'auto'};
+  top: ${(props: IStyledFloatingViewProps): string => props.$positionTop || 'auto'};
+  right: ${(props: IStyledFloatingViewProps): string => props.$positionRight || 'auto'};
+  bottom: ${(props: IStyledFloatingViewProps): string => props.$positionBottom || 'auto'};
+
+  &.fullHeight {
+    height: 100%;
+  }
+
+  &.fullWidth {
+    width: 100%;
+  }
 `;
 
 export const FloatingView = (props: IFloatingViewProps): React.ReactElement => {
   return (
-    <StyledFloatingView>
+    <StyledFloatingView
+      id={props.id}
+      className={getClassName(FloatingView.displayName, props.className, props.isFullHeight && 'fullHeight', props.isFullWidth && 'fullWidth')}
+      $positionTop={props.positionTop}
+      $positionLeft={props.positionLeft}
+      $positionRight={props.positionRight}
+      $positionBottom={props.positionBottom}
+    >
       {props.children}
     </StyledFloatingView>
   );
+};
+
+FloatingView.displayName = 'FloatingView';
+FloatingView.defaultProps = {
+  ...defaultComponentProps,
 };
