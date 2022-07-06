@@ -71,7 +71,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       const claimItemUrl = await airdropContract.uri(claimItemId);
       // const claimItemContent = JSON.parse((await new Requester().makeRequest(RestMethod.GET, claimItemUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/'))).content);
       // const claimItem: Token | null = { tokenId: claimItemContent.id, name: claimItemContent.name, description: null, imageUrl: claimItemContent.image.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/'), frameImageUrl: null, attributes: [], attributeMap: {} };
-      const claimItemContent = JSON.parse((await new Requester().makeRequest(RestMethod.GET, claimItemUrl.replace('ipfs://', 'https://ipfs.io/ipfs/'))).content);
+      const claimItemContent = JSON.parse((await new Requester(undefined, undefined, false).makeRequest(RestMethod.GET, claimItemUrl.replace('ipfs://', 'https://ipfs.io/ipfs/'))).content);
       const claimItem: Token | null = { tokenId: claimItemContent.id, name: claimItemContent.name, description: null, imageUrl: claimItemContent.image.replace('ipfs://', 'https://ipfs.io/ipfs/'), frameImageUrl: null, attributes: [], attributeMap: {} };
       setAirdropStatus({ name: 'Stormdrop ⚡️⚡️', hasClaimed, claimItem, claimLink: 'https://stormdrop.spriteclubnft.com' });
     }
