@@ -18,6 +18,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         dialog: {
           background: '#ffffff',
           text: '#222222',
+          brandPrimary: 'rgb(89,190,144)',
         },
       },
       dimensions: {
@@ -234,5 +235,16 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
+    links: {
+      note: {
+        normal: {
+          default: {
+            text: {
+              "font-size": baseTheme.texts['note']['font-size'],
+            }
+          }
+        }
+      }
+    }
   };
 };

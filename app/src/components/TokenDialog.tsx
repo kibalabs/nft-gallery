@@ -1,14 +1,25 @@
 import React from 'react';
 
-import { dateToString, isToday, resolveUrl, shortFormatEther, truncateEnd, truncateMiddle } from '@kibalabs/core';
+import { dateToString, isToday, Requester, resolveUrl, RestMethod, shortFormatEther, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
+import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../AccountContext';
 import { TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
 import { Token, TokenCollection } from '../model';
 import { getTreasureHuntTokenId } from '../util';
+import { ethers } from 'ethers';
+import SpriteClubStormdrop from '../SpriteClubStormdrop.json';
+import SpriteClub from '../SpriteClub.json';
+import SpriteClubStormdropIdMap from '../SpriteClubStormdropIdMap.json';
+
+interface AirdropStatus {
+  name: string;
+  hasClaimed: boolean;
+  claimItem: Token | null;
+  claimLink: string;
+}
 
 interface ITokenDialogProps {
   token: Token;
@@ -17,7 +28,10 @@ interface ITokenDialogProps {
   onCloseClicked: () => void;
 }
 
+const SPRITES_STORMDROP_ADDRESS = '0x27C86e1c64622643049d3D7966580Cb832dCd1EF';
+
 export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
+  const web3 = useWeb3();
   const account = useAccount();
   const { notdClient, projectId } = useGlobals();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
@@ -25,12 +39,52 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
   const [isTreasureHuntSubmitted, setIsTreasureHuntSubmitted] = React.useState<boolean>(false);
   const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
+  const [airdropStatus, setAirdropStatus] = React.useState<AirdropStatus | null | undefined>(undefined);
 
   const imageUrl = resolveUrl(props.token.imageUrl);
   const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
   const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId(projectId);
+
+  const airdropContract = React.useMemo((): ethers.Contract | null => {
+    if (!web3) {
+      return null;
+    }
+    if (projectId === 'sprites') {
+      return new ethers.Contract(SPRITES_STORMDROP_ADDRESS, SpriteClubStormdrop.abi, web3);
+    }
+    return null;
+  }, [web3]);
+
+  const updateAirdropStatus = React.useCallback(async (): Promise<void> => {
+    setAirdropStatus(undefined);
+    if (!airdropContract) {
+      setAirdropStatus(null);
+      return;
+    }
+    if (projectId === 'sprites') {
+      const claimedItemId = (await airdropContract.claimedSpriteItemIdMap(props.token.tokenId)).toNumber();
+      console.log('claimedItemId', claimedItemId);
+      const hasClaimed = claimedItemId > 0;
+      console.log('hasClaimed', hasClaimed);
+      const itemToClaimId = SpriteClubStormdropIdMap[props.token.tokenId];
+      console.log('itemToClaimId', itemToClaimId);
+      const claimItemId = claimedItemId || itemToClaimId;
+      console.log('claimItemId', claimItemId);
+      const claimItemUrl = claimItemId ? await airdropContract.uri(claimItemId) : null;
+      console.log('claimItemUrl', claimItemUrl);
+      const claimItemContent = claimItemUrl ? JSON.parse((await new Requester().makeRequest(RestMethod.GET, claimItemUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/'))).content) : null;
+      console.log('claimItemContent', claimItemContent);
+      const claimItem: Token | null = claimItemContent ? {tokenId: claimItemContent['id'], name: claimItemContent['name'], description: null, imageUrl: claimItemContent['image'].replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/'), frameImageUrl: null, attributes: [], attributeMap: {}} : null;
+      console.log('claimItemContent', claimItemContent);
+      setAirdropStatus({ name: 'Stormdrop ⚡️⚡️', hasClaimed, claimItem, claimLink: 'https://stormdrop.spriteclubnft.com' });
+    }
+  }, [projectId, props.token.tokenId, airdropContract]);
+
+  React.useEffect((): void => {
+    updateAirdropStatus();
+  }, [updateAirdropStatus]);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);
@@ -51,7 +105,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       if (isToday(tokenDate)) {
         return dateToString(tokenDate, 'HH:mm');
       }
-      return dateToString(tokenDate, 'dd-MMM-yyyy');
+      return dateToString(tokenDate, 'dd MMM yyyy');
     }
     return '';
   };
@@ -135,6 +189,22 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                       <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
                     </Stack>
                   </Stack>
+                )}
+                { airdropStatus && (
+                  <React.Fragment>
+                    <Text>{`${airdropStatus.name} ${airdropStatus.hasClaimed ? 'claimed ✅' : 'not claimed...'}`}</Text>
+                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center}>
+                      <Text variant='note'>{`${airdropStatus.hasClaimed ? 'Claimed:' : 'To claim:'}`}</Text>
+                      <Box height='1em' width='1em'>
+                        <Image source={airdropStatus.claimItem?.imageUrl} />
+                      </Box>
+                      <Text variant='note'>{`${airdropStatus.claimItem?.name}`}</Text>
+                      {!airdropStatus.hasClaimed && isOwner && (
+                        <Link variant='note' text='Claim now' target='https://stormdrop.spriteclubnft.com' />
+                      )}
+                    </Stack>
+                    <Spacing variant={PaddingSize.Wide} />
+                  </React.Fragment>
                 )}
                 { isTreasureHuntToken && (
                   <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
