@@ -240,11 +240,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         normal: {
           default: {
             text: {
-              "font-size": baseTheme.texts['note']['font-size'],
-            }
-          }
-        }
-      }
-    }
+              'font-size': baseTheme.texts.note['font-size'],
+            },
+          },
+        },
+      },
+    },
   };
 };
