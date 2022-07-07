@@ -30,4 +30,12 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.SubmitTreasureHuntForCollectionTokenRequest(userAddress, signature);
     await this.makeRequest(method, path, request, Endpoints.SubmitTreasureHuntForCollectionTokenResponse);
   };
+
+  public listCollectionTokenAirdrops = async (registryAddress: string, tokenId: string): Promise<Resources.Airdrop[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}/airdrops`;
+    const request = new Endpoints.ListCollectionTokenAirdropsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokenAirdropsResponse);
+    return response.airdrops;
+  }
 }

@@ -14,7 +14,7 @@ export const Footer = (props: IFooterProps): React.ReactElement => {
       <LinkBase target={`https://www.tokenpage.xyz?ref=${props.tokenPageReferral}`}>
         <Box variant='card-footer-unpadded'>
           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
-            <Text variant={textVariant}>Made by</Text>
+            <Text variant={textVariant}>Made with</Text>
             <Box shouldClipContent={true} width={props.isSmall ? '1rem' : '1.5rem'} height={props.isSmall ? '1rem' : '1.5rem'}>
               <Image source='https://www.tokenpage.xyz/assets/favicon.png' alternativeText='TokenPage Logo' fitType='contain' />
             </Box>

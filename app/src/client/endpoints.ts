@@ -62,3 +62,21 @@ export class SubmitTreasureHuntForCollectionTokenResponse extends ResponseData {
     return new SubmitTreasureHuntForCollectionTokenResponse();
   };
 }
+
+export class ListCollectionTokenAirdropsRequest extends RequestData {
+}
+
+export class ListCollectionTokenAirdropsResponse extends ResponseData {
+  readonly airdrops: Resources.Airdrop[];
+
+  public constructor(TokenRecentSales: Resources.Airdrop[]) {
+    super();
+    this.airdrops = TokenRecentSales;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListCollectionTokenAirdropsResponse => {
+    return new ListCollectionTokenAirdropsResponse(
+      (obj.airdrops as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.Airdrop.fromObject(innerObj)),
+    );
+  };
+}

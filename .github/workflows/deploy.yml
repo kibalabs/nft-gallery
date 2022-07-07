@@ -45,7 +45,7 @@ jobs:
           envs: DOCKER_IMAGE,NAME,VERSION
           script_stop: true
           script: |
-            url="mdtp-gallery.tokenpage.xyz"
+            url="gallery.milliondollartokenpage.com"
             varsFile=~/.${NAME}.vars
             docker pull ${DOCKER_IMAGE}
             docker stop ${NAME} && docker rm ${NAME} || true
