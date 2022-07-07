@@ -37,5 +37,5 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.ListCollectionTokenAirdropsRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokenAirdropsResponse);
     return response.airdrops;
-  }
+  };
 }

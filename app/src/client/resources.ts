@@ -2,6 +2,7 @@ import { dateFromString } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
+  // eslint-disable-next-line no-useless-constructor
   public constructor(
     readonly tokenTransferId: number,
     readonly transactionHash: string,
@@ -16,6 +17,7 @@ export class TokenTransfer {
     readonly blockNumber: number,
     readonly blockHash: string,
     readonly blockDate: Date,
+  // eslint-disable-next-line no-empty-function
   ) {}
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -38,9 +40,11 @@ export class TokenTransfer {
 }
 
 export class TokenAttribute {
+  // eslint-disable-next-line no-useless-constructor
   public constructor(
     readonly traitType: string,
     readonly value: string,
+  // eslint-disable-next-line no-empty-function
   ) {}
 
   public static fromObject = (obj: Record<string, unknown>): TokenAttribute => {
@@ -52,6 +56,7 @@ export class TokenAttribute {
 }
 
 export class CollectionToken {
+  // eslint-disable-next-line no-useless-constructor
   public constructor(
     readonly registryAddress: string,
     readonly tokenId: string,
@@ -59,6 +64,7 @@ export class CollectionToken {
     readonly imageUrl: string | null,
     readonly description: string | null,
     readonly attributes: TokenAttribute[],
+  // eslint-disable-next-line no-empty-function
   ) {}
 
   public static fromObject = (obj: Record<string, unknown>): CollectionToken => {
@@ -74,12 +80,14 @@ export class CollectionToken {
 }
 
 export class Airdrop {
+  // eslint-disable-next-line no-useless-constructor
   public constructor(
     readonly token: CollectionToken,
     readonly name: string,
     readonly isClaimed: boolean,
     readonly claimToken: CollectionToken,
     readonly claimUrl: string,
+  // eslint-disable-next-line no-empty-function
   ) {}
 
   public static fromObject = (obj: Record<string, unknown>): Airdrop => {

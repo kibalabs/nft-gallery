@@ -45,7 +45,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       console.error(error);
       setAirdrop(null);
     });
-  }, [projectId, notdClient, props.tokenCollection.address, props.token.tokenId]);
+  }, [notdClient, props.tokenCollection.address, props.token.tokenId]);
 
   React.useEffect((): void => {
     updateAirdropStatus();
