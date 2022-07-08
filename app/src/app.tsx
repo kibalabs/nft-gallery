@@ -6,6 +6,7 @@ import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { RecentSalesPage } from './pages/RecentSalesPage';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
@@ -43,6 +44,7 @@ export const globals: IGlobals = {
 export const routes: IRoute<IGlobals>[] = [
   { path: '/*', page: HomePage, getPageData: getHomePageData },
   { path: '/accounts/:accountAddress', page: AccountPage, getPageData: getHomePageData },
+  { path: '/sales', page: RecentSalesPage, getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
