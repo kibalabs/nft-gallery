@@ -12,6 +12,13 @@ export const getTreasureHuntTokenId = (projectId: string): string | null => {
   return null;
 };
 
+export const getBannerImageUrl = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
+    return '/assets/sprites/banner.png';
+  }
+  return null;
+};
+
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
   if (projectId === 'sprites') {
     return {
