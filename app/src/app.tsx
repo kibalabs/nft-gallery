@@ -42,7 +42,7 @@ export const globals: IGlobals = {
 
 export const routes: IRoute<IGlobals>[] = [
   { path: '/*', page: HomePage, getPageData: getHomePageData },
-  { path: '/accounts/:accountAddress', page: AccountPage, getPageData: getHomePageData },
+  { path: '/accounts/:accountAddress/*', page: AccountPage, getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {

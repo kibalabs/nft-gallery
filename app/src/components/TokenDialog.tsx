@@ -158,11 +158,11 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                 { airdrop && (
                   <React.Fragment>
                     <Text>{`${airdrop.name} ${airdrop.isClaimed ? 'claimed ✅' : 'not claimed...'}`}</Text>
-                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center}>
+                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center} isFullWidth={false}>
                       <Text variant='note'>{`${airdrop.isClaimed ? 'Claimed:' : 'To claim:'}`}</Text>
                       {airdrop.claimToken.imageUrl && (
                         <Box height='1em' width='1em'>
-                          <Image source={airdrop.claimToken.imageUrl} alternativeText='' />
+                          <Image source={airdrop.claimToken.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText='' />
                         </Box>
                       )}
                       <Text variant='note'>{`${airdrop.claimToken.name}`}</Text>
