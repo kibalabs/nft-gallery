@@ -19,6 +19,19 @@ export const getBannerImageUrl = (projectId: string): string | null => {
   return null;
 };
 
+export const getHost = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
+    return 'https://gallery.spriteclubnft.com';
+  }
+  if (projectId === 'goblintown') {
+    return 'https://goblintown-gallery.tokenpage.xyz';
+  }
+  if (projectId === 'mdtp') {
+    return 'https://gallery.milliondollartokenpage.com';
+  }
+  return null;
+};
+
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
   if (projectId === 'sprites') {
     return {

@@ -14,7 +14,7 @@ import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { Token, TokenCollection } from '../../model';
 import { usePageData } from '../../PageDataContext';
-import { getBackgroundMusic, getBannerImageUrl, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
 
 
@@ -148,7 +148,10 @@ export const HomePage = (): React.ReactElement => {
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
   const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
 
-  const bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
+    bannerImageUrl = `${getHost(projectId)}${bannerImageUrl}`;
+  }
 
   return (
     <React.Fragment>
