@@ -5,8 +5,8 @@ import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kib
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
+
 import 'react-toastify/dist/ReactToastify.css';
-import { RecentSalesPage } from './pages/RecentSalesPage';
 
 import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
@@ -17,6 +17,7 @@ import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { RecentSalesPage } from './pages/RecentSalesPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getEveryviewCode, getIcon } from './util';
 

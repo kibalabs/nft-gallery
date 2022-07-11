@@ -14,7 +14,7 @@ import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { Token, TokenCollection } from '../../model';
 import { usePageData } from '../../PageDataContext';
-import { getBackgroundMusic, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
 
 
@@ -148,17 +148,28 @@ export const HomePage = (): React.ReactElement => {
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
   const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
 
+  const host = getHost(projectId);
+  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
+    bannerImageUrl = `${host}${bannerImageUrl}`;
+  }
+  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
+  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
+
   return (
     <React.Fragment>
       <Head>
-        <title>{`${tokenCollection ? tokenCollection.name : 'Token'} Gallery`}</title>
-        {tokenCollection?.description ? (
-          <meta name='description' content={`The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz`} />
-        ) : tokenCollection && (
-          <meta name='description' content={`The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz`} />
-        )}
-        {tokenCollection?.bannerImageUrl && (
-          <meta property='og:image' content={tokenCollection?.bannerImageUrl} />
+        <title>{title}</title>
+        <meta name='twitter:title' content={title} />
+        {description && <meta name='description' content={description} /> }
+        {bannerImageUrl ? (
+          <React.Fragment>
+            <meta name='twitter:card' content='summary_large_image' />
+            <meta name='twitter:image' content={bannerImageUrl} />
+            <meta name='og:image' content={bannerImageUrl} />
+          </React.Fragment>
+        ) : (
+          <meta name='twitter:card' content='summary' />
         )}
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
@@ -224,7 +235,7 @@ export const HomePage = (): React.ReactElement => {
                       {filteredTokens.length > 0 ? (
                         <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
                           {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard key={token.tokenId} token={token} />
+                            <TokenCard key={token.tokenId} token={token} target={`/tokens/${token.tokenId}`} />
                           ))}
                         </EqualGrid>
                       ) : (

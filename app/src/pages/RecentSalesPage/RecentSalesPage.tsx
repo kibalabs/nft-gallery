@@ -58,10 +58,11 @@ export const RecentSalesPage = (): React.ReactElement => {
         <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
           { recentSales === undefined ? (
             <LoadingSpinner />) : (
-            recentSales && recentSales.map((ownerToken: Token, index: number) : React.ReactElement => (
+            recentSales && recentSales.map((recentSaleToken: Token, index: number) : React.ReactElement => (
               <TokenCard
                 key={index}
-                token={ownerToken}
+                token={recentSaleToken}
+                target={`/tokens/${recentSaleToken.tokenId}`}
               />
             )))}
         </EqualGrid>
