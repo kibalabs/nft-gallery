@@ -17,6 +17,7 @@ export class TokenTransfer {
     readonly blockNumber: number,
     readonly blockHash: string,
     readonly blockDate: Date,
+    readonly token: CollectionToken,
   // eslint-disable-next-line no-empty-function
   ) {}
 
@@ -35,6 +36,7 @@ export class TokenTransfer {
       Number(obj.blockNumber),
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
     );
   };
 }
@@ -61,7 +63,7 @@ export class CollectionToken {
     readonly registryAddress: string,
     readonly tokenId: string,
     readonly name: string,
-    readonly imageUrl: string | null,
+    readonly imageUrl: string,
     readonly description: string | null,
     readonly attributes: TokenAttribute[],
   // eslint-disable-next-line no-empty-function
@@ -72,7 +74,7 @@ export class CollectionToken {
       String(obj.registryAddress),
       String(obj.tokenId),
       String(obj.name),
-      obj.imageUrl ? String(obj.imageUrl) : null,
+      String(obj.imageUrl),
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
     );

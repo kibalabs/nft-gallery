@@ -5,6 +5,7 @@ import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kib
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
+
 import 'react-toastify/dist/ReactToastify.css';
 
 import { AccountControlProvider } from './AccountContext';
@@ -16,6 +17,7 @@ import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { RecentSalesPage } from './pages/RecentSalesPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getEveryviewCode, getIcon } from './util';
 
@@ -42,7 +44,8 @@ export const globals: IGlobals = {
 
 export const routes: IRoute<IGlobals>[] = [
   { path: '/*', page: HomePage, getPageData: getHomePageData },
-  { path: '/accounts/:accountAddress/*', page: AccountPage, getPageData: getHomePageData },
+  { path: '/accounts/:accountAddress', page: AccountPage, getPageData: getHomePageData },
+  { path: '/sales', page: RecentSalesPage, getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
