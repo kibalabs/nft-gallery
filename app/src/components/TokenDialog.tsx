@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Airdrop, TokenListing, TokenTransfer } from '../client';
@@ -171,7 +171,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                     <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center}>
                       <EtherValue textVariant='large-bold' value={longFormatNumber(etherToNumber(listing.value))} />
                       <Spacing variant={PaddingSize.Wide} />
-                      <Button variant='narrow' text='Purchase' target={getListingUrl(listing)} />
+                      <Button variant='narrow' text='Purchase' target={getListingUrl(listing)} iconRight={<KibaIcon variant='small' iconId='ion-open-outline' />} />
                     </Stack>
                     <Spacing variant={PaddingSize.Wide} />
                   </React.Fragment>

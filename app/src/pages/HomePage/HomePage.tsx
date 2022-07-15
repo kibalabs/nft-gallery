@@ -2,7 +2,7 @@ import React from 'react';
 
 import { RestMethod } from '@kibalabs/core';
 import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
 import { CollectionToken, TokenListing } from '../../client';
@@ -181,6 +181,10 @@ export const HomePage = (): React.ReactElement => {
     navigator.navigateTo('/');
   };
 
+  const onToggleResponsiveFilterClicked = (): void => {
+    setIsResponsiveFilterShowing(!isResponsiveFilterShowing);
+  };
+
   return (
     <React.Fragment>
       <Head>
@@ -221,88 +225,95 @@ export const HomePage = (): React.ReactElement => {
             </Box>
           </Stack>
         )}
-        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-          <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
-        </ResponsiveHidingView>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-          <Stack direction={Direction.Horizontal} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} isFullHeight={true} isFullWidth={true}>
+          <Stack direction={Direction.Horizontal} shouldAddGutters={false} isFullHeight={true} isFullWidth={true}>
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Box width='300px' isFullHeight={true}>
-                {tokenCollection === undefined ? (
-                  <LoadingSpinner />
-                ) : (
-                  <Filter
-                    filters={filters}
-                    onAttributeValueClicked={onAttributeValueClicked}
-                    account={account}
-                    showOwnedTokensOnly={showOwnedTokensOnly}
-                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                    shouldShowMusicOption={backgroundMusic != null}
-                    shouldPlayMusic={shouldPlayMusic}
-                    setShouldPlayMusic={setShouldPlayMusic}
-                    tokenCollection={tokenCollection}
-                  />
-                )}
-              </Box>
+              <React.Fragment>
+                <Box width='300px' isFullHeight={true}>
+                  {tokenCollection === undefined ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <Filter
+                      filters={filters}
+                      onAttributeValueClicked={onAttributeValueClicked}
+                      account={account}
+                      showOwnedTokensOnly={showOwnedTokensOnly}
+                      setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                      shouldShowMusicOption={backgroundMusic != null}
+                      shouldPlayMusic={shouldPlayMusic}
+                      setShouldPlayMusic={setShouldPlayMusic}
+                      tokenCollection={tokenCollection}
+                    />
+                  )}
+                </Box>
+              </React.Fragment>
             </ResponsiveHidingView>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                {tokenCollection === undefined || filteredTokens === undefined ? (
-                  <LoadingSpinner />
-                ) : (
-                  <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
-                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
-                      {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                        <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                      ))}
-                    </Stack>
-                    <Stack.Item growthFactor={1}>
-                      {filteredTokens.length > 0 ? (
-                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
-                          {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard
-                              key={token.tokenId}
-                              token={token}
-                              tokenListing={tokenListingMap[token.tokenId]}
-                              target={`/tokens/${token.tokenId}`}
-                            />
-                          ))}
-                        </EqualGrid>
+              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+                <Stack.Item growthFactor={1} shrinkFactor={1}>
+                  <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
+                    <LayerContainer>
+                      {tokenCollection === undefined || filteredTokens === undefined ? (
+                        <LoadingSpinner />
                       ) : (
-                        <Text>No tokens match filter</Text>
+                        <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                            {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                              <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                            ))}
+                          </Stack>
+                          <Stack.Item growthFactor={1} shrinkFactor={1}>
+                            <Box variant='unrounded' ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                              {filteredTokens.length > 0 ? (
+                                <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
+                                  {filteredTokens.map((token: Token): React.ReactElement => (
+                                    <TokenCard
+                                      key={token.tokenId}
+                                      token={token}
+                                      tokenListing={tokenListingMap[token.tokenId]}
+                                      target={`/tokens/${token.tokenId}`}
+                                    />
+                                  ))}
+                                </EqualGrid>
+                              ) : (
+                                <Text>No tokens match filter</Text>
+                              )}
+                            </Box>
+                          </Stack.Item>
+                        </Stack>
                       )}
-                    </Stack.Item>
-                  </Stack>
-                )}
-              </Box>
-              {isResponsiveFilterShowing && (
+                      {isResponsiveFilterShowing && (
+                        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                          <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
+                            <ColorSettingView variant='dialog'>
+                              <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
+                                {tokenCollection === undefined ? (
+                                  <LoadingSpinner />
+                                ) : (
+                                  <Filter
+                                    filters={filters}
+                                    onAttributeValueClicked={onAttributeValueClicked}
+                                    account={account}
+                                    showOwnedTokensOnly={showOwnedTokensOnly}
+                                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                                    shouldShowMusicOption={backgroundMusicSource != null}
+                                    shouldPlayMusic={shouldPlayMusic}
+                                    setShouldPlayMusic={setShouldPlayMusic}
+                                    tokenCollection={tokenCollection}
+                                  />
+                                )}
+                              </Box>
+                            </ColorSettingView>
+                          </FloatingView>
+                        </ResponsiveHidingView>
+                      )}
+                    </LayerContainer>
+                  </Box>
+                </Stack.Item>
                 <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <FloatingView isFullHeight={true} isFullWidth={true} positionLeft={'0px'} positionRight={'0px'}>
-                    <Box isFullHeight={true} isFullWidth={true} variant='backdrop' shouldCaptureTouches={true} />
-                  </FloatingView>
-                  <FloatingView isFullHeight={true} positionLeft={'0px'} positionRight={'0px'}>
-                    <ColorSettingView variant='dialog'>
-                      <Box variant='filterOverlay' isFullHeight={true} width='80%' maxWidth='350px' shouldClipContent={true}>
-                        {tokenCollection === undefined ? (
-                          <LoadingSpinner />
-                        ) : (
-                          <Filter
-                            filters={filters}
-                            onAttributeValueClicked={onAttributeValueClicked}
-                            account={account}
-                            showOwnedTokensOnly={showOwnedTokensOnly}
-                            setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                            shouldShowMusicOption={backgroundMusicSource != null}
-                            shouldPlayMusic={shouldPlayMusic}
-                            setShouldPlayMusic={setShouldPlayMusic}
-                            tokenCollection={tokenCollection}
-                          />
-                        )}
-                      </Box>
-                    </ColorSettingView>
-                  </FloatingView>
+                  <Button variant='unrounded' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
                 </ResponsiveHidingView>
-              )}
+              </Stack>
             </Stack.Item>
           </Stack>
         </Stack.Item>

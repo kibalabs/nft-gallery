@@ -75,6 +75,9 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'border-color': 'rgba(255, 255, 255, 0.2)',
           'background-color': 'rgba(255, 255, 255, 0.1)',
         },
+        unrounded: {
+          'border-radius': '0',
+        },
       },
       dividers: {
         default: {
@@ -186,7 +189,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       filterOverlay: {
         'background-color': '$colors.backgroundClear10',
         'backdrop-filter': 'blur(3px)',
-        'border-radius': '0 1em 1em 0',
+        'border-radius': '1em 1em 0 0',
       },
       backdrop: {
         'border-radius': '0',
@@ -273,6 +276,15 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
             background: {
               padding: `${baseTheme.dimensions.paddingNarrow2} ${baseTheme.dimensions.padding}`,
               'border-width': '0',
+            },
+          },
+        },
+      },
+      unrounded: {
+        normal: {
+          default: {
+            background: {
+              'border-radius': '0',
             },
           },
         },
