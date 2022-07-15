@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Alignment, Box, Direction, Image, LinkBase, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
-
-import { Token } from '../model';
-import { TokenListing } from '../client';
 import { etherToNumber, longFormatNumber } from '@kibalabs/core';
+import { Alignment, Box, Direction, Image, LinkBase, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
+
+import { TokenListing } from '../client';
+import { Token } from '../model';
 import { EtherValue } from './EtherValue';
 
 interface ITokenCardProps {

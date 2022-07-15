@@ -13,11 +13,10 @@ import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { Token, TokenCollection } from '../../model';
+import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
-import { BigNumber } from 'ethers';
-import { OpenseaClient } from '../../OpenseaClient';
 
 
 export const HomePage = (): React.ReactElement => {

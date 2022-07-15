@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString, etherToNumber, isToday, longFormatEther, longFormatNumber, resolveUrl, shortFormatEther, truncateEnd, truncateMiddle } from '@kibalabs/core';
+import { dateToString, etherToNumber, isToday, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
@@ -8,8 +8,8 @@ import { Airdrop, TokenListing, TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
 import { Token, TokenCollection } from '../model';
-import { getTreasureHuntTokenId } from '../util';
 import { OpenseaClient } from '../OpenseaClient';
+import { getTreasureHuntTokenId } from '../util';
 import { EtherValue } from './EtherValue';
 
 interface ITokenDialogProps {
@@ -83,16 +83,6 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     updateTokenSales();
   }, [updateTokenSales]);
 
-  const getTokenDateString = (tokenDate: Date): string => {
-    if (tokenDate !== null) {
-      if (isToday(tokenDate)) {
-        return dateToString(tokenDate, 'HH:mm');
-      }
-      return dateToString(tokenDate, 'dd MMM yyyy');
-    }
-    return '';
-  };
-
   const onSubmitClicked = async (): Promise<void> => {
     setTreasureHuntSubmittingError(null);
     setIsTreasureHuntSubmitting(true);
@@ -126,7 +116,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       return `https://opensea.io/assets/${tokenListing.token.registryAddress}/${tokenListing.token.tokenId}`;
     }
     return '';
-  }
+  };
 
   return (
     <ColorSettingView variant='dialog'>

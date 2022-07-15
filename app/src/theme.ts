@@ -74,10 +74,10 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'backdrop-filter': 'blur(3px)',
         },
         tokenCard: {
-          "border-width": '2px',
-          "border-color": 'rgba(255, 255, 255, 0.2)',
-          "background-color": 'rgba(255, 255, 255, 0.1)',
-        }
+          'border-width': '2px',
+          'border-color': 'rgba(255, 255, 255, 0.2)',
+          'background-color': 'rgba(255, 255, 255, 0.1)',
+        },
       },
       dividers: {
         default: {
@@ -145,12 +145,12 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'overflow-wrap': 'anywhere',
       },
       tokenCardName: {
-        "font-size": '0.8em',
+        'font-size': '0.8em',
         'font-weight': '600',
       },
       tokenCardValue: {
-        "font-size": '0.8em',
-        "line-height": '1em',
+        'font-size': '0.8em',
+        'line-height': '1em',
       },
       footer: {},
     },
@@ -195,7 +195,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       tokenCard: {
       },
       unrounded: {
-        "border-radius": '0'
+        'border-radius': '0',
       },
     },
     pills: {
@@ -262,7 +262,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
     images: {
       unrounded: {
         background: {
-          "border-radius": '0'
+          'border-radius': '0',
         },
       },
     },

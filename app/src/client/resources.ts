@@ -1,4 +1,4 @@
-import { booleanFromString, dateFromString } from '@kibalabs/core';
+import { dateFromString } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
@@ -121,8 +121,8 @@ export class TokenListing {
       Number(obj.tokenListingId),
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
       String(obj.offererAddress),
-      dateFromString(String(obj. startDate)),
-      dateFromString(String(obj. endDate)),
+      dateFromString(String(obj.startDate)),
+      dateFromString(String(obj.endDate)),
       Boolean(obj.isValueNative),
       BigNumber.from(String(obj.value)),
       String(obj.source),
