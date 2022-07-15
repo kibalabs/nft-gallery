@@ -40,9 +40,6 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         },
         tokenCardName: {
         },
-        dark: {
-          color: '$colors.textInverse',
-        },
       },
       buttons: {
         default: {
@@ -153,6 +150,9 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'line-height': '1em',
       },
       footer: {},
+      dark: {
+        color: '$colors.textInverse',
+      },
     },
     prettyTexts: {
       header3: {

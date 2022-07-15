@@ -39,7 +39,6 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const updateListings = React.useCallback(async (): Promise<void> => {
     try {
       const openseaListing = await (new OpenseaClient().getTokenListing(props.tokenCollection.address, props.token.tokenId));
-      console.log('openseaListing', openseaListing);
       setListing(openseaListing);
     } catch (error: unknown) {
       console.error(error);

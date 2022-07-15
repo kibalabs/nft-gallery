@@ -13,7 +13,6 @@ export class OpenseaClient {
 
   public getTokenListings = async (registryAddress: string, tokenIds: string[]): Promise<Record<string, TokenListing | null>> => {
     const tokenIdChunks = getChunks(tokenIds, 30);
-    console.log('tokenIdChunks', tokenIdChunks);
     const tokenListings: Record<string, TokenListing | null> = {};
     for (let tokenIdChunksIndex = 0; tokenIdChunksIndex < tokenIdChunks.length; tokenIdChunksIndex += 1) {
       const innerTokenIds = tokenIdChunks[tokenIdChunksIndex];
@@ -61,12 +60,10 @@ export class OpenseaClient {
             seaportSellOrder.order_hash as string,
           ));
         });
-        console.log(tokenId, 'listings', listings);
         if (listings.length === 0) {
           tokenListings[tokenId] = null;
         } else {
           const sortedListings = listings.sort((listing1: TokenListing, listing2: TokenListing): number => listing2.value.sub(listing1.value).div(1000000000000000000).toNumber());
-          console.log(tokenId, 'listings', listings);
           tokenListings[tokenId] = sortedListings[0];
         }
       });
