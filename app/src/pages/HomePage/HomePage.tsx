@@ -5,7 +5,7 @@ import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigato
 import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { CollectionToken } from '../../client';
+import { CollectionToken, TokenListing } from '../../client';
 import { Account } from '../../components/Account';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -16,6 +16,8 @@ import { Token, TokenCollection } from '../../model';
 import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
+import { BigNumber } from 'ethers';
+import { OpenseaClient } from '../../OpenseaClient';
 
 
 export const HomePage = (): React.ReactElement => {
@@ -29,7 +31,8 @@ export const HomePage = (): React.ReactElement => {
   const [ownedTokens, setOwnedTokens] = React.useState<Token[] | undefined | null>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
-  const [tokenLimit, setTokenLimit] = React.useState<number>(50);
+  const [tokenLimit, setTokenLimit] = React.useState<number>(30);
+  const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
   const [scrollingRef] = useRenderedRef<HTMLDivElement>();
@@ -38,6 +41,17 @@ export const HomePage = (): React.ReactElement => {
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
+
+  const isTokenSubpageShowing = location.pathname.includes('/tokens/');
+  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
+
+  const host = getHost(projectId);
+  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
+    bannerImageUrl = `${host}${bannerImageUrl}`;
+  }
+  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
+  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
@@ -54,18 +68,6 @@ export const HomePage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
-
-  const onScrolled = React.useCallback((): void => {
-    if (!scrollingRef.current) {
-      return;
-    }
-    const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
-    if (size - scrollingRef.current.scrollTop < 500) {
-      setTokenLimit(tokenLimit + 25);
-    }
-  }, [scrollingRef, tokenLimit]);
-
-  useScrollListener(scrollingRef.current, onScrolled);
 
   const loadMetadata = React.useCallback(async (): Promise<void> => {
     const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
@@ -141,20 +143,44 @@ export const HomePage = (): React.ReactElement => {
     return innerFilteredTokens.slice(0, tokenLimit);
   }, [tokenCollection, filters, tokenLimit, showOwnedTokensOnly, ownedTokens]);
 
+  const updateTokenListings = React.useCallback(async (): Promise<void> => {
+    if (!tokenCollection) {
+      return;
+    }
+    if (!filteredTokens) {
+      return;
+    }
+    const filteredTokenIds = filteredTokens.map((token: Token): string => token.tokenId);
+    const tokenIdsToUpdate = filteredTokenIds.filter((tokenId: string): boolean => !(tokenId in tokenListingMap));
+    if (tokenIdsToUpdate.length === 0) {
+      return;
+    }
+    const newListingMap = await new OpenseaClient().getTokenListings(tokenCollection.address, tokenIdsToUpdate);
+    setTokenListMap({ ...tokenListingMap, ...newListingMap });
+  }, [tokenCollection, filteredTokens, tokenListingMap]);
+
+  React.useEffect((): void => {
+    updateTokenListings();
+  }, [updateTokenListings]);
+
+  const onScrolled = React.useCallback((): void => {
+    if (filteredTokens && tokenLimit > filteredTokens.length) {
+      return;
+    }
+    if (!scrollingRef.current) {
+      return;
+    }
+    const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
+    if (size - scrollingRef.current.scrollTop < 300) {
+      setTokenLimit(tokenLimit + 30);
+    }
+  }, [scrollingRef, tokenLimit, filteredTokens]);
+
+  useScrollListener(scrollingRef.current, onScrolled);
+
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
   };
-
-  const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
-
-  const host = getHost(projectId);
-  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
-  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
-    bannerImageUrl = `${host}${bannerImageUrl}`;
-  }
-  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
-  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
 
   return (
     <React.Fragment>
@@ -235,7 +261,12 @@ export const HomePage = (): React.ReactElement => {
                       {filteredTokens.length > 0 ? (
                         <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
                           {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard key={token.tokenId} token={token} target={`/tokens/${token.tokenId}`} />
+                            <TokenCard
+                              key={token.tokenId}
+                              token={token}
+                              tokenListing={tokenListingMap[token.tokenId]}
+                              target={`/tokens/${token.tokenId}`}
+                            />
                           ))}
                         </EqualGrid>
                       ) : (

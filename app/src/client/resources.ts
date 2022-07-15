@@ -1,4 +1,4 @@
-import { dateFromString } from '@kibalabs/core';
+import { booleanFromString, dateFromString } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
 export class TokenTransfer {
@@ -97,6 +97,36 @@ export class Airdrop {
       Boolean(obj.isClaimed),
       CollectionToken.fromObject(obj.claimToken as Record<string, unknown>),
       String(obj.claimUrl),
+    );
+  };
+}
+
+export class TokenListing {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly tokenListingId: number,
+    readonly token: CollectionToken,
+    readonly offererAddress: string,
+    readonly startDate: Date,
+    readonly endDate: Date,
+    readonly isValueNative: boolean,
+    readonly value: BigNumber,
+    readonly source: string,
+    readonly sourceId: string,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): TokenListing => {
+    return new TokenListing(
+      Number(obj.tokenListingId),
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      String(obj.offererAddress),
+      dateFromString(String(obj. startDate)),
+      dateFromString(String(obj. endDate)),
+      Boolean(obj.isValueNative),
+      BigNumber.from(String(obj.value)),
+      String(obj.source),
+      String(obj.sourceId),
     );
   };
 }

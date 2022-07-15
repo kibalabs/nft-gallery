@@ -87,7 +87,11 @@ export const AccountPage = (): React.ReactElement => {
               <Text variant='error'>Failed to load account tokens</Text>
             ) : (
               holdings.map((ownerToken: Token, index: number): React.ReactElement => (
-                <TokenCard key={index} token={ownerToken} target={`/accounts/${accountAddress}/tokens/${ownerToken.tokenId}`} />
+                <TokenCard
+                  key={index}
+                  token={ownerToken}
+                  target={`/accounts/${accountAddress}/tokens/${ownerToken.tokenId}`}
+                />
               ))
             )}
           </EqualGrid>
