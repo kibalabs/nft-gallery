@@ -20,6 +20,7 @@ export class OpenseaClient {
         token_ids: innerTokenIds,
         asset_contract_address: registryAddress,
         include_orders: true,
+        limit: innerTokenIds.length,
       };
       const url = 'https://api.opensea.io/api/v1/assets';
       // eslint-disable-next-line no-await-in-loop
