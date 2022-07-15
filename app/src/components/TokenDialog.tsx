@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { dateToString, etherToNumber, isToday, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
+import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
