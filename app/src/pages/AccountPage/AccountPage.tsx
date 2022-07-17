@@ -35,7 +35,7 @@ export const AccountPage = (): React.ReactElement => {
     loadMetadata();
   }, [loadMetadata]);
 
-  const getCollectionHoldings = React.useCallback(async (shouldClear = false): Promise<void> => {
+  const listCollectionTokensByOwner = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
       setHoldings(undefined);
     }
@@ -48,7 +48,7 @@ export const AccountPage = (): React.ReactElement => {
       return;
     }
     const tokens = tokenCollection.tokens;
-    notdClient.getCollectionHoldings(tokenCollection.address, accountAddress).then((collectionTokens: CollectionToken[]): void => {
+    notdClient.listCollectionTokensByOwner(tokenCollection.address, accountAddress).then((collectionTokens: CollectionToken[]): void => {
       const newOwnedTokens = collectionTokens.map((collectionToken: CollectionToken): Token => {
         return tokens[collectionToken.tokenId];
       });
@@ -60,8 +60,8 @@ export const AccountPage = (): React.ReactElement => {
   }, [notdClient, tokenCollection, accountAddress]);
 
   React.useEffect((): void => {
-    getCollectionHoldings();
-  }, [getCollectionHoldings]);
+    listCollectionTokensByOwner();
+  }, [listCollectionTokensByOwner]);
 
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo(`/accounts/${accountAddress}`);

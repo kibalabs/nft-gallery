@@ -7,10 +7,12 @@ export interface IProjectConfig {
   name: string;
 }
 
+
 // eslint-disable-next-line unused-imports/no-unused-vars
 export const getTreasureHuntTokenId = (projectId: string): string | null => {
   return null;
 };
+
 
 export const getBannerImageUrl = (projectId: string): string | null => {
   if (projectId === 'sprites') {
@@ -18,6 +20,7 @@ export const getBannerImageUrl = (projectId: string): string | null => {
   }
   return null;
 };
+
 
 export const getHost = (projectId: string): string | null => {
   if (projectId === 'sprites') {
@@ -31,6 +34,7 @@ export const getHost = (projectId: string): string | null => {
   }
   return null;
 };
+
 
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
   if (projectId === 'sprites') {
@@ -49,6 +53,7 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
   return null;
 };
 
+
 export const getLogoImageUrl = (projectId: string): string | null => {
   if (projectId === 'sprites') {
     return '/assets/sprites/logo.png';
@@ -59,12 +64,14 @@ export const getLogoImageUrl = (projectId: string): string | null => {
   return null;
 };
 
+
 export const getBackgroundMusic = (projectId: string): string | null => {
   if (projectId === 'goblintown') {
     return '/assets/goblintown/music.mp3';
   }
   return null;
 };
+
 
 export const getIcon = (projectId: string): string | null => {
   if (projectId === 'sprites') {
@@ -79,6 +86,7 @@ export const getIcon = (projectId: string): string | null => {
   return null;
 };
 
+
 export const getEveryviewCode = (projectId: string): string | null => {
   if (projectId === 'mdtp') {
     return '54fa4b47b0b3431884b64a549d46ffd7';
@@ -86,8 +94,26 @@ export const getEveryviewCode = (projectId: string): string | null => {
   if (projectId === 'goblintown') {
     return 'eb42bb3312374c8982d92c3eb38f84e7';
   }
+  if (projectId === 'sprites') {
+    return '23fecbad77194ba4aa49b4abb88c6131';
+  }
   return null;
 };
+
+
+export const getCollectionAddress = (projectId: string): string | null => {
+  if (projectId === 'mdtp') {
+    return '0x8e720F90014fA4De02627f4A4e217B7e3942d5e8';
+  }
+  if (projectId === 'goblintown') {
+    return '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e';
+  }
+  if (projectId === 'sprites') {
+    return '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3';
+  }
+  return null;
+};
+
 
 export const loadTokenCollection = (collectionMetadata: Record<string, unknown>): TokenCollection => {
   const parsedTokens = (collectionMetadata.tokens as Record<string, unknown>[]).map((metadataObject: Record<string, unknown>): Token => {

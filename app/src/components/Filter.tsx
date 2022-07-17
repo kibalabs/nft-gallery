@@ -3,12 +3,13 @@ import React from 'react';
 import { Alignment, Checkbox, Direction, IOption, OptionSelect, PaddingSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { Account } from '../AccountContext';
-import { TokenCollection, TokenCollectionAttribute } from '../model';
+import { Collection, CollectionAttribute } from '../client';
 
 
 export interface IFilterProps {
   account: Account | null | undefined;
-  tokenCollection: TokenCollection;
+  collection: Collection;
+  collectionAttributes: CollectionAttribute[];
   filters: Record<string, string>;
   onAttributeValueClicked: (attributeName: string, attributeValue: string | null | undefined) => void;
   showOwnedTokensOnly: boolean;
@@ -19,14 +20,14 @@ export interface IFilterProps {
 }
 
 export const Filter = (props: IFilterProps): React.ReactElement => {
-  const getOptions = (attribute: TokenCollectionAttribute): IOption[] => {
-    return Object.keys(attribute.values).map((valueKey: string): IOption => ({
-      text: attribute.values[valueKey].name,
-      itemKey: attribute.values[valueKey].name,
+  const getOptions = (attribute: CollectionAttribute): IOption[] => {
+    return attribute.values.map((value: string): IOption => ({
+      text: value,
+      itemKey: value,
     }));
   };
 
-  const getSelectedOptionKey = (attribute: TokenCollectionAttribute): string | undefined => {
+  const getSelectedOptionKey = (attribute: CollectionAttribute): string | undefined => {
     return props.filters[attribute.name];
   };
 
@@ -38,9 +39,6 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     props.setShouldPlayMusic(!props.shouldPlayMusic);
   };
 
-  // NOTE(krishan711): not sure why but this re-aliasing fixes some type checks
-  const attributes = props.tokenCollection.attributes;
-
   return (
     <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
       {props.shouldShowMusicOption && (
@@ -49,24 +47,16 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       {props.account && (
         <Checkbox text='Show owned tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}
-      {attributes && Object.keys(attributes).map((attributeKey: string): React.ReactElement => (
-        <Stack key={attributes[attributeKey].name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
-          <Text variant='bold-large'>{attributes[attributeKey].name}</Text>
+      {props.collectionAttributes && props.collectionAttributes.map((collectionAttribute: CollectionAttribute): React.ReactElement => (
+        <Stack key={collectionAttribute.name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
+          <Text variant='bold-large'>{collectionAttribute.name}</Text>
           <OptionSelect
             placeholderText='Select'
             optionTextVariant='dark'
-            options={getOptions(attributes[attributeKey])}
-            onItemClicked={(itemKey: string) => props.onAttributeValueClicked(attributes[attributeKey].name, itemKey)}
-            selectedItemKey={getSelectedOptionKey(attributes[attributeKey])}
+            options={getOptions(collectionAttribute)}
+            onItemClicked={(itemKey: string) => props.onAttributeValueClicked(collectionAttribute.name, itemKey)}
+            selectedItemKey={getSelectedOptionKey(collectionAttribute)}
           />
-          {/* {Object.keys(tokenCollection.attributes[attributeKey].values).map((valueKey: string): React.ReactElement => (
-            <LinkBase key={valueKey} onClicked={(): void => onAttributeValueClicked(attributeKey, valueKey)} isFullWidth={true}>
-              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.Fill} isFullWidth={true}>
-                <Text>{tokenCollection.attributes[attributeKey].values[valueKey].name || 'none'}</Text>
-                <Text variant='note'>{tokenCollection.attributes[attributeKey].values[valueKey].tokenIds.length}</Text>
-              </Stack>
-            </LinkBase>
-          ))} */}
         </Stack>
       ))}
     </Stack>
