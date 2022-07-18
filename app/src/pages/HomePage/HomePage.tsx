@@ -25,13 +25,6 @@ export const useScrollListenerElement = <T extends HTMLElement>(handler: (event:
 };
 
 
-export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
-  const [element, setElement] = React.useState<T | null>(null);
-  useEventListener(element, 'scroll', handler, dependencies);
-  return [element, setElement];
-};
-
-
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
