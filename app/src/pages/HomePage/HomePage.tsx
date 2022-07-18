@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { RestMethod } from '@kibalabs/core';
-import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
+import { getIsRunningOnBrowser, useDeepCompareCallback, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
@@ -19,6 +19,13 @@ import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTre
 import { IHomePageData } from './getHomePageData';
 
 
+export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
+  const [element, setElement] = React.useState<T | null>(null);
+  useEventListener(element, 'scroll', handler, dependencies);
+  return [element, setElement];
+};
+
+
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
@@ -34,7 +41,7 @@ export const HomePage = (): React.ReactElement => {
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
-  const [scrollingRef] = useRenderedRef<HTMLDivElement>();
+  // const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const logoImageUrl = getLogoImageUrl(projectId);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
@@ -115,8 +122,8 @@ export const HomePage = (): React.ReactElement => {
       filtersCopy[attributeName] = attributeValue;
     }
     setFilters(filtersCopy);
-    if (scrollingRef.current) {
-      scrollingRef.current.scrollTop = 0;
+    if (scrollingRef) {
+      scrollingRef.scrollTop = 0;
     }
   };
 
@@ -162,20 +169,18 @@ export const HomePage = (): React.ReactElement => {
     updateTokenListings();
   }, [updateTokenListings]);
 
-  const onScrolled = React.useCallback((): void => {
+  const onScrolled = React.useCallback((event: Event): void => {
+    const eventTarget = event.target as HTMLDivElement;
     if (filteredTokens && tokenLimit > filteredTokens.length) {
       return;
     }
-    if (!scrollingRef.current) {
-      return;
-    }
-    const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
-    if (size - scrollingRef.current.scrollTop < 300) {
+    const size = eventTarget.scrollHeight - eventTarget.clientHeight;
+    if (size - eventTarget.scrollTop < 300) {
       setTokenLimit(tokenLimit + 30);
     }
-  }, [scrollingRef, tokenLimit, filteredTokens]);
+  }, [filteredTokens, tokenLimit]);
 
-  useScrollListener(scrollingRef.current, onScrolled);
+  const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
@@ -263,7 +268,7 @@ export const HomePage = (): React.ReactElement => {
                             ))}
                           </Stack>
                           <Stack.Item growthFactor={1} shrinkFactor={1}>
-                            <Box variant='unrounded' ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                            <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
                               {filteredTokens.length > 0 ? (
                                 <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
                                   {filteredTokens.map((token: Token): React.ReactElement => (
