@@ -65,11 +65,6 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         },
       },
       boxes: {
-        footer: {
-          'background-color': '$colors.backgroundClear25',
-          'border-color': '$colors.backgroundClear05',
-          'backdrop-filter': 'blur(3px)',
-        },
         tokenCard: {
           'border-width': '2px',
           'border-color': 'rgba(255, 255, 255, 0.2)',
@@ -199,6 +194,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       },
       unrounded: {
         'border-radius': '0',
+      },
+      footer: {
+        'background-color': '$colors.backgroundClear25',
+        'border-color': '$colors.backgroundClear05',
+        'backdrop-filter': 'blur(3px)',
       },
     },
     pills: {

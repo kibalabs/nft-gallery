@@ -5,7 +5,7 @@ import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } fr
 import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount } from '../../AccountContext';
-import { Collection, CollectionAttribute, CollectionToken, TokenListing } from '../../client';
+import { Collection, CollectionAttribute, CollectionToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -32,6 +32,7 @@ export const HomePage = (): React.ReactElement => {
   const { data } = usePageData<IHomePageData>();
   const { notdClient, projectId, requester } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
+  const [allTokens, setAllTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
   const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
   const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
@@ -88,8 +89,13 @@ export const HomePage = (): React.ReactElement => {
       const collectionData = JSON.parse(collectionDataResponse.content);
       const newCollection = Collection.fromObject(collectionData.collection);
       const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+      const newAllTokensRaw = collectionData.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
+      const newAllTokens = newAllTokensRaw.map((token: CollectionToken): CollectionToken => {
+        return new CollectionToken(token.registryAddress, token.tokenId, token.name, `/assets/${projectId}/images/${token.imageUrl}`, token.frameImageUrl, token.description, token.attributes)
+      });
       setCollection(newCollection);
       setCollectionAttributes(newCollectionAttributes);
+      setAllTokens(newAllTokens);
     }
   }, [notdClient, requester, projectId]);
 
@@ -110,9 +116,24 @@ export const HomePage = (): React.ReactElement => {
         setCollectionTokens(null);
       });
     } else {
-      // TODO(krishan711): Load from file
+      if (!allTokens) {
+        setCollectionTokens([]);
+        return;
+      }
+      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+        if (accumulator.length < tokenLimitRef.current) {
+          const isMatch = value.attributes.reduce((innerAccumulator: boolean, innerValue: TokenAttribute): boolean => {
+            return innerAccumulator && (!(innerValue.traitType in filters) || innerValue.value == filters[innerValue.traitType]);
+          }, true);
+          if (isMatch) {
+            accumulator.push(value);
+          }
+        }
+        return accumulator;
+      }, []);
+      setCollectionTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, account]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, allTokens, account]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -129,7 +150,22 @@ export const HomePage = (): React.ReactElement => {
         setCollectionTokens([...collectionTokens, ...retrievedCollectionTokens]);
       });
     } else {
-      // TODO(krishan711): Load from file
+      if (!allTokens) {
+        setCollectionTokens([]);
+        return;
+      }
+      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+        if (accumulator.length < tokenLimitRef.current) {
+          const isMatch = value.attributes.reduce((innerAccumulator: boolean, innerValue: TokenAttribute): boolean => {
+            return innerAccumulator && (!(innerValue.traitType in filters) || innerValue.value == filters[innerValue.traitType]);
+          }, true);
+          if (isMatch) {
+            accumulator.push(value);
+          }
+        }
+        return accumulator;
+      }, []);
+      setCollectionTokens(newTokens);
     }
   }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account]);
 
