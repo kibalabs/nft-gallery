@@ -111,4 +111,3 @@ export const getCollectionAddress = (projectId: string): string | null => {
   }
   return null;
 };
-

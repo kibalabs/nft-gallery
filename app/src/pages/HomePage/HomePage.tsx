@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { RestMethod } from '@kibalabs/core';
 import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
@@ -15,7 +16,6 @@ import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
 import { IHomePageData } from './getHomePageData';
-import { RestMethod } from '@kibalabs/core';
 
 
 export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
@@ -84,14 +84,14 @@ export const HomePage = (): React.ReactElement => {
         setCollectionAttributes(null);
       });
     } else {
-      const dataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
-      const data = JSON.parse(dataResponse.content);
-      const collection = Collection.fromObject(data.collection);
-      const collectionAttributes = data.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
-      setCollection(collection);
-      setCollectionAttributes(collectionAttributes);
+      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
+      const collectionData = JSON.parse(collectionDataResponse.content);
+      const newCollection = Collection.fromObject(collectionData.collection);
+      const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+      setCollection(newCollection);
+      setCollectionAttributes(newCollectionAttributes);
     }
-  }, [notdClient, projectId]);
+  }, [notdClient, requester, projectId]);
 
   React.useEffect((): void => {
     updateCollection();

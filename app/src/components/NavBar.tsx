@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { RestMethod } from '@kibalabs/core';
 import { Alignment, Box, Button, Direction, Image, LinkBase, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
@@ -8,7 +9,6 @@ import { useGlobals } from '../globalsContext';
 import { IGalleryPageData, usePageData } from '../PageDataContext';
 import { getCollectionAddress, getLogoImageUrl } from '../util';
 import { Account } from './Account';
-import { RestMethod } from '@kibalabs/core';
 
 
 export const NavBar = (): React.ReactElement => {
@@ -30,12 +30,12 @@ export const NavBar = (): React.ReactElement => {
         setCollection(null);
       });
     } else {
-      const dataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
-      const data = JSON.parse(dataResponse.content);
-      const collection = Collection.fromObject(data.collection);
-      setCollection(collection);
+      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
+      const collectionData = JSON.parse(collectionDataResponse.content);
+      const newCollection = Collection.fromObject(collectionData.collection);
+      setCollection(newCollection);
     }
-  }, [notdClient, projectId]);
+  }, [notdClient, requester, projectId]);
 
   React.useEffect((): void => {
     updateCollection();
