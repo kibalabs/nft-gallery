@@ -25,6 +25,13 @@ export const useScrollListenerElement = <T extends HTMLElement>(handler: (event:
 };
 
 
+export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
+  const [element, setElement] = React.useState<T | null>(null);
+  useEventListener(element, 'scroll', handler, dependencies);
+  return [element, setElement];
+};
+
+
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
@@ -174,6 +181,39 @@ export const HomePage = (): React.ReactElement => {
       loadMoreCollectionTokens();
     }
   }, [collectionTokens, tokenLimitRef, loadMoreCollectionTokens]);
+
+  const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
+
+  const updateTokenListings = React.useCallback(async (): Promise<void> => {
+    if (!tokenCollection) {
+      return;
+    }
+    if (!filteredTokens) {
+      return;
+    }
+    const filteredTokenIds = filteredTokens.map((token: Token): string => token.tokenId);
+    const tokenIdsToUpdate = filteredTokenIds.filter((tokenId: string): boolean => !(tokenId in tokenListingMap));
+    if (tokenIdsToUpdate.length === 0) {
+      return;
+    }
+    const newListingMap = await new OpenseaClient().getTokenListings(tokenCollection.address, tokenIdsToUpdate);
+    setTokenListMap({ ...tokenListingMap, ...newListingMap });
+  }, [tokenCollection, filteredTokens, tokenListingMap]);
+
+  React.useEffect((): void => {
+    updateTokenListings();
+  }, [updateTokenListings]);
+
+  const onScrolled = React.useCallback((event: Event): void => {
+    const eventTarget = event.target as HTMLDivElement;
+    if (filteredTokens && tokenLimit > filteredTokens.length) {
+      return;
+    }
+    const size = eventTarget.scrollHeight - eventTarget.clientHeight;
+    if (size - eventTarget.scrollTop < 300) {
+      setTokenLimit(tokenLimit + 30);
+    }
+  }, [filteredTokens, tokenLimit]);
 
   const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
