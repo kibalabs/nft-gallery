@@ -4,7 +4,6 @@ import { etherToNumber, longFormatNumber } from '@kibalabs/core';
 import { Alignment, Box, Direction, HidingView, Image, LinkBase, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { CollectionToken, TokenListing } from '../client';
-import { Token } from '../model';
 import { EtherValue } from './EtherValue';
 
 interface ITokenCardProps {

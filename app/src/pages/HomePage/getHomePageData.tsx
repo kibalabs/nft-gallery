@@ -1,9 +1,9 @@
 import { Collection, CollectionAttribute, CollectionToken } from '../../client';
 import { IGlobals } from '../../globalsContext';
-import { TokenCollection } from '../../model';
-import { getCollectionAddress, loadTokenCollection } from '../../util';
+import { IGalleryPageData } from '../../PageDataContext';
+import { getCollectionAddress } from '../../util';
 
-export interface IHomePageData {
+export interface IHomePageData extends IGalleryPageData {
   collection: Collection;
   collectionTokens: CollectionToken[];
   collectionAttributes: CollectionAttribute[];
@@ -12,25 +12,25 @@ export interface IHomePageData {
 export const getHomePageData = async (globals: IGlobals): Promise<IHomePageData> => {
   const collectionAddress = getCollectionAddress(globals.projectId);
   if (collectionAddress) {
-      const collection = await globals.notdClient.getCollection(collectionAddress);
-      const collectionTokens = await globals.notdClient.queryCollectionTokens(collectionAddress);
-      const collectionAttributes = await globals.notdClient.listCollectionAttributes(collectionAddress);
-      return {
-        collection,
-        collectionTokens,
-        collectionAttributes,
-      };
-    } else {
-    // @ts-ignore
-    // eslint-disable-next-line no-undef
-    // const metadatas = __non_webpack_require__(`./assets/${globals.projectId}/metadatas.json`);
-    // const tokenCollection = loadTokenCollection(metadatas as Record<string, unknown>);
-    // tokenCollection.tokens = undefined;
-    // tokenCollection.attributes = undefined;
+    const collection = await globals.notdClient.getCollection(collectionAddress);
+    const collectionTokens = await globals.notdClient.queryCollectionTokens(collectionAddress);
+    const collectionAttributes = await globals.notdClient.listCollectionAttributes(collectionAddress);
     return {
-      collection: null,
-      collectionTokens: [],
-      collectionAttributes: [],
-    }
+      collection,
+      collectionTokens,
+      collectionAttributes,
+    };
   }
+  // @ts-ignore
+  // eslint-disable-next-line no-undef
+  const dataString = __non_webpack_require__(`./assets/${globals.projectId}/data.json`);
+  const data = JSON.parse(dataString);
+  const collection = Collection.fromObject(data.collection);
+  const collectionTokens = data.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
+  const collectionAttributes = data.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+  return {
+    collection,
+    collectionTokens,
+    collectionAttributes,
+  };
 };

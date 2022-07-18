@@ -133,22 +133,24 @@ export class InQueryParam extends RequestData {
       fieldName: this.fieldName,
       values: this.values,
     };
-  }
+  };
 }
 
 export class QueryCollectionTokensRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
+  readonly ownerAddress?: string;
   readonly minPrice?: number;
   readonly maxPrice?: number;
   readonly isListed?: boolean;
   readonly tokenIdIn?: string[];
   readonly attributeFilters?: InQueryParam[];
 
-  public constructor(limit?: number, offset?: number, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[]) {
+  public constructor(limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[]) {
     super();
     this.limit = limit;
     this.offset = offset;
+    this.ownerAddress = ownerAddress;
     this.minPrice = minPrice;
     this.maxPrice = maxPrice;
     this.isListed = isListed;
@@ -160,6 +162,7 @@ export class QueryCollectionTokensRequest extends RequestData {
     return {
       limit: this.limit,
       offset: this.offset,
+      ownerAddress: this.ownerAddress,
       minPrice: this.minPrice,
       maxPrice: this.maxPrice,
       isListed: this.isListed,

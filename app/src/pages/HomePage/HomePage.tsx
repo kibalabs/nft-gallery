@@ -1,12 +1,11 @@
 import React from 'react';
 
-import { RestMethod } from '@kibalabs/core';
-import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
+import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { CollectionAttribute, CollectionToken, TokenListing, Collection } from '../../client';
-import { Account } from '../../components/Account';
+import { useAccount } from '../../AccountContext';
+import { Collection, CollectionAttribute, CollectionToken, TokenListing } from '../../client';
+import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
 import { TokenCard } from '../../components/TokenCard';
@@ -14,9 +13,16 @@ import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
-import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
 import { IHomePageData } from './getHomePageData';
-import { InQueryParam } from '../../client/endpoints';
+import { RestMethod } from '@kibalabs/core';
+
+
+export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
+  const [element, setElement] = React.useState<T | null>(null);
+  useEventListener(element, 'scroll', handler, dependencies);
+  return [element, setElement];
+};
 
 
 export const HomePage = (): React.ReactElement => {
@@ -24,8 +30,7 @@ export const HomePage = (): React.ReactElement => {
   const location = useLocation();
   const account = useAccount();
   const { data } = usePageData<IHomePageData>();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
-  const { notdClient, projectId } = useGlobals();
+  const { notdClient, projectId, requester } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
   const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
   const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
@@ -34,17 +39,14 @@ export const HomePage = (): React.ReactElement => {
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
-  const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const tokenLimitRef = React.useRef<number>(30);
-
-  const logoImageUrl = getLogoImageUrl(projectId);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && collectionTokens ? collectionTokens[Number(location.pathname.replace('/tokens/', ''))] : null;
+  const chosenToken = isTokenSubpageShowing && collectionTokens ? collectionTokens.find((token: CollectionToken): boolean => token.tokenId === location.pathname.split('/tokens/')[1]) : null;
 
   const host = getHost(projectId);
   let bannerImageUrl = getBannerImageUrl(projectId) || collection?.bannerImageUrl;
@@ -66,11 +68,7 @@ export const HomePage = (): React.ReactElement => {
     }
   }, [backgroundMusic, shouldPlayMusic]);
 
-  const onConnectWalletClicked = async (): Promise<void> => {
-    await onLinkAccountsClicked();
-  };
-
-  const updateCollection = React.useCallback((): void => {
+  const updateCollection = React.useCallback(async (): Promise<void> => {
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
       notdClient.getCollection(collectionAddress).then((retrievedCollection: Collection): void => {
@@ -86,10 +84,12 @@ export const HomePage = (): React.ReactElement => {
         setCollectionAttributes(null);
       });
     } else {
-      // TODO(krishan711): Load from file
-      //   const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
-      //   const loadedTokenCollection = loadTokenCollection(JSON.parse(metadataResponse.content) as Record<string, unknown>);
-      //   setTokenCollection(loadedTokenCollection);
+      const dataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
+      const data = JSON.parse(dataResponse.content);
+      const collection = Collection.fromObject(data.collection);
+      const collectionAttributes = data.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+      setCollection(collection);
+      setCollectionAttributes(collectionAttributes);
     }
   }, [notdClient, projectId]);
 
@@ -102,13 +102,8 @@ export const HomePage = (): React.ReactElement => {
     setCollectionTokens(undefined);
     tokenLimitRef.current = 30;
     if (collectionAddress) {
-      if (showOwnedTokensOnly) {
-        // TODO(krishna711): add ownerAddress filter to query
-        setCollectionTokens([]);
-        return;
-      }
       const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
         setCollectionTokens(retrievedCollectionTokens);
       }).catch((error: unknown): void => {
         console.error(error);
@@ -117,7 +112,7 @@ export const HomePage = (): React.ReactElement => {
     } else {
       // TODO(krishan711): Load from file
     }
-  }, [projectId, filters, showOwnedTokensOnly, tokenLimitRef]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, account]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -129,19 +124,14 @@ export const HomePage = (): React.ReactElement => {
     }
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
-      if (showOwnedTokensOnly) {
-        // TODO(krishna711): add ownerAddress filter to query
-        setCollectionTokens([]);
-        return;
-      }
       const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, collectionTokens.length, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, collectionTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
         setCollectionTokens([...collectionTokens, ...retrievedCollectionTokens]);
       });
     } else {
       // TODO(krishan711): Load from file
     }
-  }, [notdClient, projectId, showOwnedTokensOnly, tokenLimitRef, collectionTokens]);
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -151,8 +141,8 @@ export const HomePage = (): React.ReactElement => {
       filtersCopy[attributeName] = attributeValue;
     }
     setFilters(filtersCopy);
-    if (scrollingRef.current) {
-      scrollingRef.current.scrollTop = 0;
+    if (scrollingRef) {
+      scrollingRef.scrollTop = 0;
     }
   };
 
@@ -173,22 +163,19 @@ export const HomePage = (): React.ReactElement => {
     updateTokenListings();
   }, [updateTokenListings]);
 
-  const onScrolled = React.useCallback((): void => {
-    console.log('onScrolled');
+  const onScrolled = React.useCallback((event: Event): void => {
+    const eventTarget = event.target as HTMLDivElement;
     if (collectionTokens && tokenLimitRef.current > collectionTokens.length) {
       return;
     }
-    if (!scrollingRef.current) {
-      return;
-    }
-    const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
-    if (size - scrollingRef.current.scrollTop < 300) {
-      tokenLimitRef.current = tokenLimitRef.current + 30;
+    const size = eventTarget.scrollHeight - eventTarget.clientHeight;
+    if (size - eventTarget.scrollTop < 300) {
+      tokenLimitRef.current += 30;
       loadMoreCollectionTokens();
     }
-  }, [scrollingRef, tokenLimitRef, collectionTokens]);
+  }, [collectionTokens, tokenLimitRef, loadMoreCollectionTokens]);
 
-  useScrollListener(scrollingRef.current, onScrolled);
+  const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
@@ -214,23 +201,7 @@ export const HomePage = (): React.ReactElement => {
           <meta name='twitter:card' content='summary' />
         )}
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
-          <Stack.Item shrinkFactor={1} growthFactor={1}>
-            {logoImageUrl ? (
-              <Box height='2em'>
-                <Image source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} Gallery`} />
-              </Box>
-            ) : (
-              <Text variant='header1'>{`${collection ? collection.name : ''} Gallery`}</Text>
-            )}
-          </Stack.Item>
-          { !account ? (
-            <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
-          ) : (
-            <Account accountId={account.address} target={`/accounts/${account.address}`} />
-          )}
-        </Stack>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
         { getTreasureHuntTokenId(projectId) && (
           <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
             <Box variant='notification'>
@@ -275,13 +246,15 @@ export const HomePage = (): React.ReactElement => {
                         <Text variant='error'>Failed to load</Text>
                       ) : (
                         <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
-                          <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
-                            {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                              <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                            ))}
-                          </Stack>
+                          {Object.keys(filters).length > 0 && (
+                            <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                              {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                              ))}
+                            </Stack>
+                          )}
                           <Stack.Item growthFactor={1} shrinkFactor={1}>
-                            <Box variant='unrounded' ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                            <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
                               {collectionTokens.length > 0 ? (
                                 <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
                                   {collectionTokens.map((token: CollectionToken): React.ReactElement => (

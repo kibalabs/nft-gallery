@@ -55,10 +55,10 @@ export class NotdClient extends ServiceClient {
     return response.airdrops;
   };
 
-  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.CollectionToken[]> => {
+  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.CollectionToken[]> => {
     const method = RestMethod.POST;
     const path = `gallery/v1/collections/${registryAddress}/tokens/query`;
-    const request = new Endpoints.QueryCollectionTokensRequest(limit, offset, minPrice, maxPrice, isListed, tokenIdIn, attributeFilters);
+    const request = new Endpoints.QueryCollectionTokensRequest(limit, offset, ownerAddress, minPrice, maxPrice, isListed, tokenIdIn, attributeFilters);
     const response = await this.makeRequest(method, path, request, Endpoints.QueryCollectionTokensResponse);
     return response.tokens;
   };

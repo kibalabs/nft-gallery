@@ -2,6 +2,8 @@ import React, { useContext, useState } from 'react';
 
 import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
+import { Collection } from './client';
+
 // NOTE(krishan711): this may be better without the setData?
 interface IPageData<DataType = unknown, > {
   data: DataType | null | undefined;
@@ -33,3 +35,9 @@ export const usePageData = <DataType, >(): IPageData<DataType> => {
     setData: pageDataContext.setData as ((data: DataType | null | undefined) => void),
   };
 };
+
+// App specific
+
+export interface IGalleryPageData {
+  collection: Collection;
+}
