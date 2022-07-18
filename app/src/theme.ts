@@ -39,13 +39,6 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'font-weight': '500',
         },
         tokenCardName: {
-          color: '$colors.text',
-        },
-        footer: {
-          color: '$colors.text',
-        },
-        dark: {
-          color: '$colors.textInverse',
         },
       },
       buttons: {
@@ -76,6 +69,14 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'background-color': '$colors.backgroundClear25',
           'border-color': '$colors.backgroundClear05',
           'backdrop-filter': 'blur(3px)',
+        },
+        tokenCard: {
+          'border-width': '2px',
+          'border-color': 'rgba(255, 255, 255, 0.2)',
+          'background-color': 'rgba(255, 255, 255, 0.1)',
+        },
+        unrounded: {
+          'border-radius': '0',
         },
       },
       dividers: {
@@ -143,8 +144,18 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       wrapped: {
         'overflow-wrap': 'anywhere',
       },
-      tokenCardName: {},
+      tokenCardName: {
+        'font-size': '0.8em',
+        'font-weight': '600',
+      },
+      tokenCardValue: {
+        'font-size': '0.8em',
+        'line-height': '1em',
+      },
       footer: {},
+      dark: {
+        color: '$colors.textInverse',
+      },
     },
     prettyTexts: {
       header3: {
@@ -178,11 +189,16 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       filterOverlay: {
         'background-color': '$colors.backgroundClear10',
         'backdrop-filter': 'blur(3px)',
-        'border-radius': '0 1em 1em 0',
+        'border-radius': '1em 1em 0 0',
       },
       backdrop: {
         'border-radius': '0',
         'background-color': '$colors.backdrop',
+      },
+      tokenCard: {
+      },
+      unrounded: {
+        'border-radius': '0',
       },
     },
     pills: {
@@ -241,6 +257,34 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             text: {
               'font-size': baseTheme.texts.note['font-size'],
+            },
+          },
+        },
+      },
+    },
+    images: {
+      unrounded: {
+        background: {
+          'border-radius': '0',
+        },
+      },
+    },
+    buttons: {
+      narrow: {
+        normal: {
+          default: {
+            background: {
+              padding: `${baseTheme.dimensions.paddingNarrow2} ${baseTheme.dimensions.padding}`,
+              'border-width': '0',
+            },
+          },
+        },
+      },
+      unrounded: {
+        normal: {
+          default: {
+            background: {
+              'border-radius': '0',
             },
           },
         },

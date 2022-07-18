@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Head, IHeadRootProviderProps, KibaApp } from '@kibalabs/ui-react';
+import { Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -75,9 +75,11 @@ export const App = (props: IAppProps): React.ReactElement => {
         </GlobalsProvider>
       </PageDataProvider>
       <ToastContainer />
-      <FloatingView positionBottom='20px' positionRight='20px'>
-        <Footer isSmall={true} tokenPageReferral={`gallery-${projectId}`} />
-      </FloatingView>
+      <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+        <FloatingView positionBottom='20px' positionRight='20px'>
+          <Footer isSmall={true} tokenPageReferral={`gallery-${projectId}`} />
+        </FloatingView>
+      </ResponsiveHidingView>
     </KibaApp>
   );
 };

@@ -8,7 +8,7 @@ interface IFooterProps {
 }
 
 export const Footer = (props: IFooterProps): React.ReactElement => {
-  const textVariant = getVariant(props.isSmall ? 'note' : 'default', 'footer');
+  const textVariant = getVariant(props.isSmall ? 'small' : 'default', 'footer');
   return (
     <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
       <LinkBase target={`https://www.tokenpage.xyz?ref=${props.tokenPageReferral}`}>

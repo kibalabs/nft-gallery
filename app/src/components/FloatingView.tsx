@@ -15,6 +15,7 @@ interface IFloatingViewProps extends IComponentProps<IBoxTheme>, ISingleAnyChild
   positionTop?: string;
   positionRight?: string;
   positionBottom?: string;
+  zIndex?: string;
 }
 
 interface IStyledFloatingViewProps {
@@ -22,6 +23,7 @@ interface IStyledFloatingViewProps {
   $positionTop?: string;
   $positionRight?: string;
   $positionBottom?: string;
+  $zIndex?: string;
 }
 
 const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
@@ -30,6 +32,7 @@ const StyledFloatingView = styled.div<IStyledFloatingViewProps>`
   top: ${(props: IStyledFloatingViewProps): string => props.$positionTop || 'auto'};
   right: ${(props: IStyledFloatingViewProps): string => props.$positionRight || 'auto'};
   bottom: ${(props: IStyledFloatingViewProps): string => props.$positionBottom || 'auto'};
+  z-index: ${(props: IStyledFloatingViewProps): string => props.$zIndex || 'auto'};
 
   &.fullHeight {
     height: 100%;
@@ -49,6 +52,7 @@ export const FloatingView = (props: IFloatingViewProps): React.ReactElement => {
       $positionLeft={props.positionLeft}
       $positionRight={props.positionRight}
       $positionBottom={props.positionBottom}
+      $zIndex={props.zIndex}
     >
       {props.children}
     </StyledFloatingView>

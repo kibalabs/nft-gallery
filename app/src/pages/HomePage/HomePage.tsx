@@ -1,11 +1,11 @@
 import React from 'react';
 
 import { RestMethod } from '@kibalabs/core';
-import { getIsRunningOnBrowser, useDeepCompareCallback, useLocation, useNavigator, useRenderedRef, useScrollListener } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { getIsRunningOnBrowser, useDeepCompareCallback, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
+import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { CollectionToken } from '../../client';
+import { CollectionToken, TokenListing } from '../../client';
 import { Account } from '../../components/Account';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -13,9 +13,17 @@ import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { Token, TokenCollection } from '../../model';
+import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
 import { IHomePageData } from './getHomePageData';
+
+
+export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
+  const [element, setElement] = React.useState<T | null>(null);
+  useEventListener(element, 'scroll', handler, dependencies);
+  return [element, setElement];
+};
 
 
 export const HomePage = (): React.ReactElement => {
@@ -29,15 +37,27 @@ export const HomePage = (): React.ReactElement => {
   const [ownedTokens, setOwnedTokens] = React.useState<Token[] | undefined | null>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
-  const [tokenLimit, setTokenLimit] = React.useState<number>(50);
+  const [tokenLimit, setTokenLimit] = React.useState<number>(30);
+  const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
-  const [scrollingRef] = useRenderedRef<HTMLDivElement>();
+  // const [scrollingRef] = useRenderedRef<HTMLDivElement>();
   const logoImageUrl = getLogoImageUrl(projectId);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
+
+  const isTokenSubpageShowing = location.pathname.includes('/tokens/');
+  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
+
+  const host = getHost(projectId);
+  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
+    bannerImageUrl = `${host}${bannerImageUrl}`;
+  }
+  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
+  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
@@ -54,18 +74,6 @@ export const HomePage = (): React.ReactElement => {
   const onConnectWalletClicked = async (): Promise<void> => {
     await onLinkAccountsClicked();
   };
-
-  const onScrolled = React.useCallback((): void => {
-    if (!scrollingRef.current) {
-      return;
-    }
-    const size = scrollingRef.current.scrollHeight - scrollingRef.current.clientHeight;
-    if (size - scrollingRef.current.scrollTop < 500) {
-      setTokenLimit(tokenLimit + 25);
-    }
-  }, [scrollingRef, tokenLimit]);
-
-  useScrollListener(scrollingRef.current, onScrolled);
 
   const loadMetadata = React.useCallback(async (): Promise<void> => {
     const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
@@ -114,8 +122,8 @@ export const HomePage = (): React.ReactElement => {
       filtersCopy[attributeName] = attributeValue;
     }
     setFilters(filtersCopy);
-    if (scrollingRef.current) {
-      scrollingRef.current.scrollTop = 0;
+    if (scrollingRef) {
+      scrollingRef.scrollTop = 0;
     }
   };
 
@@ -141,20 +149,46 @@ export const HomePage = (): React.ReactElement => {
     return innerFilteredTokens.slice(0, tokenLimit);
   }, [tokenCollection, filters, tokenLimit, showOwnedTokensOnly, ownedTokens]);
 
+  const updateTokenListings = React.useCallback(async (): Promise<void> => {
+    if (!tokenCollection) {
+      return;
+    }
+    if (!filteredTokens) {
+      return;
+    }
+    const filteredTokenIds = filteredTokens.map((token: Token): string => token.tokenId);
+    const tokenIdsToUpdate = filteredTokenIds.filter((tokenId: string): boolean => !(tokenId in tokenListingMap));
+    if (tokenIdsToUpdate.length === 0) {
+      return;
+    }
+    const newListingMap = await new OpenseaClient().getTokenListings(tokenCollection.address, tokenIdsToUpdate);
+    setTokenListMap({ ...tokenListingMap, ...newListingMap });
+  }, [tokenCollection, filteredTokens, tokenListingMap]);
+
+  React.useEffect((): void => {
+    updateTokenListings();
+  }, [updateTokenListings]);
+
+  const onScrolled = React.useCallback((event: Event): void => {
+    const eventTarget = event.target as HTMLDivElement;
+    if (filteredTokens && tokenLimit > filteredTokens.length) {
+      return;
+    }
+    const size = eventTarget.scrollHeight - eventTarget.clientHeight;
+    if (size - eventTarget.scrollTop < 300) {
+      setTokenLimit(tokenLimit + 30);
+    }
+  }, [filteredTokens, tokenLimit]);
+
+  const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
+
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
   };
 
-  const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
-
-  const host = getHost(projectId);
-  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
-  if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
-    bannerImageUrl = `${host}${bannerImageUrl}`;
-  }
-  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
-  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
+  const onToggleResponsiveFilterClicked = (): void => {
+    setIsResponsiveFilterShowing(!isResponsiveFilterShowing);
+  };
 
   return (
     <React.Fragment>
@@ -196,83 +230,95 @@ export const HomePage = (): React.ReactElement => {
             </Box>
           </Stack>
         )}
-        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-          <Button variant='small' text={isResponsiveFilterShowing ? 'Hide Filter Menu' : 'Show Filter Menu'} onClicked={(): void => setIsResponsiveFilterShowing(!isResponsiveFilterShowing)} />
-        </ResponsiveHidingView>
         <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-          <Stack direction={Direction.Horizontal} shouldAddGutters={true} defaultGutter={PaddingSize.Wide2} isFullHeight={true} isFullWidth={true}>
+          <Stack direction={Direction.Horizontal} shouldAddGutters={false} isFullHeight={true} isFullWidth={true}>
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <Box width='300px' isFullHeight={true}>
-                {tokenCollection === undefined ? (
-                  <LoadingSpinner />
-                ) : (
-                  <Filter
-                    filters={filters}
-                    onAttributeValueClicked={onAttributeValueClicked}
-                    account={account}
-                    showOwnedTokensOnly={showOwnedTokensOnly}
-                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                    shouldShowMusicOption={backgroundMusic != null}
-                    shouldPlayMusic={shouldPlayMusic}
-                    setShouldPlayMusic={setShouldPlayMusic}
-                    tokenCollection={tokenCollection}
-                  />
-                )}
-              </Box>
+              <React.Fragment>
+                <Box width='300px' isFullHeight={true}>
+                  {tokenCollection === undefined ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <Filter
+                      filters={filters}
+                      onAttributeValueClicked={onAttributeValueClicked}
+                      account={account}
+                      showOwnedTokensOnly={showOwnedTokensOnly}
+                      setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                      shouldShowMusicOption={backgroundMusic != null}
+                      shouldPlayMusic={shouldPlayMusic}
+                      setShouldPlayMusic={setShouldPlayMusic}
+                      tokenCollection={tokenCollection}
+                    />
+                  )}
+                </Box>
+              </React.Fragment>
             </ResponsiveHidingView>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Box ref={scrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                {tokenCollection === undefined || filteredTokens === undefined ? (
-                  <LoadingSpinner />
-                ) : (
-                  <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingRight={PaddingSize.Wide2}>
-                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start}>
-                      {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                        <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                      ))}
-                    </Stack>
-                    <Stack.Item growthFactor={1}>
-                      {filteredTokens.length > 0 ? (
-                        <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false}>
-                          {filteredTokens.map((token: Token): React.ReactElement => (
-                            <TokenCard key={token.tokenId} token={token} target={`/tokens/${token.tokenId}`} />
-                          ))}
-                        </EqualGrid>
+              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+                <Stack.Item growthFactor={1} shrinkFactor={1}>
+                  <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
+                    <LayerContainer>
+                      {tokenCollection === undefined || filteredTokens === undefined ? (
+                        <LoadingSpinner />
                       ) : (
-                        <Text>No tokens match filter</Text>
+                        <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                            {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                              <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                            ))}
+                          </Stack>
+                          <Stack.Item growthFactor={1} shrinkFactor={1}>
+                            <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                              {filteredTokens.length > 0 ? (
+                                <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
+                                  {filteredTokens.map((token: Token): React.ReactElement => (
+                                    <TokenCard
+                                      key={token.tokenId}
+                                      token={token}
+                                      tokenListing={tokenListingMap[token.tokenId]}
+                                      target={`/tokens/${token.tokenId}`}
+                                    />
+                                  ))}
+                                </EqualGrid>
+                              ) : (
+                                <Text>No tokens match filter</Text>
+                              )}
+                            </Box>
+                          </Stack.Item>
+                        </Stack>
                       )}
-                    </Stack.Item>
-                  </Stack>
-                )}
-              </Box>
-              {isResponsiveFilterShowing && (
+                      {isResponsiveFilterShowing && (
+                        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                          <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
+                            <ColorSettingView variant='dialog'>
+                              <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
+                                {tokenCollection === undefined ? (
+                                  <LoadingSpinner />
+                                ) : (
+                                  <Filter
+                                    filters={filters}
+                                    onAttributeValueClicked={onAttributeValueClicked}
+                                    account={account}
+                                    showOwnedTokensOnly={showOwnedTokensOnly}
+                                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                                    shouldShowMusicOption={backgroundMusicSource != null}
+                                    shouldPlayMusic={shouldPlayMusic}
+                                    setShouldPlayMusic={setShouldPlayMusic}
+                                    tokenCollection={tokenCollection}
+                                  />
+                                )}
+                              </Box>
+                            </ColorSettingView>
+                          </FloatingView>
+                        </ResponsiveHidingView>
+                      )}
+                    </LayerContainer>
+                  </Box>
+                </Stack.Item>
                 <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <FloatingView isFullHeight={true} isFullWidth={true} positionLeft={'0px'} positionRight={'0px'}>
-                    <Box isFullHeight={true} isFullWidth={true} variant='backdrop' shouldCaptureTouches={true} />
-                  </FloatingView>
-                  <FloatingView isFullHeight={true} positionLeft={'0px'} positionRight={'0px'}>
-                    <ColorSettingView variant='dialog'>
-                      <Box variant='filterOverlay' isFullHeight={true} width='80%' maxWidth='350px' shouldClipContent={true}>
-                        {tokenCollection === undefined ? (
-                          <LoadingSpinner />
-                        ) : (
-                          <Filter
-                            filters={filters}
-                            onAttributeValueClicked={onAttributeValueClicked}
-                            account={account}
-                            showOwnedTokensOnly={showOwnedTokensOnly}
-                            setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                            shouldShowMusicOption={backgroundMusicSource != null}
-                            shouldPlayMusic={shouldPlayMusic}
-                            setShouldPlayMusic={setShouldPlayMusic}
-                            tokenCollection={tokenCollection}
-                          />
-                        )}
-                      </Box>
-                    </ColorSettingView>
-                  </FloatingView>
+                  <Button variant='unrounded' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
                 </ResponsiveHidingView>
-              )}
+              </Stack>
             </Stack.Item>
           </Stack>
         </Stack.Item>
