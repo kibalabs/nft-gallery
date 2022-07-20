@@ -5,7 +5,7 @@ import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } fr
 import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount } from '../../AccountContext';
-import { Collection, CollectionAttribute, CollectionToken, TokenListing } from '../../client';
+import { Collection, CollectionAttribute, CollectionToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -32,6 +32,7 @@ export const HomePage = (): React.ReactElement => {
   const { data } = usePageData<IHomePageData>();
   const { notdClient, projectId, requester } = useGlobals();
   const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
+  const [allTokens, setAllTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
   const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
   const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
@@ -89,8 +90,10 @@ export const HomePage = (): React.ReactElement => {
       const collectionData = JSON.parse(collectionDataResponse.content);
       const newCollection = Collection.fromObject(collectionData.collection);
       const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+      const newAllTokens = collectionData.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
       setCollection(newCollection);
       setCollectionAttributes(newCollectionAttributes);
+      setAllTokens(newAllTokens);
     }
   }, [notdClient, requester, projectId]);
 
@@ -101,24 +104,24 @@ export const HomePage = (): React.ReactElement => {
   const updateCollectionTokens = React.useCallback((): void => {
     const collectionAddress = getCollectionAddress(projectId);
     const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-    const newQuery = {
-      collectionAddress,
-      limit: tokenLimitRef.current,
-      ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
-      minPrice: undefined,
-      maxPrice: undefined,
-      isListed: undefined,
-      tokenIdIn: undefined,
-      attributeFilters,
-    };
-    if (JSON.stringify(newQuery) === previousQueryRef.current) {
-      return;
-    }
-    // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
-    previousQueryRef.current = JSON.stringify(newQuery);
-    setCollectionTokens(undefined);
     tokenLimitRef.current = 30;
     if (collectionAddress) {
+      const newQuery = {
+        collectionAddress,
+        limit: tokenLimitRef.current,
+        ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        isListed: undefined,
+        tokenIdIn: undefined,
+        attributeFilters,
+      };
+      if (JSON.stringify(newQuery) === previousQueryRef.current) {
+        return;
+      }
+      // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
+      previousQueryRef.current = JSON.stringify(newQuery);
+      setCollectionTokens(undefined);
       notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
         setCollectionTokens(retrievedCollectionTokens);
       }).catch((error: unknown): void => {
@@ -126,9 +129,24 @@ export const HomePage = (): React.ReactElement => {
         setCollectionTokens(null);
       });
     } else {
-      // TODO(krishan711): Load from file
+      if (!allTokens) {
+        setCollectionTokens([]);
+        return;
+      }
+      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+        if (accumulator.length < tokenLimitRef.current) {
+          const isMatch = value.attributes.reduce((innerAccumulator: boolean, innerValue: TokenAttribute): boolean => {
+            return innerAccumulator && (!(innerValue.traitType in filters) || innerValue.value === filters[innerValue.traitType]);
+          }, true);
+          if (isMatch) {
+            accumulator.push(value);
+          }
+        }
+        return accumulator;
+      }, []);
+      setCollectionTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account, allTokens]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -145,9 +163,24 @@ export const HomePage = (): React.ReactElement => {
         setCollectionTokens([...collectionTokens, ...retrievedCollectionTokens]);
       });
     } else {
-      // TODO(krishan711): Load from file
+      if (!allTokens) {
+        setCollectionTokens([]);
+        return;
+      }
+      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+        if (accumulator.length < tokenLimitRef.current) {
+          const isMatch = value.attributes.reduce((innerAccumulator: boolean, innerValue: TokenAttribute): boolean => {
+            return innerAccumulator && (!(innerValue.traitType in filters) || innerValue.value === filters[innerValue.traitType]);
+          }, true);
+          if (isMatch) {
+            accumulator.push(value);
+          }
+        }
+        return accumulator;
+      }, []);
+      setCollectionTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account]);
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };

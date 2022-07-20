@@ -34,6 +34,14 @@ export const getHost = (projectId: string): string | null => {
 };
 
 
+export const getChain = (projectId: string): string | null => {
+  if (projectId === 'pepes') {
+    return 'avalanche';
+  }
+  return 'ethereum';
+};
+
+
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
   if (projectId === 'sprites') {
     return {

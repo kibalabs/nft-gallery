@@ -7,7 +7,7 @@ import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Collection } from '../client';
 import { useGlobals } from '../globalsContext';
 import { IGalleryPageData, usePageData } from '../PageDataContext';
-import { getCollectionAddress, getLogoImageUrl } from '../util';
+import { getChain, getCollectionAddress, getLogoImageUrl } from '../util';
 import { Account } from './Account';
 
 
@@ -16,6 +16,7 @@ export const NavBar = (): React.ReactElement => {
   const { notdClient, projectId, requester } = useGlobals();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const logoImageUrl = getLogoImageUrl(projectId);
+  const chain = getChain(projectId);
   const { data } = usePageData<IGalleryPageData>();
   const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
 
@@ -57,10 +58,12 @@ export const NavBar = (): React.ReactElement => {
       <Stack.Item shrinkFactor={1} growthFactor={1}>
         <Spacing />
       </Stack.Item>
-      { !account ? (
-        <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
-      ) : (
-        <Account accountId={account.address} target={`/accounts/${account.address}`} />
+      { chain === 'ethereum' && (
+        account ? (
+          <Account accountId={account.address} target={`/accounts/${account.address}`} />
+        ) : (
+          <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
+        )
       )}
     </Stack>
   );
