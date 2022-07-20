@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, IconButton, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Airdrop, TokenListing, TokenTransfer } from '../client';
@@ -67,7 +67,6 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   React.useEffect((): void => {
     updateAirdropStatus();
   }, [updateAirdropStatus]);
-
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);
     notdClient.getTokenRecentTransfers(props.tokenCollection.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
@@ -77,7 +76,6 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       setTokenTransfers(null);
     });
   }, [notdClient, props.tokenCollection.address, props.token.tokenId]);
-
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
@@ -136,6 +134,17 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
                 <Text variant='header2'>{props.token.name}</Text>
+                <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
+                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${props.tokenCollection.address}/tokens/${props.token.tokenId}`} />
+                  {latestTransfer
+                    && (
+                      <>
+                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/tx/${latestTransfer.transactionHash}`} />
+                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${props.tokenCollection.address}/${props.token.tokenId}`} />
+                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${props.tokenCollection.address}/${props.token.tokenId}`} />
+                      </>
+                    )}
+                </Stack>
                 <Spacing variant={PaddingSize.Narrow2} />
                 { latestTransfer && (
                   <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>

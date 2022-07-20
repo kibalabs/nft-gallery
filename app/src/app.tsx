@@ -29,8 +29,7 @@ declare global {
 const requester = new Requester(undefined, undefined, false);
 const notdClient = new NotdClient(requester, typeof window !== 'undefined' && window.KRT_API_URL ? window.KRT_API_URL : undefined);
 const localStorageClient = new LocalStorageClient(typeof window !== 'undefined' ? window.localStorage : new MockStorage());
-
-const projectId = (typeof window !== 'undefined' ? window.KRT_PROJECT : process.env.KRT_PROJECT) || 'mdtp';
+const projectId = (typeof window !== 'undefined' ? window.KRT_PROJECT : process.env.KRT_PROJECT) || 'sprites';
 const theme = buildProjectTheme(projectId);
 
 export const globals: IGlobals = {
