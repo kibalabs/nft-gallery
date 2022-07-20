@@ -12,6 +12,7 @@ import { FloatingView } from '../../components/FloatingView';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
+import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
@@ -204,8 +205,18 @@ export const HomePage = (): React.ReactElement => {
     if (tokenIdsToUpdate.length === 0) {
       return;
     }
-    const newListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
-    setTokenListMap({ ...tokenListingMap, ...newListingMap });
+    const openseaListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
+    const looksrareListingMap = await new LooksrareClient().getTokenListings(collection.address, tokenIdsToUpdate);
+    const newListingMap: Record<string, TokenListing | null> = { ...tokenListingMap };
+    tokenIdsToUpdate.forEach((tokenId: string): void => {
+      const listings = [openseaListingMap[tokenId], looksrareListingMap[tokenId]].filter((listing: TokenListing | null): boolean => listing != null) as TokenListing[];
+      if (listings.length === 0) {
+        newListingMap[tokenId] = null;
+      } else {
+        newListingMap[tokenId] = listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0];
+      }
+    });
+    setTokenListMap(newListingMap);
   }, [collection, collectionTokens, tokenListingMap]);
 
   React.useEffect((): void => {
