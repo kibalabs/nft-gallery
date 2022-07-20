@@ -4,22 +4,16 @@ import { IGalleryPageData } from '../../PageDataContext';
 import { getCollectionAddress } from '../../util';
 
 export interface IHomePageData extends IGalleryPageData {
-  collection: Collection;
-  allTokens: CollectionToken[] | undefined;
-  collectionTokens: CollectionToken[];
-  collectionAttributes: CollectionAttribute[];
 }
 
 export const getHomePageData = async (globals: IGlobals): Promise<IHomePageData> => {
   const collectionAddress = getCollectionAddress(globals.projectId);
   if (collectionAddress) {
     const collection = await globals.notdClient.getCollection(collectionAddress);
-    // const collectionTokens = await globals.notdClient.queryCollectionTokens(collectionAddress);
     const collectionAttributes = await globals.notdClient.listCollectionAttributes(collectionAddress);
     return {
       collection,
       allTokens: undefined,
-      collectionTokens: [],
       collectionAttributes,
     };
   }
@@ -32,7 +26,6 @@ export const getHomePageData = async (globals: IGlobals): Promise<IHomePageData>
   return {
     collection,
     allTokens,
-    collectionTokens: [],
     collectionAttributes,
   };
 };

@@ -1,22 +1,18 @@
 import React from 'react';
 
-import { RestMethod } from '@kibalabs/core';
-import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount } from '../../AccountContext';
-import { Collection, CollectionAttribute, CollectionToken, TokenAttribute, TokenListing } from '../../client';
+import { CollectionToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
 import { TokenCard } from '../../components/TokenCard';
-import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
-import { usePageData } from '../../PageDataContext';
 import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
-import { IHomePageData } from './getHomePageData';
 
 
 export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
@@ -30,12 +26,8 @@ export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
   const account = useAccount();
-  const { data } = usePageData<IHomePageData>();
-  const { notdClient, projectId, requester } = useGlobals();
-  const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
-  const [allTokens, setAllTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
-  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
-  const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
+  const { notdClient, projectId, collection, collectionAttributes, allTokens } = useGlobals();
+  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
@@ -49,7 +41,6 @@ export const HomePage = (): React.ReactElement => {
   }, [backgroundMusicSource]);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && collectionTokens ? collectionTokens.find((token: CollectionToken): boolean => token.tokenId === location.pathname.split('/tokens/')[1]) : null;
 
   const host = getHost(projectId);
   let bannerImageUrl = getBannerImageUrl(projectId) || collection?.bannerImageUrl;
@@ -70,37 +61,6 @@ export const HomePage = (): React.ReactElement => {
       backgroundMusic.pause();
     }
   }, [backgroundMusic, shouldPlayMusic]);
-
-  const updateCollection = React.useCallback(async (): Promise<void> => {
-    const collectionAddress = getCollectionAddress(projectId);
-    if (collectionAddress) {
-      notdClient.getCollection(collectionAddress).then((retrievedCollection: Collection): void => {
-        setCollection(retrievedCollection);
-      }).catch((error: unknown): void => {
-        console.error(error);
-        setCollection(null);
-      });
-      notdClient.listCollectionAttributes(collectionAddress).then((retrievedCollectionAttributes: CollectionAttribute[]): void => {
-        setCollectionAttributes(retrievedCollectionAttributes);
-      }).catch((error: unknown): void => {
-        console.error(error);
-        setCollectionAttributes(null);
-      });
-    } else {
-      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
-      const collectionData = JSON.parse(collectionDataResponse.content);
-      const newCollection = Collection.fromObject(collectionData.collection);
-      const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
-      const newAllTokens = collectionData.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
-      setCollection(newCollection);
-      setCollectionAttributes(newCollectionAttributes);
-      setAllTokens(newAllTokens);
-    }
-  }, [notdClient, requester, projectId]);
-
-  React.useEffect((): void => {
-    updateCollection();
-  }, [updateCollection]);
 
   const updateCollectionTokens = React.useCallback((): void => {
     const collectionAddress = getCollectionAddress(projectId);
@@ -261,24 +221,24 @@ export const HomePage = (): React.ReactElement => {
           <meta name='twitter:card' content='summary' />
         )}
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-        { getTreasureHuntTokenId(projectId) && (
-          <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
-            <Box variant='notification'>
-              <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
-            </Box>
-          </Stack>
-        )}
-        <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-          <Stack direction={Direction.Horizontal} shouldAddGutters={false} isFullHeight={true} isFullWidth={true}>
-            <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <React.Fragment>
-                <Box width='300px' isFullHeight={true}>
-                  {collection === undefined || collectionAttributes === undefined ? (
-                    <LoadingSpinner />
-                  ) : collection === null || collectionAttributes === null ? (
-                    <Text variant='error'>Failed to load</Text>
-                  ) : (
+      {collection === undefined || collectionAttributes === undefined ? (
+        <LoadingSpinner />
+      ) : collection === null || collectionAttributes === null ? (
+        <Text variant='error'>Failed to load</Text>
+      ) : (
+        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+          { getTreasureHuntTokenId(projectId) && (
+            <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
+              <Box variant='notification'>
+                <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
+              </Box>
+            </Stack>
+          )}
+          <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+            <Stack direction={Direction.Horizontal} shouldAddGutters={false} isFullHeight={true} isFullWidth={true}>
+              <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                <React.Fragment>
+                  <Box width='300px' isFullHeight={true}>
                     <Filter
                       filters={filters}
                       onAttributeValueClicked={onAttributeValueClicked}
@@ -291,58 +251,52 @@ export const HomePage = (): React.ReactElement => {
                       collection={collection}
                       collectionAttributes={collectionAttributes}
                     />
-                  )}
-                </Box>
-              </React.Fragment>
-            </ResponsiveHidingView>
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-                <Stack.Item growthFactor={1} shrinkFactor={1}>
-                  <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
-                    <LayerContainer>
-                      {collection === undefined || collectionTokens === undefined ? (
-                        <LoadingSpinner />
-                      ) : collection === null || collectionTokens === null ? (
-                        <Text variant='error'>Failed to load</Text>
-                      ) : (
-                        <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
-                          {Object.keys(filters).length > 0 && (
-                            <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
-                              {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                              ))}
-                            </Stack>
-                          )}
-                          <Stack.Item growthFactor={1} shrinkFactor={1}>
-                            <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                              {collectionTokens.length > 0 ? (
-                                <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
-                                  {collectionTokens.map((token: CollectionToken): React.ReactElement => (
-                                    <TokenCard
-                                      key={token.tokenId}
-                                      token={token}
-                                      tokenListing={tokenListingMap[token.tokenId]}
-                                      target={`/tokens/${token.tokenId}`}
-                                    />
-                                  ))}
-                                </EqualGrid>
-                              ) : (
-                                <Text>No tokens match filter</Text>
-                              )}
-                            </Box>
-                          </Stack.Item>
-                        </Stack>
-                      )}
-                      {isResponsiveFilterShowing && (
-                        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                          <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
-                            <ColorSettingView variant='dialog'>
-                              <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
-                                {collection === undefined || collectionAttributes === undefined ? (
-                                  <LoadingSpinner />
-                                ) : collection === null || collectionAttributes === null ? (
-                                  <Text variant='error'>Failed to load</Text>
+                  </Box>
+                </React.Fragment>
+              </ResponsiveHidingView>
+              <Stack.Item growthFactor={1} shrinkFactor={1}>
+                <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+                  <Stack.Item growthFactor={1} shrinkFactor={1}>
+                    <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
+                      <LayerContainer>
+                        {collectionTokens === undefined ? (
+                          <LoadingSpinner />
+                        ) : collectionTokens === null ? (
+                          <Text variant='error'>Failed to load</Text>
+                        ) : (
+                          <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
+                            {Object.keys(filters).length > 0 && (
+                              <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                                {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                                  <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                                ))}
+                              </Stack>
+                            )}
+                            <Stack.Item growthFactor={1} shrinkFactor={1}>
+                              <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                                {collectionTokens.length > 0 ? (
+                                  <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
+                                    {collectionTokens.map((token: CollectionToken): React.ReactElement => (
+                                      <TokenCard
+                                        key={token.tokenId}
+                                        token={token}
+                                        tokenListing={tokenListingMap[token.tokenId]}
+                                        target={`/tokens/${token.tokenId}`}
+                                      />
+                                    ))}
+                                  </EqualGrid>
                                 ) : (
+                                  <Text>No tokens match filter</Text>
+                                )}
+                              </Box>
+                            </Stack.Item>
+                          </Stack>
+                        )}
+                        {isResponsiveFilterShowing && (
+                          <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                            <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
+                              <ColorSettingView variant='dialog'>
+                                <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
                                   <Filter
                                     filters={filters}
                                     onAttributeValueClicked={onAttributeValueClicked}
@@ -355,31 +309,33 @@ export const HomePage = (): React.ReactElement => {
                                     collection={collection}
                                     collectionAttributes={collectionAttributes}
                                   />
-                                )}
-                              </Box>
-                            </ColorSettingView>
-                          </FloatingView>
-                        </ResponsiveHidingView>
-                      )}
-                    </LayerContainer>
-                  </Box>
-                </Stack.Item>
-                <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <Button variant='unrounded' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
-                </ResponsiveHidingView>
-              </Stack>
-            </Stack.Item>
-          </Stack>
-        </Stack.Item>
-      </Stack>
-      {isTokenSubpageShowing && chosenToken && collection && (
-        <TokenDialog
-          token={chosenToken}
-          collection={collection}
+                                </Box>
+                              </ColorSettingView>
+                            </FloatingView>
+                          </ResponsiveHidingView>
+                        )}
+                      </LayerContainer>
+                    </Box>
+                  </Stack.Item>
+                  <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                    <Button variant='unrounded' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
+                  </ResponsiveHidingView>
+                </Stack>
+              </Stack.Item>
+            </Stack>
+          </Stack.Item>
+        </Stack>
+      )}
+      <ColorSettingView variant='dialog'>
+        <Dialog
           isOpen={isTokenSubpageShowing}
           onCloseClicked={onCloseSubpageClicked}
-        />
-      )}
+          maxWidth='1000px'
+          maxHeight='90%'
+        >
+          <SubRouterOutlet />
+        </Dialog>
+      </ColorSettingView>
     </React.Fragment>
   );
 };

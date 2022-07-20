@@ -21,6 +21,26 @@ export class GetCollectionResponse extends ResponseData {
   };
 }
 
+
+export class GetCollectionTokenRequest extends RequestData {
+}
+
+export class GetCollectionTokenResponse extends ResponseData {
+  readonly token: Resources.CollectionToken;
+
+  public constructor(token: Resources.CollectionToken) {
+    super();
+    this.token = token;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionTokenResponse => {
+    return new GetCollectionTokenResponse(
+      Resources.CollectionToken.fromObject(obj.token as Record<string, unknown>),
+    );
+  };
+}
+
+
 export class ListCollectionAttributesRequest extends RequestData {
 }
 
@@ -38,6 +58,7 @@ export class ListCollectionAttributesResponse extends ResponseData {
     );
   };
 }
+
 
 export class ListTokenRecentTransfersRequest extends RequestData {
 }
@@ -57,6 +78,7 @@ export class ListTokenRecentTransfersResponse extends ResponseData {
   };
 }
 
+
 export class ListCollectionTokensByOwnersRequest extends RequestData {
 }
 
@@ -74,6 +96,7 @@ export class ListCollectionTokensByOwnersResponse extends ResponseData {
     );
   };
 }
+
 
 export class SubmitTreasureHuntForCollectionTokenRequest extends RequestData {
   readonly userAddress: string;
@@ -100,6 +123,7 @@ export class SubmitTreasureHuntForCollectionTokenResponse extends ResponseData {
   };
 }
 
+
 export class ListCollectionTokenAirdropsRequest extends RequestData {
 }
 
@@ -117,6 +141,7 @@ export class ListCollectionTokenAirdropsResponse extends ResponseData {
     );
   };
 }
+
 
 export class InQueryParam extends RequestData {
   readonly fieldName: string;

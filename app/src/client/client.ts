@@ -16,6 +16,14 @@ export class NotdClient extends ServiceClient {
     return response.collection;
   };
 
+  public getCollectionToken = async (registryAddress: string, tokenId: string): Promise<Resources.CollectionToken> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}`;
+    const request = new Endpoints.GetCollectionTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionTokenResponse);
+    return response.token;
+  };
+
   public listCollectionAttributes = async (address: string): Promise<Resources.CollectionAttribute[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${address}/attributes`;

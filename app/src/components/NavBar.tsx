@@ -1,46 +1,19 @@
 import React from 'react';
 
-import { RestMethod } from '@kibalabs/core';
 import { Alignment, Box, Button, Direction, Image, LinkBase, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
-import { Collection } from '../client';
 import { useGlobals } from '../globalsContext';
-import { IGalleryPageData, usePageData } from '../PageDataContext';
-import { getChain, getCollectionAddress, getLogoImageUrl } from '../util';
+import { getChain, getLogoImageUrl } from '../util';
 import { Account } from './Account';
 
 
 export const NavBar = (): React.ReactElement => {
   const account = useAccount();
-  const { notdClient, projectId, requester } = useGlobals();
+  const { projectId, collection } = useGlobals();
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const logoImageUrl = getLogoImageUrl(projectId);
   const chain = getChain(projectId);
-  const { data } = usePageData<IGalleryPageData>();
-  const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
-
-  // TODO(krishan711): this would be much better somewhere global
-  const updateCollection = React.useCallback(async (): Promise<void> => {
-    const collectionAddress = getCollectionAddress(projectId);
-    if (collectionAddress) {
-      notdClient.getCollection(collectionAddress).then((retrievedCollection: Collection): void => {
-        setCollection(retrievedCollection);
-      }).catch((error: unknown): void => {
-        console.error(error);
-        setCollection(null);
-      });
-    } else {
-      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
-      const collectionData = JSON.parse(collectionDataResponse.content);
-      const newCollection = Collection.fromObject(collectionData.collection);
-      setCollection(newCollection);
-    }
-  }, [notdClient, requester, projectId]);
-
-  React.useEffect((): void => {
-    updateCollection();
-  }, [updateCollection]);
 
   return (
     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Default} paddingVertical={PaddingSize.Wide}>
