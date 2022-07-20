@@ -1,21 +1,20 @@
 import React from 'react';
 
 import { RestMethod } from '@kibalabs/core';
-import { getIsRunningOnBrowser, useDeepCompareCallback, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, Image, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { getIsRunningOnBrowser, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
+import { Alignment, Box, Button, ColorSettingView, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { CollectionToken, TokenListing } from '../../client';
-import { Account } from '../../components/Account';
+import { useAccount } from '../../AccountContext';
+import { Collection, CollectionAttribute, CollectionToken, TokenListing } from '../../client';
+import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
 import { TokenCard } from '../../components/TokenCard';
 import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
-import { Token, TokenCollection } from '../../model';
 import { OpenseaClient } from '../../OpenseaClient';
 import { usePageData } from '../../PageDataContext';
-import { getBackgroundMusic, getBannerImageUrl, getHost, getLogoImageUrl, getTreasureHuntTokenId, loadTokenCollection } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
 import { IHomePageData } from './getHomePageData';
 
 
@@ -31,33 +30,32 @@ export const HomePage = (): React.ReactElement => {
   const location = useLocation();
   const account = useAccount();
   const { data } = usePageData<IHomePageData>();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
-  const { notdClient, requester, projectId } = useGlobals();
-  const [tokenCollection, setTokenCollection] = React.useState<TokenCollection | undefined>(data?.tokenCollection || undefined);
-  const [ownedTokens, setOwnedTokens] = React.useState<Token[] | undefined | null>(undefined);
+  const { notdClient, projectId, requester } = useGlobals();
+  const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
+  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
+  const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
-  const [tokenLimit, setTokenLimit] = React.useState<number>(30);
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
-  // const [scrollingRef] = useRenderedRef<HTMLDivElement>();
-  const logoImageUrl = getLogoImageUrl(projectId);
+  const tokenLimitRef = React.useRef<number>(30);
+  const previousQueryRef = React.useRef<string | null>(null);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && tokenCollection?.tokens ? tokenCollection.tokens[Number(location.pathname.replace('/tokens/', ''))] : null;
+  const chosenToken = isTokenSubpageShowing && collectionTokens ? collectionTokens.find((token: CollectionToken): boolean => token.tokenId === location.pathname.split('/tokens/')[1]) : null;
 
   const host = getHost(projectId);
-  let bannerImageUrl = getBannerImageUrl(projectId) || tokenCollection?.bannerImageUrl;
+  let bannerImageUrl = getBannerImageUrl(projectId) || collection?.bannerImageUrl;
   if (bannerImageUrl && bannerImageUrl.startsWith('/')) {
     bannerImageUrl = `${host}${bannerImageUrl}`;
   }
-  const title = `${tokenCollection ? tokenCollection.name : 'Token'} Gallery`;
-  const description = tokenCollection?.description ? `The gallery of ${tokenCollection.name}. ${tokenCollection.description} built by https://www.tokenpage.xyz` : tokenCollection ? `The gallery of ${tokenCollection.name} built by https://www.tokenpage.xyz` : '';
+  const title = `${collection ? collection.name : 'Token'} Gallery`;
+  const description = collection?.description ? `The gallery of ${collection.name}. ${collection.description} built by https://www.tokenpage.xyz` : collection ? `The gallery of ${collection.name} built by https://www.tokenpage.xyz` : '';
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
@@ -71,48 +69,85 @@ export const HomePage = (): React.ReactElement => {
     }
   }, [backgroundMusic, shouldPlayMusic]);
 
-  const onConnectWalletClicked = async (): Promise<void> => {
-    await onLinkAccountsClicked();
-  };
-
-  const loadMetadata = React.useCallback(async (): Promise<void> => {
-    const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
-    const loadedTokenCollection = loadTokenCollection(JSON.parse(metadataResponse.content) as Record<string, unknown>);
-    setTokenCollection(loadedTokenCollection);
-  }, [requester, projectId]);
-
-  React.useEffect((): void => {
-    loadMetadata();
-  }, [loadMetadata]);
-
-  const getCollectionHoldings = useDeepCompareCallback(async (shouldClear = false): Promise<void> => {
-    if (shouldClear) {
-      setOwnedTokens(undefined);
-    }
-    if (!account) {
-      setOwnedTokens(null);
-      return;
-    }
-    if (!tokenCollection || !tokenCollection.tokens) {
-      setOwnedTokens(undefined);
-      return;
-    }
-    // NOTE(krishan711): not sure why but this re-aliasing fixes some type checks
-    const tokens = tokenCollection.tokens;
-    notdClient.getCollectionHoldings(tokenCollection.address, account.address).then((collectionTokens: CollectionToken[]): void => {
-      const newOwnedTokens = collectionTokens.map((collectionToken: CollectionToken): Token => {
-        return tokens[collectionToken.tokenId];
+  const updateCollection = React.useCallback(async (): Promise<void> => {
+    const collectionAddress = getCollectionAddress(projectId);
+    if (collectionAddress) {
+      notdClient.getCollection(collectionAddress).then((retrievedCollection: Collection): void => {
+        setCollection(retrievedCollection);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setCollection(null);
       });
-      setOwnedTokens(newOwnedTokens);
-    }).catch((error: unknown): void => {
-      console.error(error);
-      setOwnedTokens(null);
-    });
-  }, [notdClient, tokenCollection, account]);
+      notdClient.listCollectionAttributes(collectionAddress).then((retrievedCollectionAttributes: CollectionAttribute[]): void => {
+        setCollectionAttributes(retrievedCollectionAttributes);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setCollectionAttributes(null);
+      });
+    } else {
+      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
+      const collectionData = JSON.parse(collectionDataResponse.content);
+      const newCollection = Collection.fromObject(collectionData.collection);
+      const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+      setCollection(newCollection);
+      setCollectionAttributes(newCollectionAttributes);
+    }
+  }, [notdClient, requester, projectId]);
 
   React.useEffect((): void => {
-    getCollectionHoldings();
-  }, [getCollectionHoldings]);
+    updateCollection();
+  }, [updateCollection]);
+
+  const updateCollectionTokens = React.useCallback((): void => {
+    const collectionAddress = getCollectionAddress(projectId);
+    const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
+    const newQuery = {
+      collectionAddress,
+      limit: tokenLimitRef.current,
+      ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      isListed: undefined,
+      tokenIdIn: undefined,
+      attributeFilters,
+    };
+    if (JSON.stringify(newQuery) === previousQueryRef.current) {
+      return;
+    }
+    // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
+    previousQueryRef.current = JSON.stringify(newQuery);
+    setCollectionTokens(undefined);
+    tokenLimitRef.current = 30;
+    if (collectionAddress) {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
+        setCollectionTokens(retrievedCollectionTokens);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setCollectionTokens(null);
+      });
+    } else {
+      // TODO(krishan711): Load from file
+    }
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account]);
+
+  React.useEffect((): void => {
+    updateCollectionTokens();
+  }, [updateCollectionTokens]);
+
+  const loadMoreCollectionTokens = React.useCallback((): void => {
+    if (!collectionTokens) {
+      return;
+    }
+    const collectionAddress = getCollectionAddress(projectId);
+    if (collectionAddress) {
+      const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, collectionTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
+        setCollectionTokens([...collectionTokens, ...retrievedCollectionTokens]);
+      });
+    } else {
+      // TODO(krishan711): Load from file
+    }
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -127,43 +162,18 @@ export const HomePage = (): React.ReactElement => {
     }
   };
 
-  const filteredTokens = React.useMemo((): Token[] | undefined => {
-    if (!tokenCollection || !tokenCollection.tokens) {
-      return undefined;
-    }
-    let tokens = Object.values(tokenCollection.tokens);
-    if (showOwnedTokensOnly) {
-      if (!ownedTokens) {
-        return undefined;
-      }
-      tokens = ownedTokens;
-    }
-    const validFilterKeys = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] != null);
-    const innerFilteredTokens = tokens.filter((token: Token): boolean => {
-      let match = true;
-      validFilterKeys.forEach((filterKey: string): void => {
-        match = match && token.attributeMap[filterKey] === filters[filterKey];
-      });
-      return match;
-    });
-    return innerFilteredTokens.slice(0, tokenLimit);
-  }, [tokenCollection, filters, tokenLimit, showOwnedTokensOnly, ownedTokens]);
-
   const updateTokenListings = React.useCallback(async (): Promise<void> => {
-    if (!tokenCollection) {
+    if (!collection || !collectionTokens) {
       return;
     }
-    if (!filteredTokens) {
-      return;
-    }
-    const filteredTokenIds = filteredTokens.map((token: Token): string => token.tokenId);
+    const filteredTokenIds = collectionTokens.map((token: CollectionToken): string => token.tokenId);
     const tokenIdsToUpdate = filteredTokenIds.filter((tokenId: string): boolean => !(tokenId in tokenListingMap));
     if (tokenIdsToUpdate.length === 0) {
       return;
     }
-    const newListingMap = await new OpenseaClient().getTokenListings(tokenCollection.address, tokenIdsToUpdate);
+    const newListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
     setTokenListMap({ ...tokenListingMap, ...newListingMap });
-  }, [tokenCollection, filteredTokens, tokenListingMap]);
+  }, [collection, collectionTokens, tokenListingMap]);
 
   React.useEffect((): void => {
     updateTokenListings();
@@ -171,14 +181,15 @@ export const HomePage = (): React.ReactElement => {
 
   const onScrolled = React.useCallback((event: Event): void => {
     const eventTarget = event.target as HTMLDivElement;
-    if (filteredTokens && tokenLimit > filteredTokens.length) {
+    if (collectionTokens && tokenLimitRef.current > collectionTokens.length) {
       return;
     }
     const size = eventTarget.scrollHeight - eventTarget.clientHeight;
     if (size - eventTarget.scrollTop < 300) {
-      setTokenLimit(tokenLimit + 30);
+      tokenLimitRef.current += 30;
+      loadMoreCollectionTokens();
     }
-  }, [filteredTokens, tokenLimit]);
+  }, [collectionTokens, tokenLimitRef, loadMoreCollectionTokens]);
 
   const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
@@ -206,23 +217,7 @@ export const HomePage = (): React.ReactElement => {
           <meta name='twitter:card' content='summary' />
         )}
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingTop={PaddingSize.Wide}>
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide2}>
-          <Stack.Item shrinkFactor={1} growthFactor={1}>
-            {logoImageUrl ? (
-              <Box height='2em'>
-                <Image source={logoImageUrl} alternativeText={`${tokenCollection ? tokenCollection.name : ''} Gallery`} />
-              </Box>
-            ) : (
-              <Text variant='header1'>{`${tokenCollection ? tokenCollection.name : ''} Gallery`}</Text>
-            )}
-          </Stack.Item>
-          { !account ? (
-            <Button variant='secondary' text= 'Connect Wallet' onClicked={onConnectWalletClicked} />
-          ) : (
-            <Account accountId={account.address} target={`/accounts/${account.address}`} />
-          )}
-        </Stack>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
         { getTreasureHuntTokenId(projectId) && (
           <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
             <Box variant='notification'>
@@ -235,8 +230,10 @@ export const HomePage = (): React.ReactElement => {
             <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
               <React.Fragment>
                 <Box width='300px' isFullHeight={true}>
-                  {tokenCollection === undefined ? (
+                  {collection === undefined || collectionAttributes === undefined ? (
                     <LoadingSpinner />
+                  ) : collection === null || collectionAttributes === null ? (
+                    <Text variant='error'>Failed to load</Text>
                   ) : (
                     <Filter
                       filters={filters}
@@ -247,7 +244,8 @@ export const HomePage = (): React.ReactElement => {
                       shouldShowMusicOption={backgroundMusic != null}
                       shouldPlayMusic={shouldPlayMusic}
                       setShouldPlayMusic={setShouldPlayMusic}
-                      tokenCollection={tokenCollection}
+                      collection={collection}
+                      collectionAttributes={collectionAttributes}
                     />
                   )}
                 </Box>
@@ -258,20 +256,24 @@ export const HomePage = (): React.ReactElement => {
                 <Stack.Item growthFactor={1} shrinkFactor={1}>
                   <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
                     <LayerContainer>
-                      {tokenCollection === undefined || filteredTokens === undefined ? (
+                      {collection === undefined || collectionTokens === undefined ? (
                         <LoadingSpinner />
+                      ) : collection === null || collectionTokens === null ? (
+                        <Text variant='error'>Failed to load</Text>
                       ) : (
                         <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
-                          <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
-                            {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                              <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                            ))}
-                          </Stack>
+                          {Object.keys(filters).length > 0 && (
+                            <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                              {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
+                              ))}
+                            </Stack>
+                          )}
                           <Stack.Item growthFactor={1} shrinkFactor={1}>
                             <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                              {filteredTokens.length > 0 ? (
+                              {collectionTokens.length > 0 ? (
                                 <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
-                                  {filteredTokens.map((token: Token): React.ReactElement => (
+                                  {collectionTokens.map((token: CollectionToken): React.ReactElement => (
                                     <TokenCard
                                       key={token.tokenId}
                                       token={token}
@@ -292,8 +294,10 @@ export const HomePage = (): React.ReactElement => {
                           <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
                             <ColorSettingView variant='dialog'>
                               <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
-                                {tokenCollection === undefined ? (
+                                {collection === undefined || collectionAttributes === undefined ? (
                                   <LoadingSpinner />
+                                ) : collection === null || collectionAttributes === null ? (
+                                  <Text variant='error'>Failed to load</Text>
                                 ) : (
                                   <Filter
                                     filters={filters}
@@ -304,7 +308,8 @@ export const HomePage = (): React.ReactElement => {
                                     shouldShowMusicOption={backgroundMusicSource != null}
                                     shouldPlayMusic={shouldPlayMusic}
                                     setShouldPlayMusic={setShouldPlayMusic}
-                                    tokenCollection={tokenCollection}
+                                    collection={collection}
+                                    collectionAttributes={collectionAttributes}
                                   />
                                 )}
                               </Box>
@@ -323,10 +328,10 @@ export const HomePage = (): React.ReactElement => {
           </Stack>
         </Stack.Item>
       </Stack>
-      {isTokenSubpageShowing && chosenToken && tokenCollection && (
+      {isTokenSubpageShowing && chosenToken && collection && (
         <TokenDialog
           token={chosenToken}
-          tokenCollection={tokenCollection}
+          collection={collection}
           isOpen={isTokenSubpageShowing}
           onCloseClicked={onCloseSubpageClicked}
         />

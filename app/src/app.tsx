@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize } from '@kibalabs/ui-react';
+import { Box, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -11,6 +11,7 @@ import { AccountControlProvider } from './AccountContext';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
 import { Footer } from './components/Footer';
+import { NavBar } from './components/NavBar';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage/AccountPage';
@@ -51,7 +52,7 @@ export interface IAppProps extends IHeadRootProviderProps {
 }
 
 export const App = (props: IAppProps): React.ReactElement => {
-  useFavicon(getIcon(projectId) || undefined);
+  useFavicon(getIcon(projectId) || '/assets/icon.png');
 
   useInitialization((): void => {
     const everyviewCode = getEveryviewCode(projectId);
@@ -70,7 +71,14 @@ export const App = (props: IAppProps): React.ReactElement => {
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={globals}>
           <AccountControlProvider>
-            <Router staticPath={props.staticPath} routes={routes} />
+            <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+              <NavBar />
+              <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                <Box variant='unrounded' shouldClipContent={true}>
+                  <Router staticPath={props.staticPath} routes={routes} />
+                </Box>
+              </Stack.Item>
+            </Stack>
           </AccountControlProvider>
         </GlobalsProvider>
       </PageDataProvider>

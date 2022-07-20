@@ -4,18 +4,17 @@ import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddl
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
-import { Airdrop, TokenListing, TokenTransfer } from '../client';
+import { Airdrop, Collection, CollectionToken, TokenAttribute, TokenListing, TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
-import { Token, TokenCollection } from '../model';
 import { OpenseaClient } from '../OpenseaClient';
 import { getTreasureHuntTokenId } from '../util';
 import { EtherValue } from './EtherValue';
 
 interface ITokenDialogProps {
-  token: Token;
+  token: CollectionToken;
   isOpen: boolean;
-  tokenCollection: TokenCollection;
+  collection: Collection;
   onCloseClicked: () => void;
 }
 
@@ -30,7 +29,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
   const [listing, setListing] = React.useState<TokenListing | null | undefined>(undefined);
 
-  const imageUrl = resolveUrl(props.token.imageUrl);
+  const imageUrl = props.token.imageUrl ? resolveUrl(props.token.imageUrl) : '';
   const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
@@ -38,13 +37,13 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
 
   const updateListings = React.useCallback(async (): Promise<void> => {
     try {
-      const openseaListing = await (new OpenseaClient().getTokenListing(props.tokenCollection.address, props.token.tokenId));
+      const openseaListing = await (new OpenseaClient().getTokenListing(props.collection.address, props.token.tokenId));
       setListing(openseaListing);
     } catch (error: unknown) {
       console.error(error);
       setListing(null);
     }
-  }, [props.tokenCollection.address, props.token.tokenId]);
+  }, [props.collection.address, props.token.tokenId]);
 
   React.useEffect((): void => {
     updateListings();
@@ -52,7 +51,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
 
   const updateAirdropStatus = React.useCallback(async (): Promise<void> => {
     setAirdrop(undefined);
-    notdClient.listCollectionTokenAirdrops(props.tokenCollection.address, props.token.tokenId).then((airdrops: Airdrop[]): void => {
+    notdClient.listCollectionTokenAirdrops(props.collection.address, props.token.tokenId).then((airdrops: Airdrop[]): void => {
       if (airdrops.length > 0) {
         setAirdrop(airdrops[0]);
       } else {
@@ -62,7 +61,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       console.error(error);
       setAirdrop(null);
     });
-  }, [notdClient, props.tokenCollection.address, props.token.tokenId]);
+  }, [notdClient, props.collection.address, props.token.tokenId]);
 
   React.useEffect((): void => {
     updateAirdropStatus();
@@ -70,13 +69,13 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
     setTokenTransfers(undefined);
-    notdClient.getTokenRecentTransfers(props.tokenCollection.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+    notdClient.listCollectionTokenRecentTransfers(props.collection.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
       setTokenTransfers(retrievedTokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenTransfers(null);
     });
-  }, [notdClient, props.tokenCollection.address, props.token.tokenId]);
+  }, [notdClient, props.collection.address, props.token.tokenId]);
 
   React.useEffect((): void => {
     updateTokenSales();
@@ -93,14 +92,14 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     const message = JSON.stringify({
       command: 'COMPLETE_TREASURE_HUNT',
       message: {
-        registryAddress: props.tokenCollection.address,
+        registryAddress: props.collection.address,
         tokenId: props.token.tokenId,
       },
     });
     let signature;
     try {
       signature = await account.signer.signMessage(message);
-      await notdClient.submitTreasureHuntForCollectionToken(props.tokenCollection.address, props.token.tokenId, account.address, signature);
+      await notdClient.submitTreasureHuntForCollectionToken(props.collection.address, props.token.tokenId, account.address, signature);
     } catch (error: unknown) {
       setIsTreasureHuntSubmitting(false);
       setTreasureHuntSubmittingError(error as Error);
@@ -138,20 +137,15 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                 <Text variant='header2'>{props.token.name}</Text>
                 <Spacing variant={PaddingSize.Narrow2} />
                 { latestTransfer && (
-                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                    <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
-                      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                        <Text variant='small'>Owned by</Text>
-                        <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                          <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
-                        </Box>
-                        <Text variant='small'>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
-                      </Stack>
-                    </LinkBase>
-                    {/* <Spacing variant={PaddingSize.Default} />
-                    <Text variant='note'>Last Transfer</Text>
-                    <Text>{`${shortFormatEther(latestTransfer.value)} on ${getTokenDateString(latestTransfer.blockDate)}`}</Text> */}
-                  </Stack>
+                  <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
+                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                      <Text variant='small'>Owned by</Text>
+                      <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
+                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
+                      </Box>
+                      <Text variant='small'>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
+                    </Stack>
+                  </LinkBase>
                 )}
                 <Spacing variant={PaddingSize.Wide} />
                 { props.token.frameImageUrl && frameImageUrl && (
@@ -159,7 +153,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                     <Text variant='note'>Frame</Text>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                        <Image source={`${frameImageUrl}`} alternativeText='Avatar' />
+                        <Image source={frameImageUrl} alternativeText='Avatar' />
                       </Box>
                       <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
                     </Stack>
@@ -217,8 +211,8 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   </Stack>
                 )}
                 <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                  {Object.keys(props.token.attributeMap).map((attributeKey: string): React.ReactElement => (
-                    <KeyValue key={attributeKey} name={attributeKey} nameTextVariant='note' value={props.token.attributeMap[attributeKey]} valueTextVariant='default' />
+                  {props.token.attributes.map((attribute: TokenAttribute): React.ReactElement => (
+                    <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
                   ))}
                 </EqualGrid>
               </Stack>

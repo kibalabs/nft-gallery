@@ -8,19 +8,27 @@ export class NotdClient extends ServiceClient {
     super(requester, baseUrl || 'https://notd-api.kibalabs.com');
   }
 
-  public getTokenRecentTransfers = async (registryAddress: string, tokenId: string): Promise<Resources.TokenTransfer[]> => {
+  public getCollection = async (registryAddress: string): Promise<Resources.Collection> => {
     const method = RestMethod.GET;
-    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/recent-transfers`;
-    const request = new Endpoints.GetTokenRecentTransfersRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.GetTokenRecentTransfersResponse);
-    return response.tokenTransfers;
+    const path = `v1/collections/${registryAddress}`;
+    const request = new Endpoints.GetCollectionRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionResponse);
+    return response.collection;
   };
 
-  public getCollectionHoldings = async (address: string, ownerAddress: string): Promise<Resources.CollectionToken[]> => {
+  public listCollectionAttributes = async (address: string): Promise<Resources.CollectionAttribute[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${address}/attributes`;
+    const request = new Endpoints.ListCollectionAttributesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionAttributesResponse);
+    return response.attributes;
+  };
+
+  public listCollectionTokensByOwner = async (address: string, ownerAddress: string): Promise<Resources.CollectionToken[]> => {
     const method = RestMethod.GET;
     const path = `v1/collections/${address}/tokens/owner/${ownerAddress}`;
-    const request = new Endpoints.GetCollectionHoldingsRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionHoldingsResponse);
+    const request = new Endpoints.ListCollectionTokensByOwnersRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokensByOwnersResponse);
     return response.tokens;
   };
 
@@ -31,11 +39,27 @@ export class NotdClient extends ServiceClient {
     await this.makeRequest(method, path, request, Endpoints.SubmitTreasureHuntForCollectionTokenResponse);
   };
 
+  public listCollectionTokenRecentTransfers = async (registryAddress: string, tokenId: string): Promise<Resources.TokenTransfer[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/recent-transfers`;
+    const request = new Endpoints.ListTokenRecentTransfersRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListTokenRecentTransfersResponse);
+    return response.tokenTransfers;
+  };
+
   public listCollectionTokenAirdrops = async (registryAddress: string, tokenId: string): Promise<Resources.Airdrop[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}/airdrops`;
     const request = new Endpoints.ListCollectionTokenAirdropsRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokenAirdropsResponse);
     return response.airdrops;
+  };
+
+  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.CollectionToken[]> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/collections/${registryAddress}/tokens/query`;
+    const request = new Endpoints.QueryCollectionTokensRequest(limit, offset, ownerAddress, minPrice, maxPrice, isListed, tokenIdIn, attributeFilters);
+    const response = await this.makeRequest(method, path, request, Endpoints.QueryCollectionTokensResponse);
+    return response.tokens;
   };
 }

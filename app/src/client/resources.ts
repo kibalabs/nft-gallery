@@ -39,6 +39,55 @@ export class TokenTransfer {
   };
 }
 
+export class Collection {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly address: string,
+    readonly name: string | null,
+    readonly imageUrl: string | null,
+    readonly description: string | null,
+    readonly url: string | null,
+    readonly openseaSlug: string | null,
+    readonly bannerImageUrl: string | null,
+    readonly discordUrl: string | null,
+    readonly instagramUsername: string | null,
+    readonly twitterUsername: string | null,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): Collection => {
+    return new Collection(
+      String(obj.address),
+      obj.name ? String(obj.name) : null,
+      obj.imageUrl ? String(obj.imageUrl) : null,
+      obj.description ? String(obj.description) : null,
+      obj.url ? String(obj.url) : null,
+      obj.openseaSlug ? String(obj.openseaSlug) : null,
+      obj.bannerImageUrl ? String(obj.bannerImageUrl) : null,
+      obj.discordUrl ? String(obj.discordUrl) : null,
+      obj.instagramUsername ? String(obj.instagramUsername) : null,
+      obj.twitterUsername ? String(obj.twitterUsername) : null,
+    );
+  };
+}
+
+
+export class CollectionAttribute {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly name: string,
+    readonly values: string[],
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionAttribute => {
+    return new CollectionAttribute(
+      String(obj.name),
+      ((obj.values as unknown[]).map((value: unknown): string => String(value))),
+    );
+  };
+}
+
 export class TokenAttribute {
   // eslint-disable-next-line no-useless-constructor
   public constructor(
@@ -62,6 +111,7 @@ export class CollectionToken {
     readonly tokenId: string,
     readonly name: string,
     readonly imageUrl: string | null,
+    readonly frameImageUrl: string | null,
     readonly description: string | null,
     readonly attributes: TokenAttribute[],
   // eslint-disable-next-line no-empty-function
@@ -73,6 +123,7 @@ export class CollectionToken {
       String(obj.tokenId),
       String(obj.name),
       obj.imageUrl ? String(obj.imageUrl) : null,
+      obj.frameImageUrl ? String(obj.frameImageUrl) : null,
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
     );
