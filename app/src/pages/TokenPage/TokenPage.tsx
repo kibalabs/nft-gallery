@@ -1,27 +1,23 @@
 import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { useStringRouteParam } from '@kibalabs/core-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Head, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
-import { Airdrop, Collection, CollectionToken, TokenAttribute, TokenListing, TokenTransfer } from '../client';
-import { KeyValue } from '../components/KeyValue';
-import { useGlobals } from '../globalsContext';
-import { LooksrareClient } from '../LooksrareClient';
-import { OpenseaClient } from '../OpenseaClient';
-import { getTreasureHuntTokenId } from '../util';
-import { EtherValue } from './EtherValue';
+import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
+import { Airdrop, CollectionToken, TokenAttribute, TokenListing, TokenTransfer } from '../../client';
+import { EtherValue } from '../../components/EtherValue';
+import { KeyValue } from '../../components/KeyValue';
+import { useGlobals } from '../../globalsContext';
+import { LooksrareClient } from '../../LooksrareClient';
+import { OpenseaClient } from '../../OpenseaClient';
+import { getTreasureHuntTokenId } from '../../util';
 
-interface ITokenDialogProps {
-  token: CollectionToken;
-  isOpen: boolean;
-  collection: Collection;
-  onCloseClicked: () => void;
-}
-
-export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
+export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
-  const { notdClient, projectId } = useGlobals();
+  const tokenId = useStringRouteParam('tokenId');
+  const { notdClient, projectId, collection, allTokens } = useGlobals();
+  const [collectionToken, setCollectionToken] = React.useState<CollectionToken | null | undefined>(undefined);
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
@@ -30,16 +26,43 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
   const [listing, setListing] = React.useState<TokenListing | null | undefined>(undefined);
 
-  const imageUrl = props.token.imageUrl ? resolveUrl(props.token.imageUrl) : '';
-  const frameImageUrl = props.token.frameImageUrl && resolveUrl(props.token.frameImageUrl);
+  const imageUrl = collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '';
+  const frameImageUrl = collectionToken?.frameImageUrl && resolveUrl(collectionToken.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
-  const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId(projectId);
+  const isTreasureHuntToken = collectionToken?.tokenId === getTreasureHuntTokenId(projectId);
+
+  const updateCollectionToken = React.useCallback(async (): Promise<void> => {
+    if (collection === undefined) {
+      setCollectionToken(undefined);
+      return;
+    }
+    if (collection === null) {
+      setCollectionToken(null);
+      return;
+    }
+    if (allTokens) {
+      setCollectionToken(allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId));
+    } else {
+      await notdClient.getCollectionToken(collection.address, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
+        setCollectionToken(retrievedCollectionToken);
+      });
+    }
+  }, [notdClient, collection, allTokens, tokenId]);
+
+  React.useEffect((): void => {
+    updateCollectionToken();
+  }, [updateCollectionToken]);
 
   const updateListings = React.useCallback(async (): Promise<void> => {
+    if (!collection || !collectionToken) {
+      setListing(null);
+      return;
+    }
+    setListing(undefined);
     const listings: TokenListing[] = [];
     try {
-      const openseaListing = await (new OpenseaClient().getTokenListing(props.collection.address, props.token.tokenId));
+      const openseaListing = await (new OpenseaClient().getTokenListing(collection.address, collectionToken.tokenId));
       if (openseaListing) {
         listings.push(openseaListing);
       }
@@ -47,7 +70,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       console.error(error);
     }
     try {
-      const looksrareListing = await (new LooksrareClient().getTokenListing(props.collection.address, props.token.tokenId));
+      const looksrareListing = await (new LooksrareClient().getTokenListing(collection.address, collectionToken.tokenId));
       if (looksrareListing) {
         listings.push(looksrareListing);
       }
@@ -59,15 +82,19 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     } else {
       setListing(listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0]);
     }
-  }, [props.collection.address, props.token.tokenId]);
+  }, [collection, collectionToken]);
 
   React.useEffect((): void => {
     updateListings();
   }, [updateListings]);
 
   const updateAirdropStatus = React.useCallback(async (): Promise<void> => {
+    if (!collection || !collectionToken) {
+      setAirdrop(null);
+      return;
+    }
     setAirdrop(undefined);
-    notdClient.listCollectionTokenAirdrops(props.collection.address, props.token.tokenId).then((airdrops: Airdrop[]): void => {
+    notdClient.listCollectionTokenAirdrops(collection.address, collectionToken.tokenId).then((airdrops: Airdrop[]): void => {
       if (airdrops.length > 0) {
         setAirdrop(airdrops[0]);
       } else {
@@ -77,27 +104,34 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
       console.error(error);
       setAirdrop(null);
     });
-  }, [notdClient, props.collection.address, props.token.tokenId]);
+  }, [notdClient, collection, collectionToken]);
 
   React.useEffect((): void => {
     updateAirdropStatus();
   }, [updateAirdropStatus]);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
+    if (!collection || !collectionToken) {
+      setTokenTransfers(null);
+      return;
+    }
     setTokenTransfers(undefined);
-    notdClient.listCollectionTokenRecentTransfers(props.collection.address, props.token.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+    notdClient.listCollectionTokenRecentTransfers(collection.address, collectionToken.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
       setTokenTransfers(retrievedTokenTransfers);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenTransfers(null);
     });
-  }, [notdClient, props.collection.address, props.token.tokenId]);
+  }, [notdClient, collection, collectionToken]);
 
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
 
   const onSubmitClicked = async (): Promise<void> => {
+    if (!collection || !collectionToken) {
+      return;
+    }
     setTreasureHuntSubmittingError(null);
     setIsTreasureHuntSubmitting(true);
     if (!account) {
@@ -108,14 +142,14 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
     const message = JSON.stringify({
       command: 'COMPLETE_TREASURE_HUNT',
       message: {
-        registryAddress: props.collection.address,
-        tokenId: props.token.tokenId,
+        registryAddress: collection.address,
+        tokenId: collectionToken.tokenId,
       },
     });
     let signature;
     try {
       signature = await account.signer.signMessage(message);
-      await notdClient.submitTreasureHuntForCollectionToken(props.collection.address, props.token.tokenId, account.address, signature);
+      await notdClient.submitTreasureHuntForCollectionToken(collection.address, collectionToken.tokenId, account.address, signature);
     } catch (error: unknown) {
       setIsTreasureHuntSubmitting(false);
       setTreasureHuntSubmittingError(error as Error);
@@ -136,24 +170,37 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   };
 
   return (
-    <ColorSettingView variant='dialog'>
-      <Dialog
-        isOpen={props.isOpen}
-        onCloseClicked={props.onCloseClicked}
-        maxWidth='1000px'
-        maxHeight='90%'
-      >
+    <React.Fragment>
+      <Head>
+        {/* <title>{title}</title>
+        <meta name='twitter:title' content={title} />
+        {description && <meta name='description' content={description} /> }
+        {bannerImageUrl ? (
+          <React.Fragment>
+            <meta name='twitter:card' content='summary_large_image' />
+            <meta name='twitter:image' content={bannerImageUrl} />
+            <meta name='og:image' content={bannerImageUrl} />
+          </React.Fragment>
+        ) : (
+          <meta name='twitter:card' content='summary' />
+        )} */}
+      </Head>
+      {collection === undefined || collectionToken === undefined ? (
+        <LoadingSpinner />
+      ) : collection === null || collectionToken === null ? (
+        <Text variant='error'>Failed to load</Text>
+      ) : (
         <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Box maxHeight='30em' maxWidth='50%' isFullWidth={false}>
-                <Image source={imageUrl} isLazyLoadable={true} alternativeText={props.token.name} />
+                <Image source={imageUrl} isLazyLoadable={true} alternativeText={collectionToken.name} />
               </Box>
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                <Text variant='header2'>{props.token.name}</Text>
+                <Text variant='header2'>{collectionToken.name}</Text>
                 <Spacing variant={PaddingSize.Narrow2} />
                 { latestTransfer && (
                   <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
@@ -167,14 +214,14 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   </LinkBase>
                 )}
                 <Spacing variant={PaddingSize.Wide} />
-                { props.token.frameImageUrl && frameImageUrl && (
+                { collectionToken.frameImageUrl && frameImageUrl && (
                   <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
                     <Text variant='note'>Frame</Text>
                     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                       <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
                         <Image source={frameImageUrl} alternativeText='Avatar' />
                       </Box>
-                      <Link text={truncateEnd(props.token.frameImageUrl, 20)} target={frameImageUrl} />
+                      <Link text={truncateEnd(collectionToken.frameImageUrl, 20)} target={frameImageUrl} />
                     </Stack>
                   </Stack>
                 )}
@@ -230,7 +277,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
                   </Stack>
                 )}
                 <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                  {props.token.attributes.map((attribute: TokenAttribute): React.ReactElement => (
+                  {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
                     <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
                   ))}
                 </EqualGrid>
@@ -238,7 +285,7 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
             </Stack.Item>
           </Stack>
         </ResponsiveTextAlignmentView>
-      </Dialog>
-    </ColorSettingView>
+      )}
+    </React.Fragment>
   );
 };

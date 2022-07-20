@@ -3,6 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IMultiAnyChildProps } from '@kibalabs/core-react';
 
+import { Collection, CollectionAttribute, CollectionToken } from './client';
 import { NotdClient } from './client/client';
 
 export interface IGlobals {
@@ -10,6 +11,9 @@ export interface IGlobals {
   requester: Requester;
   notdClient: NotdClient;
   localStorageClient: LocalStorageClient;
+  collection: Collection | null | undefined;
+  collectionAttributes: CollectionAttribute[] | null | undefined;
+  allTokens: CollectionToken[] | null | undefined;
 }
 
 export const GlobalsContext = React.createContext<IGlobals | null>(null);

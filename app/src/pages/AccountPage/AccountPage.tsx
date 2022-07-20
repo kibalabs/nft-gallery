@@ -1,51 +1,21 @@
 import React from 'react';
 
 import { truncateMiddle } from '@kibalabs/core';
-import { useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Direction, EqualGrid, Head, Image, LoadingSpinner, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
+import { Alignment, Box, ColorSettingView, Dialog, Direction, EqualGrid, Head, Image, LoadingSpinner, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { Collection, CollectionToken } from '../../client/resources';
+import { CollectionToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
-import { TokenDialog } from '../../components/TokenDialog';
 import { useGlobals } from '../../globalsContext';
-import { usePageData } from '../../PageDataContext';
-import { getCollectionAddress } from '../../util';
-import { IHomePageData } from '../HomePage/getHomePageData';
 
 export const AccountPage = (): React.ReactElement => {
-  const { notdClient, projectId } = useGlobals();
+  const { notdClient, collection } = useGlobals();
   const location = useLocation();
   const navigator = useNavigator();
-  const { data } = usePageData<IHomePageData>();
   const accountAddress = useStringRouteParam('accountAddress');
-  const [collection, setCollection] = React.useState<Collection | null | undefined>(data?.collection || undefined);
-  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(data?.collectionTokens || undefined);
+  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(undefined);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-  const chosenToken = isTokenSubpageShowing && collectionTokens ? collectionTokens.find((token: CollectionToken): boolean => token.tokenId === location.pathname.split('/tokens/')[1]) : null;
-
-  // TODO(krishan711): this would be much better somewhere global
-  const updateCollection = React.useCallback((): void => {
-    const collectionAddress = getCollectionAddress(projectId);
-    if (collectionAddress) {
-      notdClient.getCollection(collectionAddress).then((retrievedCollection: Collection): void => {
-        setCollection(retrievedCollection);
-      }).catch((error: unknown): void => {
-        console.error(error);
-        setCollection(null);
-      });
-    } else {
-      // TODO(krishan711): Load from file
-      //   const metadataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/metadatas.json`);
-      //   const loadedTokenCollection = loadTokenCollection(JSON.parse(metadataResponse.content) as Record<string, unknown>);
-      //   setTokenCollection(loadedTokenCollection);
-    }
-  }, [notdClient, projectId]);
-
-  React.useEffect((): void => {
-    updateCollection();
-  }, [updateCollection]);
-
 
   const getCollectionHoldings = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -106,14 +76,16 @@ export const AccountPage = (): React.ReactElement => {
           </EqualGrid>
         </Stack.Item>
       </Stack>
-      {isTokenSubpageShowing && chosenToken && collection && (
-        <TokenDialog
-          token={chosenToken}
-          collection={collection}
+      <ColorSettingView variant='dialog'>
+        <Dialog
           isOpen={isTokenSubpageShowing}
           onCloseClicked={onCloseSubpageClicked}
-        />
-      )}
+          maxWidth='1000px'
+          maxHeight='90%'
+        >
+          <SubRouterOutlet />
+        </Dialog>
+      </ColorSettingView>
     </React.Fragment>
   );
 };
