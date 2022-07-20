@@ -158,6 +158,22 @@ jobs:
               --env LETSENCRYPT_HOST=${url} \
               --env-file ${varsFile} \
               ${DOCKER_IMAGE}
+  deploy-app-pepes:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+    env:
+      DOCKER_IMAGE: ghcr.io/${{ github.repository }}-app-pepes:latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Login to GitHub container registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: docker build --tag $DOCKER_IMAGE --build-arg KRT_PROJECT=pepes .
+      - name: Push to container registry
+        run: docker push $DOCKER_IMAGE
   run-app-pepes:
     needs: deploy-app-pepes
     runs-on: ubuntu-latest
