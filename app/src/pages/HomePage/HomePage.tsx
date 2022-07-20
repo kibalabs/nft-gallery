@@ -40,6 +40,7 @@ export const HomePage = (): React.ReactElement => {
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
   const tokenLimitRef = React.useRef<number>(30);
+  const previousQueryRef = React.useRef<string | null>(null);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
@@ -99,10 +100,25 @@ export const HomePage = (): React.ReactElement => {
 
   const updateCollectionTokens = React.useCallback((): void => {
     const collectionAddress = getCollectionAddress(projectId);
+    const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
+    const newQuery = {
+      collectionAddress,
+      limit: tokenLimitRef.current,
+      ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
+      minPrice: undefined,
+      maxPrice: undefined,
+      isListed: undefined,
+      tokenIdIn: undefined,
+      attributeFilters,
+    };
+    if (JSON.stringify(newQuery) === previousQueryRef.current) {
+      return;
+    }
+    // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
+    previousQueryRef.current = JSON.stringify(newQuery);
     setCollectionTokens(undefined);
     tokenLimitRef.current = 30;
     if (collectionAddress) {
-      const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
       notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
         setCollectionTokens(retrievedCollectionTokens);
       }).catch((error: unknown): void => {
@@ -112,7 +128,7 @@ export const HomePage = (): React.ReactElement => {
     } else {
       // TODO(krishan711): Load from file
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, account]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
