@@ -104,24 +104,24 @@ export const HomePage = (): React.ReactElement => {
   const updateCollectionTokens = React.useCallback((): void => {
     const collectionAddress = getCollectionAddress(projectId);
     const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-    const newQuery = {
-      collectionAddress,
-      limit: tokenLimitRef.current,
-      ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
-      minPrice: undefined,
-      maxPrice: undefined,
-      isListed: undefined,
-      tokenIdIn: undefined,
-      attributeFilters,
-    };
-    if (JSON.stringify(newQuery) === previousQueryRef.current) {
-      return;
-    }
-    // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
-    previousQueryRef.current = JSON.stringify(newQuery);
-    setCollectionTokens(undefined);
     tokenLimitRef.current = 30;
     if (collectionAddress) {
+      const newQuery = {
+        collectionAddress,
+        limit: tokenLimitRef.current,
+        ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        isListed: undefined,
+        tokenIdIn: undefined,
+        attributeFilters,
+      };
+      if (JSON.stringify(newQuery) === previousQueryRef.current) {
+        return;
+      }
+      // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
+      previousQueryRef.current = JSON.stringify(newQuery);
+      setCollectionTokens(undefined);
       notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
         setCollectionTokens(retrievedCollectionTokens);
       }).catch((error: unknown): void => {
