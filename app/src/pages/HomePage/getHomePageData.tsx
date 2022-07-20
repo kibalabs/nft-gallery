@@ -32,7 +32,7 @@ export const getHomePageData = async (globals: IGlobals): Promise<IHomePageData>
   const collectionAttributes = data.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
   return {
     collection,
-    allTokens: allTokens,
+    allTokens,
     collectionTokens: [],
     collectionAttributes,
   };

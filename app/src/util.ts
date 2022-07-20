@@ -38,7 +38,7 @@ export const getChain = (projectId: string): string | null => {
   if (projectId === 'pepes') {
     return 'avalanche';
   }
-  return "ethereum";
+  return 'ethereum';
 };
 
 
