@@ -7,6 +7,7 @@ import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { Airdrop, Collection, CollectionToken, TokenAttribute, TokenListing, TokenTransfer } from '../client';
 import { KeyValue } from '../components/KeyValue';
 import { useGlobals } from '../globalsContext';
+import { LooksrareClient } from '../LooksrareClient';
 import { OpenseaClient } from '../OpenseaClient';
 import { getTreasureHuntTokenId } from '../util';
 import { EtherValue } from './EtherValue';
@@ -36,12 +37,27 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const isTreasureHuntToken = props.token.tokenId === getTreasureHuntTokenId(projectId);
 
   const updateListings = React.useCallback(async (): Promise<void> => {
+    const listings: TokenListing[] = [];
     try {
       const openseaListing = await (new OpenseaClient().getTokenListing(props.collection.address, props.token.tokenId));
-      setListing(openseaListing);
+      if (openseaListing) {
+        listings.push(openseaListing);
+      }
     } catch (error: unknown) {
       console.error(error);
+    }
+    try {
+      const looksrareListing = await (new LooksrareClient().getTokenListing(props.collection.address, props.token.tokenId));
+      if (looksrareListing) {
+        listings.push(looksrareListing);
+      }
+    } catch (error: unknown) {
+      console.error(error);
+    }
+    if (listings.length === 0) {
       setListing(null);
+    } else {
+      setListing(listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0]);
     }
   }, [props.collection.address, props.token.tokenId]);
 
@@ -112,6 +128,9 @@ export const TokenDialog = (props: ITokenDialogProps): React.ReactElement => {
   const getListingUrl = (tokenListing: TokenListing): string => {
     if (tokenListing.source.startsWith('opensea')) {
       return `https://opensea.io/assets/${tokenListing.token.registryAddress}/${tokenListing.token.tokenId}`;
+    }
+    if (tokenListing.source === 'looksrare') {
+      return `https://looksrare.org/collections/${tokenListing.token.registryAddress}/${tokenListing.token.tokenId}`;
     }
     return '';
   };

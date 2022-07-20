@@ -8,7 +8,7 @@ export class OpenseaClient {
   private requester: Requester;
 
   public constructor() {
-    this.requester = new Requester();
+    this.requester = new Requester(undefined, undefined, false);
   }
 
   public getTokenListings = async (registryAddress: string, tokenIds: string[]): Promise<Record<string, TokenListing | null>> => {
