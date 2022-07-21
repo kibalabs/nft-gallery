@@ -97,6 +97,7 @@ export const HomePage = (): React.ReactElement => {
       const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
         if (accumulator.length < tokenLimitRef.current) {
           const tokenAttributeMap = value.attributes.reduce((innerAccumulator: Record<string, string>, innerValue: TokenAttribute): Record<string, string> => {
+            // eslint-disable-next-line no-param-reassign
             innerAccumulator[innerValue.traitType] = innerValue.value;
             return innerAccumulator;
           }, {});
