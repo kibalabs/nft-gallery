@@ -96,8 +96,12 @@ export const HomePage = (): React.ReactElement => {
       }
       const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
         if (accumulator.length < tokenLimitRef.current) {
-          const isMatch = value.attributes.reduce((innerAccumulator: boolean, innerValue: TokenAttribute): boolean => {
-            return innerAccumulator && (!(innerValue.traitType in filters) || innerValue.value === filters[innerValue.traitType]);
+          const tokenAttributeMap = value.attributes.reduce((innerAccumulator: Record<string, string>, innerValue: TokenAttribute): Record<string, string> => {
+            innerAccumulator[innerValue.traitType] = innerValue.value;
+            return innerAccumulator;
+          }, {});
+          const isMatch = Object.keys(filters).reduce((innerAccumulator: boolean, filterKey: string): boolean => {
+            return innerAccumulator && tokenAttributeMap[filterKey] === filters[filterKey];
           }, true);
           if (isMatch) {
             accumulator.push(value);
