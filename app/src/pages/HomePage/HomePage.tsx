@@ -12,7 +12,7 @@ import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
-import { getBackgroundMusic, getBannerImageUrl, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getChain, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
 
 
 export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
@@ -91,7 +91,6 @@ export const HomePage = (): React.ReactElement => {
       });
     } else {
       if (!allTokens) {
-        setCollectionTokens([]);
         return;
       }
       const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
@@ -130,7 +129,6 @@ export const HomePage = (): React.ReactElement => {
       });
     } else {
       if (!allTokens) {
-        setCollectionTokens([]);
         return;
       }
       const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
@@ -170,19 +168,25 @@ export const HomePage = (): React.ReactElement => {
     if (tokenIdsToUpdate.length === 0) {
       return;
     }
-    const openseaListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
-    const looksrareListingMap = await new LooksrareClient().getTokenListings(collection.address, tokenIdsToUpdate);
     const newListingMap: Record<string, TokenListing | null> = { ...tokenListingMap };
-    tokenIdsToUpdate.forEach((tokenId: string): void => {
-      const listings = [openseaListingMap[tokenId], looksrareListingMap[tokenId]].filter((listing: TokenListing | null): boolean => listing != null) as TokenListing[];
-      if (listings.length === 0) {
+    if (getChain(projectId) !== 'ethereum') {
+      tokenIdsToUpdate.forEach((tokenId: string): void => {
         newListingMap[tokenId] = null;
-      } else {
-        newListingMap[tokenId] = listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0];
-      }
-    });
+      });
+    } else {
+      const openseaListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
+      const looksrareListingMap = await new LooksrareClient().getTokenListings(collection.address, tokenIdsToUpdate);
+      tokenIdsToUpdate.forEach((tokenId: string): void => {
+        const listings = [openseaListingMap[tokenId], looksrareListingMap[tokenId]].filter((listing: TokenListing | null): boolean => listing != null) as TokenListing[];
+        if (listings.length === 0) {
+          newListingMap[tokenId] = null;
+        } else {
+          newListingMap[tokenId] = listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0];
+        }
+      });
+    }
     setTokenListMap(newListingMap);
-  }, [collection, collectionTokens, tokenListingMap]);
+  }, [projectId, collection, collectionTokens, tokenListingMap]);
 
   React.useEffect((): void => {
     updateTokenListings();

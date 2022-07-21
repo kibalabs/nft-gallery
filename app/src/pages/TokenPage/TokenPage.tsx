@@ -11,7 +11,7 @@ import { KeyValue } from '../../components/KeyValue';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
-import { getTreasureHuntTokenId } from '../../util';
+import { getChain, getTreasureHuntTokenId } from '../../util';
 
 export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
@@ -61,28 +61,30 @@ export const TokenPage = (): React.ReactElement => {
     }
     setListing(undefined);
     const listings: TokenListing[] = [];
-    try {
-      const openseaListing = await (new OpenseaClient().getTokenListing(collection.address, collectionToken.tokenId));
-      if (openseaListing) {
-        listings.push(openseaListing);
+    if (getChain(projectId) === 'ethereum') {
+      try {
+        const openseaListing = await (new OpenseaClient().getTokenListing(collection.address, collectionToken.tokenId));
+        if (openseaListing) {
+          listings.push(openseaListing);
+        }
+      } catch (error: unknown) {
+        console.error(error);
       }
-    } catch (error: unknown) {
-      console.error(error);
-    }
-    try {
-      const looksrareListing = await (new LooksrareClient().getTokenListing(collection.address, collectionToken.tokenId));
-      if (looksrareListing) {
-        listings.push(looksrareListing);
+      try {
+        const looksrareListing = await (new LooksrareClient().getTokenListing(collection.address, collectionToken.tokenId));
+        if (looksrareListing) {
+          listings.push(looksrareListing);
+        }
+      } catch (error: unknown) {
+        console.error(error);
       }
-    } catch (error: unknown) {
-      console.error(error);
     }
     if (listings.length === 0) {
       setListing(null);
     } else {
       setListing(listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0]);
     }
-  }, [collection, collectionToken]);
+  }, [projectId, collection, collectionToken]);
 
   React.useEffect((): void => {
     updateListings();
@@ -116,13 +118,17 @@ export const TokenPage = (): React.ReactElement => {
       return;
     }
     setTokenTransfers(undefined);
-    notdClient.listCollectionTokenRecentTransfers(collection.address, collectionToken.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
-      setTokenTransfers(retrievedTokenTransfers);
-    }).catch((error: unknown): void => {
-      console.error(error);
-      setTokenTransfers(null);
-    });
-  }, [notdClient, collection, collectionToken]);
+    if (getChain(projectId) !== 'ethereum') {
+      setTokenTransfers([]);
+    } else {
+      notdClient.listCollectionTokenRecentTransfers(collection.address, collectionToken.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+        setTokenTransfers(retrievedTokenTransfers);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setTokenTransfers(null);
+      });
+    }
+  }, [notdClient, projectId, collection, collectionToken]);
 
   React.useEffect((): void => {
     updateTokenSales();
