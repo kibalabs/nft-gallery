@@ -203,14 +203,9 @@ export const TokenPage = (): React.ReactElement => {
                 <Text variant='header2'>{collectionToken.name}</Text>
                 <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
                   <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
-                  {latestTransfer
-                    && (
-                      <>
-                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/tx/${latestTransfer.transactionHash}`} />
-                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${latestTransfer.registryAddress}/${tokenId}`} />
-                        <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${latestTransfer.registryAddress}/${tokenId}`} />
-                      </>
-                    )}
+                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
+                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
+                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
                 </Stack>
                 <Spacing variant={PaddingSize.Narrow2} />
                 { latestTransfer && (
