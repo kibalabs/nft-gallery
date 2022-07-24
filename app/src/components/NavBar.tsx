@@ -20,7 +20,7 @@ export const NavBar = (): React.ReactElement => {
       <Stack.Item shrinkFactor={1}>
         <LinkBase target='/' isFullHeight={true}>
           {logoImageUrl ? (
-            <Box height='100%' maxHeight='2em' shouldClipContent={true}>
+            <Box height='100%' maxHeight={projectId === 'pepes' ? '3rem' : '2rem'} shouldClipContent={true}>
               <Image source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} Gallery`} isFullHeight={true} />
             </Box>
           ) : (

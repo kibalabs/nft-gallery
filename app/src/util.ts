@@ -48,6 +48,13 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
       linearGradient: '180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%',
     };
   }
+  // if (projectId === 'pepes') {
+  //   return {
+  //     layers: [
+  //       { imageUrl: '/assets/pepes/background.png' },
+  //     ],
+  //   };
+  // }
   if (projectId === 'goblintown') {
     return {
       layers: [
@@ -63,6 +70,9 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
 export const getLogoImageUrl = (projectId: string): string | null => {
   if (projectId === 'sprites') {
     return '/assets/sprites/logo.png';
+  }
+  if (projectId === 'pepes') {
+    return '/assets/pepes/logo.png';
   }
   if (projectId === 'goblintown') {
     return '/assets/goblintown/logo-animated-inverse.gif';
@@ -85,6 +95,9 @@ export const getIcon = (projectId: string): string | null => {
   }
   if (projectId === 'goblintown') {
     return '/assets/goblintown/icon.png';
+  }
+  if (projectId === 'pepes') {
+    return '/assets/pepes/icon.png';
   }
   if (projectId === 'mdtp') {
     return '/assets/mdtp/icon.png';

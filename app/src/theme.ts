@@ -26,19 +26,13 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
       fonts: {
         main: {
-          // url: 'https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
-          // url: 'https://fonts.googleapis.com/css2?family=Varela+Round&display=swap',
           url: 'https://fonts.googleapis.com/css2?family=Kodchasan:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap',
         },
       },
       texts: {
         default: {
-          // 'font-family': "'Rubik', sans-serif",
-          // 'font-family': "'Varela Round', sans-serif",
           'font-family': "'Kodchasan', sans-serif",
           'font-weight': '500',
-        },
-        tokenCardName: {
         },
       },
       buttons: {
@@ -70,13 +64,33 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'border-color': 'rgba(255, 255, 255, 0.2)',
           'background-color': 'rgba(255, 255, 255, 0.1)',
         },
-        unrounded: {
-          'border-radius': '0',
-        },
       },
       dividers: {
         default: {
           color: 'white',
+        },
+      },
+    }));
+  }
+  if (projectId === 'pepes') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      colors: {
+        background: '#606455',
+      },
+      dimensions: {
+        borderRadius: '0.25em',
+      },
+      boxes: {
+        tokenCard: {
+          'border-width': '2px',
+          'border-color': 'rgba(255, 255, 255, 0.2)',
+          'background-color': 'rgba(255, 255, 255, 0.1)',
+        },
+      },
+      texts: {
+        default: {
+          'font-family': "'RevMiniPixel-Regular', monospace",
+          'font-weight': '500',
         },
       },
     }));
