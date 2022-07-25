@@ -46,10 +46,10 @@ export const TokenPage = (): React.ReactElement => {
     }
     if (allTokens) {
       const chosenCollectionToken = allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId);
-      if (chosenCollectionToken === undefined) {
+      if (chosenCollectionToken == null) {
         setGalleryToken(null);
       } else {
-        setGalleryToken(new GalleryToken(collectionToken, null));
+        setGalleryToken(new GalleryToken(chosenCollectionToken, null));
       }
     } else {
       await notdClient.getGalleryToken(collection.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
