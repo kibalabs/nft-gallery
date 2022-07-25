@@ -216,7 +216,6 @@ export class TokenCustomization {
 }
 
 
-
 export class GalleryToken {
   // eslint-disable-next-line no-useless-constructor
   public constructor(

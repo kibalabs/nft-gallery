@@ -5,7 +5,7 @@ import { useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, Image, KibaIcon, Link, LinkBase, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountContext';
-import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenCustomization, TokenListing, TokenTransfer } from '../../client';
+import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenTransfer } from '../../client';
 import { EtherValue } from '../../components/EtherValue';
 import { KeyValue } from '../../components/KeyValue';
 import { useGlobals } from '../../globalsContext';
@@ -45,8 +45,8 @@ export const TokenPage = (): React.ReactElement => {
       return;
     }
     if (allTokens) {
-      const collectionToken = allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId);
-      if (collectionToken === undefined) {
+      const chosenCollectionToken = allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId);
+      if (chosenCollectionToken === undefined) {
         setGalleryToken(null);
       } else {
         setGalleryToken(new GalleryToken(collectionToken, null));
@@ -227,7 +227,6 @@ export const TokenPage = (): React.ReactElement => {
     } catch (error: unknown) {
       setUpdatingStoryErrorMessaging((error as Error).message);
       setIsSavingStory(false);
-      return;
     }
   };
 

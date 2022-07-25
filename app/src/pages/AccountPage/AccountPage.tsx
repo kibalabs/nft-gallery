@@ -4,7 +4,7 @@ import { truncateMiddle } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, ColorSettingView, Dialog, Direction, EqualGrid, Head, Image, LoadingSpinner, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { CollectionToken, GalleryToken } from '../../client/resources';
+import { GalleryToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 
