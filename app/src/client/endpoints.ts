@@ -41,6 +41,25 @@ export class GetCollectionTokenResponse extends ResponseData {
 }
 
 
+export class GetGalleryTokenRequest extends RequestData {
+}
+
+export class GetGalleryTokenResponse extends ResponseData {
+  readonly galleryToken: Resources.GalleryToken;
+
+  public constructor(galleryToken: Resources.GalleryToken) {
+    super();
+    this.galleryToken = galleryToken;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetGalleryTokenResponse => {
+    return new GetGalleryTokenResponse(
+      Resources.GalleryToken.fromObject(obj.galleryToken as Record<string, unknown>),
+    );
+  };
+}
+
+
 export class ListCollectionAttributesRequest extends RequestData {
 }
 
@@ -198,16 +217,54 @@ export class QueryCollectionTokensRequest extends RequestData {
 }
 
 export class QueryCollectionTokensResponse extends ResponseData {
-  readonly tokens: Resources.CollectionToken[];
+  readonly galleryTokens: Resources.GalleryToken[];
 
-  public constructor(tokens: Resources.CollectionToken[]) {
+  public constructor(galleryTokens: Resources.GalleryToken[]) {
     super();
-    this.tokens = tokens;
+    this.galleryTokens = galleryTokens;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): ListCollectionTokensByOwnersResponse => {
-    return new ListCollectionTokensByOwnersResponse(
-      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionToken.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): QueryCollectionTokensResponse => {
+    return new QueryCollectionTokensResponse(
+      (obj.galleryTokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.GalleryToken.fromObject(innerObj)),
+    );
+  };
+}
+
+
+export class CreateCustomizationForCollectionTokenRequest extends RequestData {
+  public constructor(
+    readonly creatorAddress: string,
+    readonly signature: string,
+    readonly blockNumber: number,
+    readonly name: string | null,
+    readonly description: string | null,
+  ) {
+    super();
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      creatorAddress: this.creatorAddress,
+      signature: this.signature,
+      blockNumber: this.blockNumber,
+      name: this.name,
+      description: this.description,
+    };
+  };
+}
+
+export class CreateCustomizationForCollectionTokenResponse extends ResponseData {
+  readonly tokenCustomization: Resources.TokenCustomization;
+
+  public constructor(tokenCustomization: Resources.TokenCustomization) {
+    super();
+    this.tokenCustomization = tokenCustomization;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): CreateCustomizationForCollectionTokenResponse => {
+    return new CreateCustomizationForCollectionTokenResponse(
+      Resources.TokenCustomization.fromObject(obj.tokenCustomization as Record<string, unknown>),
     );
   };
 }

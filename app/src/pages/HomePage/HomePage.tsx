@@ -4,7 +4,7 @@ import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, 
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 
 import { useAccount } from '../../AccountContext';
-import { CollectionToken, TokenAttribute, TokenListing } from '../../client';
+import { CollectionToken, GalleryToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -27,7 +27,7 @@ export const HomePage = (): React.ReactElement => {
   const location = useLocation();
   const account = useAccount();
   const { notdClient, projectId, collection, collectionAttributes, allTokens } = useGlobals();
-  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(undefined);
+  const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
@@ -82,18 +82,18 @@ export const HomePage = (): React.ReactElement => {
       }
       // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
       previousQueryRef.current = JSON.stringify(newQuery);
-      setCollectionTokens(undefined);
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
-        setCollectionTokens(retrievedCollectionTokens);
+      setGalleryTokens(undefined);
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+        setGalleryTokens(retrievedGalleryTokens);
       }).catch((error: unknown): void => {
         console.error(error);
-        setCollectionTokens(null);
+        setGalleryTokens(null);
       });
     } else {
       if (!allTokens) {
         return;
       }
-      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+      const newTokens = allTokens.reduce((accumulator: GalleryToken[], value: CollectionToken): GalleryToken[] => {
         if (accumulator.length < tokenLimitRef.current) {
           const tokenAttributeMap = value.attributes.reduce((innerAccumulator: Record<string, string>, innerValue: TokenAttribute): Record<string, string> => {
             // eslint-disable-next-line no-param-reassign
@@ -104,12 +104,12 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
           }, true);
           if (isMatch) {
-            accumulator.push(value);
+            accumulator.push(new GalleryToken(value, null));
           }
         }
         return accumulator;
       }, []);
-      setCollectionTokens(newTokens);
+      setGalleryTokens(newTokens);
     }
   }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account, allTokens]);
 
@@ -118,20 +118,20 @@ export const HomePage = (): React.ReactElement => {
   }, [updateCollectionTokens]);
 
   const loadMoreCollectionTokens = React.useCallback((): void => {
-    if (!collectionTokens) {
+    if (!galleryTokens) {
       return;
     }
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
       const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, collectionTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedCollectionTokens: CollectionToken[]): void => {
-        setCollectionTokens([...collectionTokens, ...retrievedCollectionTokens]);
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+        setGalleryTokens([...galleryTokens, ...retrievedGalleryTokens]);
       });
     } else {
       if (!allTokens) {
         return;
       }
-      const newTokens = allTokens.reduce((accumulator: CollectionToken[], value: CollectionToken): CollectionToken[] => {
+      const newTokens = allTokens.reduce((accumulator: GalleryToken[], value: CollectionToken): GalleryToken[] => {
         if (accumulator.length < tokenLimitRef.current) {
           const tokenAttributeMap = value.attributes.reduce((innerAccumulator: Record<string, string>, innerValue: TokenAttribute): Record<string, string> => {
             // eslint-disable-next-line no-param-reassign
@@ -142,14 +142,14 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
           }, true);
           if (isMatch) {
-            accumulator.push(value);
+            accumulator.push(new GalleryToken(value, null));
           }
         }
         return accumulator;
       }, []);
-      setCollectionTokens(newTokens);
+      setGalleryTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, collectionTokens, account, allTokens]);
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, galleryTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -165,10 +165,10 @@ export const HomePage = (): React.ReactElement => {
   };
 
   const updateTokenListings = React.useCallback(async (): Promise<void> => {
-    if (!collection || !collectionTokens) {
+    if (!collection || !galleryTokens) {
       return;
     }
-    const filteredTokenIds = collectionTokens.map((token: CollectionToken): string => token.tokenId);
+    const filteredTokenIds = galleryTokens.map((galleryToken: GalleryToken): string => galleryToken.collectionToken.tokenId);
     const tokenIdsToUpdate = filteredTokenIds.filter((tokenId: string): boolean => !(tokenId in tokenListingMap));
     if (tokenIdsToUpdate.length === 0) {
       return;
@@ -191,7 +191,7 @@ export const HomePage = (): React.ReactElement => {
       });
     }
     setTokenListMap(newListingMap);
-  }, [projectId, collection, collectionTokens, tokenListingMap]);
+  }, [projectId, collection, galleryTokens, tokenListingMap]);
 
   React.useEffect((): void => {
     updateTokenListings();
@@ -199,7 +199,7 @@ export const HomePage = (): React.ReactElement => {
 
   const onScrolled = React.useCallback((event: Event): void => {
     const eventTarget = event.target as HTMLDivElement;
-    if (collectionTokens && tokenLimitRef.current > collectionTokens.length) {
+    if (galleryTokens && tokenLimitRef.current > galleryTokens.length) {
       return;
     }
     const size = eventTarget.scrollHeight - eventTarget.clientHeight;
@@ -207,7 +207,7 @@ export const HomePage = (): React.ReactElement => {
       tokenLimitRef.current += 30;
       loadMoreCollectionTokens();
     }
-  }, [collectionTokens, tokenLimitRef, loadMoreCollectionTokens]);
+  }, [galleryTokens, tokenLimitRef, loadMoreCollectionTokens]);
 
   const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
@@ -273,9 +273,9 @@ export const HomePage = (): React.ReactElement => {
                   <Stack.Item growthFactor={1} shrinkFactor={1}>
                     <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
                       <LayerContainer>
-                        {collectionTokens === undefined ? (
+                        {galleryTokens === undefined ? (
                           <LoadingSpinner />
-                        ) : collectionTokens === null ? (
+                        ) : galleryTokens === null ? (
                           <Text variant='error'>Failed to load</Text>
                         ) : (
                           <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
@@ -288,14 +288,15 @@ export const HomePage = (): React.ReactElement => {
                             )}
                             <Stack.Item growthFactor={1} shrinkFactor={1}>
                               <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                                {collectionTokens.length > 0 ? (
+                                {galleryTokens.length > 0 ? (
                                   <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
-                                    {collectionTokens.map((token: CollectionToken): React.ReactElement => (
+                                    {galleryTokens.map((galleryToken: GalleryToken): React.ReactElement => (
                                       <TokenCard
-                                        key={token.tokenId}
-                                        token={token}
-                                        tokenListing={tokenListingMap[token.tokenId]}
-                                        target={`/tokens/${token.tokenId}`}
+                                        key={galleryToken.collectionToken.tokenId}
+                                        token={galleryToken.collectionToken}
+                                        tokenCustomization={galleryToken.tokenCustomization}
+                                        tokenListing={tokenListingMap[galleryToken.collectionToken.tokenId]}
+                                        target={`/tokens/${galleryToken.collectionToken.tokenId}`}
                                       />
                                     ))}
                                   </EqualGrid>

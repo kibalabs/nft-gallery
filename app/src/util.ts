@@ -34,11 +34,19 @@ export const getHost = (projectId: string): string | null => {
 };
 
 
-export const getChain = (projectId: string): string | null => {
+export const getChain = (projectId: string): string => {
   if (projectId === 'pepes') {
     return 'avalanche';
   }
   return 'ethereum';
+};
+
+
+export const getShouldAllowCustomization = (projectId: string): boolean => {
+  if (projectId === 'sprites') {
+    return true;
+  }
+  return false;
 };
 
 
@@ -48,13 +56,14 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
       linearGradient: '180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%',
     };
   }
-  // if (projectId === 'pepes') {
-  //   return {
-  //     layers: [
-  //       { imageUrl: '/assets/pepes/background.png' },
-  //     ],
-  //   };
-  // }
+  if (projectId === 'pepes') {
+    return {
+      layers: [
+        { imageUrl: '/assets/pepes/background.png' },
+        { color: 'RGBA(96, 100, 85, 0.75)' },
+      ],
+    };
+  }
   if (projectId === 'goblintown') {
     return {
       layers: [
