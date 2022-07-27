@@ -26,7 +26,7 @@ export const TokenPage = (): React.ReactElement => {
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
   const [listing, setListing] = React.useState<TokenListing | null | undefined>(undefined);
 
-  const imageUrl = collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '';
+  const imageUrl = collectionToken?.resizableImageUrl ?? (collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '');
   const frameImageUrl = collectionToken?.frameImageUrl && resolveUrl(collectionToken.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
   const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
