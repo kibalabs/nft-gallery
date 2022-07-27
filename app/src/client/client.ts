@@ -24,6 +24,14 @@ export class NotdClient extends ServiceClient {
     return response.token;
   };
 
+  public getGalleryToken = async (registryAddress: string, tokenId: string): Promise<Resources.GalleryToken> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}`;
+    const request = new Endpoints.GetGalleryTokenRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.GetGalleryTokenResponse);
+    return response.galleryToken;
+  };
+
   public listCollectionAttributes = async (address: string): Promise<Resources.CollectionAttribute[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${address}/attributes`;
@@ -38,13 +46,6 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.ListCollectionTokensByOwnersRequest();
     const response = await this.makeRequest(method, path, request, Endpoints.ListCollectionTokensByOwnersResponse);
     return response.tokens;
-  };
-
-  public submitTreasureHuntForCollectionToken = async (registryAddress: string, tokenId: string, userAddress: string, signature: string): Promise<void> => {
-    const method = RestMethod.POST;
-    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/submit-treasure-hunt`;
-    const request = new Endpoints.SubmitTreasureHuntForCollectionTokenRequest(userAddress, signature);
-    await this.makeRequest(method, path, request, Endpoints.SubmitTreasureHuntForCollectionTokenResponse);
   };
 
   public listCollectionTokenRecentTransfers = async (registryAddress: string, tokenId: string): Promise<Resources.TokenTransfer[]> => {
@@ -63,11 +64,26 @@ export class NotdClient extends ServiceClient {
     return response.airdrops;
   };
 
-  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.CollectionToken[]> => {
+  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.GalleryToken[]> => {
     const method = RestMethod.POST;
     const path = `gallery/v1/collections/${registryAddress}/tokens/query`;
     const request = new Endpoints.QueryCollectionTokensRequest(limit, offset, ownerAddress, minPrice, maxPrice, isListed, tokenIdIn, attributeFilters);
     const response = await this.makeRequest(method, path, request, Endpoints.QueryCollectionTokensResponse);
-    return response.tokens;
+    return response.galleryTokens;
+  };
+
+  public submitTreasureHuntForCollectionToken = async (registryAddress: string, tokenId: string, userAddress: string, signature: string): Promise<void> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}/submit-treasure-hunt`;
+    const request = new Endpoints.SubmitTreasureHuntForCollectionTokenRequest(userAddress, signature);
+    await this.makeRequest(method, path, request, Endpoints.SubmitTreasureHuntForCollectionTokenResponse);
+  };
+
+  public createCustomizationForCollectionToken = async (registryAddress: string, tokenId: string, creatorAddress: string, signature: string, blockNumber: number, name: string | null, description: string | null): Promise<Resources.TokenCustomization> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}/customizations`;
+    const request = new Endpoints.CreateCustomizationForCollectionTokenRequest(creatorAddress, signature, blockNumber, name, description);
+    const response = await this.makeRequest(method, path, request, Endpoints.CreateCustomizationForCollectionTokenResponse);
+    return response.tokenCustomization;
   };
 }

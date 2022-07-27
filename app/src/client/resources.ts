@@ -183,3 +183,53 @@ export class TokenListing {
     );
   };
 }
+
+
+export class TokenCustomization {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly tokenCustomizationId: number,
+    readonly createdDate: Date,
+    readonly updatedDate: Date,
+    readonly registryAddress: string,
+    readonly tokenId: string,
+    readonly creatorAddress: string,
+    readonly blockNumber: number,
+    readonly signature: string,
+    readonly name: string | null,
+    readonly description: string | null,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): TokenCustomization => {
+    return new TokenCustomization(
+      Number(obj.tokenCustomizationId),
+      dateFromString(String(obj.createdDate)),
+      dateFromString(String(obj.updatedDate)),
+      String(obj.registryAddress),
+      String(obj.tokenId),
+      String(obj.creatorAddress),
+      Number(obj.blockNumber),
+      String(obj.signature),
+      obj.name ? String(obj.name) : null,
+      obj.description ? String(obj.description) : null,
+    );
+  };
+}
+
+
+export class GalleryToken {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly collectionToken: CollectionToken,
+    readonly tokenCustomization: TokenCustomization | null,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryToken => {
+    return new GalleryToken(
+      CollectionToken.fromObject(obj.collectionToken as Record<string, unknown>),
+      obj.tokenCustomization ? TokenCustomization.fromObject(obj.tokenCustomization as Record<string, unknown>) : null,
+    );
+  };
+}
