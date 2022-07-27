@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'RevMiniPixel-Regular';
+    src:url('/assets/pepes/fonts/RevMiniPixel-Regular.ttf.woff') format('woff'),
+        url('/assets/pepes/fonts/RevMiniPixel-Regular.ttf.svg#RevMiniPixel-Regular') format('svg'),
+        url('/assets/pepes/fonts/RevMiniPixel-Regular.ttf.eot'),
+        url('/assets/pepes/fonts/RevMiniPixel-Regular.ttf.eot?#iefix') format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+}

@@ -22,6 +22,9 @@ import { TokenPage } from './pages/TokenPage/TokenPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getCollectionAddress, getEveryviewCode, getIcon } from './util';
 
+import './fonts.css';
+
+
 declare global {
   export interface Window {
     KRT_API_URL?: string;
