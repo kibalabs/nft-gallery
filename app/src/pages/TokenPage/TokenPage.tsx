@@ -198,21 +198,23 @@ export const TokenPage = (): React.ReactElement => {
       ) : (
         <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Box maxHeight='30em' maxWidth='50%' isFullWidth={false}>
-                <Image source={imageUrl} isLazyLoadable={true} alternativeText={collectionToken.name} />
-              </Box>
+            <Stack.Item growthFactor={1} shrinkFactor={1} baseSize='50%'>
+              <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                <Image source={imageUrl} maxHeight='30em' isLazyLoadable={true} alternativeText={collectionToken.name} isFullHeight={true} isFullWidth={true} />
+                {getChain(projectId) === 'ethereum' && (
+                  <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
+                    <IconButton variant={'tertiary'} icon={<Image source={'/assets/icon-info.svg'} alternativeText={'info'} />} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
+                    <IconButton variant={'tertiary'} icon={<Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} />} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
+                    <IconButton variant={'tertiary'} icon={<Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} />} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
+                    <IconButton variant={'tertiary'} icon={<Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} />} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
+                  </Stack>
+                )}
+              </Stack>
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Stack.Item growthFactor={1} shrinkFactor={1} baseSize='50%' shouldShrinkBelowContentSize={true}>
               <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
                 <Text variant='header2'>{collectionToken.name}</Text>
-                <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
-                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
-                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
-                  <IconButton variant={'tertiary'} icon={<Box height='1rem' width='1rem' variant='unrounded'><Image variant='unrounded' source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
-                </Stack>
                 <Spacing variant={PaddingSize.Narrow2} />
                 { latestTransfer && (
                   <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
