@@ -265,6 +265,8 @@ export const TokenPage = (): React.ReactElement => {
                   <Box maxWidth='350px'>
                     <Form onFormSubmitted={onUpdateStorySaveClicked} isLoading={isSavingStory}>
                       <Stack direction={Direction.Vertical} shouldAddGutters={false}>
+                        <Text variant='header3'>Update your Sprite&apos;s profile</Text>
+                        <Spacing variant={PaddingSize.Wide} />
                         <Text variant='note'>Name</Text>
                         <SingleLineInput
                           value={customName}
@@ -277,7 +279,7 @@ export const TokenPage = (): React.ReactElement => {
                           value={customDescription}
                           onValueChanged={setCustomDescription}
                           maxRowCount={3}
-                          placeholderText={"What's your sprites story? Are they playful, wild, curious? What do they like to eat? Tell us everything..."}
+                          placeholderText={"What's your sprite's story? Are they playful, wild, curious? What do they like to eat? Tell us everything..."}
                         />
                         <Spacing variant={PaddingSize.Wide} />
                         <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
