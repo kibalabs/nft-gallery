@@ -35,7 +35,7 @@ export class OpenseaClient {
           }
           listings.push(new TokenListing(
             -1,
-            new CollectionToken(registryAddress, tokenId, '', null, null, null, []),
+            new CollectionToken(registryAddress, tokenId, '', null, null, null, null, []),
             (sellOrder.maker as Record<string, unknown>).address as string,
             new Date(sellOrder.listing_time as string),
             new Date(sellOrder.expiration_time as string),
@@ -51,7 +51,7 @@ export class OpenseaClient {
           }
           listings.push(new TokenListing(
             -1,
-            new CollectionToken(registryAddress, tokenId, '', null, null, null, []),
+            new CollectionToken(registryAddress, tokenId, '', null, null, null, null, []),
             (seaportSellOrder.maker as Record<string, unknown>).address as string,
             new Date(seaportSellOrder.listing_time as string),
             new Date(seaportSellOrder.expiration_time as string),
