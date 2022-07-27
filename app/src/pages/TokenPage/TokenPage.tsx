@@ -2,10 +2,10 @@ import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, LinkBase, LoadingSpinner, PaddingSize, ResponsiveTextAlignmentView, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, IconButton, Image, KibaIcon, Link, LinkBase, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../../AccountContext';
-import { Airdrop, CollectionToken, TokenAttribute, TokenListing, TokenTransfer } from '../../client';
+import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountContext';
+import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenTransfer } from '../../client';
 import { EtherValue } from '../../components/EtherValue';
 import { KeyValue } from '../../components/KeyValue';
 import { useGlobals } from '../../globalsContext';
@@ -15,9 +15,12 @@ import { getChain, getTreasureHuntTokenId } from '../../util';
 
 export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
+  const web3 = useWeb3();
   const tokenId = useStringRouteParam('tokenId');
   const { notdClient, projectId, collection, allTokens } = useGlobals();
-  const [collectionToken, setCollectionToken] = React.useState<CollectionToken | null | undefined>(undefined);
+  const [galleryToken, setGalleryToken] = React.useState<GalleryToken | null | undefined>(undefined);
+  const collectionToken = galleryToken?.collectionToken;
+  const tokenCustomization = galleryToken?.tokenCustomization;
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
@@ -34,18 +37,23 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     if (collection === undefined) {
-      setCollectionToken(undefined);
+      setGalleryToken(undefined);
       return;
     }
     if (collection === null) {
-      setCollectionToken(null);
+      setGalleryToken(null);
       return;
     }
     if (allTokens) {
-      setCollectionToken(allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId));
+      const chosenCollectionToken = allTokens.find((candidateCollectionToken: CollectionToken): boolean => candidateCollectionToken.tokenId === tokenId);
+      if (chosenCollectionToken == null) {
+        setGalleryToken(null);
+      } else {
+        setGalleryToken(new GalleryToken(chosenCollectionToken, null));
+      }
     } else {
-      await notdClient.getCollectionToken(collection.address, tokenId).then((retrievedCollectionToken: CollectionToken): void => {
-        setCollectionToken(retrievedCollectionToken);
+      await notdClient.getGalleryToken(collection.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
+        setGalleryToken(retrievedGalleryToken);
       });
     }
   }, [notdClient, collection, allTokens, tokenId]);
@@ -175,6 +183,53 @@ export const TokenPage = (): React.ReactElement => {
     return '';
   };
 
+  // TODO(krishan711): move this to a separate component
+  const [isUpdatingStory, setIsUpdatingStory] = React.useState<boolean>(false);
+  const [isSavingStory, setIsSavingStory] = React.useState<boolean>(false);
+  const [customName, setCustomName] = React.useState<string>('');
+  const [customDescription, setCustomDescription] = React.useState<string>('');
+  const [updatingStoryErrorMessaging, setUpdatingStoryErrorMessaging] = React.useState<string | null>(null);
+  const onUpdateStoryClicked = (): void => {
+    setIsUpdatingStory(true);
+    setCustomName(tokenCustomization?.name || collectionToken?.name || '');
+    setCustomDescription('');
+  };
+
+  const onUpdateStoryCancelClicked = (): void => {
+    setIsUpdatingStory(false);
+  };
+
+  const onUpdateStorySaveClicked = async (): Promise<void> => {
+    if (!web3 || !account || !collection) {
+      setUpdatingStoryErrorMessaging('Your wallet is not connected');
+      return;
+    }
+    setUpdatingStoryErrorMessaging(null);
+    setIsSavingStory(true);
+    const blockNumber = await web3.getBlockNumber();
+    const command = 'CREATE_CUSTOMIZATION';
+    const message = {
+      registryAddress: collection.address,
+      tokenId,
+      creatorAddress: account.address,
+      blockNumber,
+      name: customName,
+      description: customDescription,
+    };
+    const dataString = JSON.stringify({ command, message }, undefined, 2);
+    let signature;
+    try {
+      signature = await account.signer.signMessage(dataString);
+      await notdClient.createCustomizationForCollectionToken(collection.address, tokenId, account.address, signature, blockNumber, customName, customDescription);
+      updateCollectionToken();
+      setIsSavingStory(false);
+      setIsUpdatingStory(false);
+    } catch (error: unknown) {
+      setUpdatingStoryErrorMessaging((error as Error).message);
+      setIsSavingStory(false);
+    }
+  };
+
   return (
     <React.Fragment>
       <Head>
@@ -212,89 +267,142 @@ export const TokenPage = (): React.ReactElement => {
               </Stack>
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
-            <Stack.Item growthFactor={1} shrinkFactor={1} baseSize='50%' shouldShrinkBelowContentSize={true}>
-              <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                <Text variant='header2'>{collectionToken.name}</Text>
-                <Spacing variant={PaddingSize.Narrow2} />
-                { latestTransfer && (
-                  <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                      <Text variant='small'>Owned by</Text>
-                      <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
-                      </Box>
-                      <Text variant='small'>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
-                    </Stack>
-                  </LinkBase>
-                )}
-                <Spacing variant={PaddingSize.Wide} />
-                { collectionToken.frameImageUrl && frameImageUrl && (
-                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
-                    <Text variant='note'>Frame</Text>
-                    <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-                      <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                        <Image source={frameImageUrl} alternativeText='Avatar' />
-                      </Box>
-                      <Link text={truncateEnd(collectionToken.frameImageUrl, 20)} target={frameImageUrl} />
-                    </Stack>
-                  </Stack>
-                )}
-                { listing && (
+            <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+              <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true}>
+                {isUpdatingStory ? (
+                  <Box maxWidth='350px'>
+                    <Form onFormSubmitted={onUpdateStorySaveClicked} isLoading={isSavingStory}>
+                      <Stack direction={Direction.Vertical} shouldAddGutters={false}>
+                        <Text variant='header3'>Update your Sprite&apos;s profile</Text>
+                        <Spacing variant={PaddingSize.Wide} />
+                        <Text variant='note'>Name</Text>
+                        <SingleLineInput
+                          value={customName}
+                          onValueChanged={setCustomName}
+                          placeholderText={"Give your sprite it's own name..."}
+                        />
+                        <Spacing variant={PaddingSize.Default} />
+                        <Text variant='note'>Background</Text>
+                        <MultiLineInput
+                          value={customDescription}
+                          onValueChanged={setCustomDescription}
+                          maxRowCount={3}
+                          placeholderText={"What's your sprite's story? Are they playful, wild, curious? What do they like to eat? Tell us everything..."}
+                        />
+                        <Spacing variant={PaddingSize.Wide} />
+                        <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center}>
+                          <Button variant='secondary' text='Cancel' onClicked={onUpdateStoryCancelClicked} />
+                          <Button variant='primary' text='Save' buttonType='submit' />
+                        </Stack>
+                        {updatingStoryErrorMessaging && (
+                          <React.Fragment>
+                            <Spacing variant={PaddingSize.Default} />
+                            <Text variant='error'>{updatingStoryErrorMessaging}</Text>
+                          </React.Fragment>
+                        )}
+                      </Stack>
+                    </Form>
+                  </Box>
+                ) : (
                   <React.Fragment>
-                    <Text variant='note'>Current price</Text>
-                    <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center}>
-                      <EtherValue textVariant='large-bold' value={longFormatNumber(etherToNumber(listing.value))} />
-                      <Spacing variant={PaddingSize.Wide} />
-                      <Button variant='narrow' text='Purchase' target={getListingUrl(listing)} iconRight={<KibaIcon variant='small' iconId='ion-open-outline' />} />
-                    </Stack>
-                    <Spacing variant={PaddingSize.Wide} />
-                  </React.Fragment>
-                )}
-                { airdrop && (
-                  <React.Fragment>
-                    <Text>{`${airdrop.name} ${airdrop.isClaimed ? 'claimed ✅' : 'not claimed...'}`}</Text>
-                    <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center} isFullWidth={false}>
-                      <Text variant='small'>{`${airdrop.isClaimed ? 'Claimed:' : 'To claim:'}`}</Text>
-                      {airdrop.claimToken.imageUrl && (
-                        <Box height='1em' width='1em'>
-                          <Image source={airdrop.claimToken.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText='' />
-                        </Box>
-                      )}
-                      <Text variant='small'>{`${airdrop.claimToken.name}`}</Text>
-                      {!airdrop.isClaimed && isOwner && (
-                        <Link variant='small' text='Claim now' target='https://stormdrop.spriteclubnft.com' />
-                      )}
-                    </Stack>
-                    <Spacing variant={PaddingSize.Wide} />
-                  </React.Fragment>
-                )}
-                { isTreasureHuntToken && (
-                  <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
-                    <Text variant='note'>Treasure Hunt</Text>
-                    <Text>You found the chosen Sprite!</Text>
-                    {isTreasureHuntSubmitting ? (
-                      <LoadingSpinner />
-                    ) : (
+                    {tokenCustomization?.name && (
+                      <Text variant='note'>{collectionToken.name}</Text>
+                    )}
+                    <Text variant='header2'>{tokenCustomization?.name || collectionToken.name}</Text>
+                    <Spacing variant={PaddingSize.Narrow2} />
+                    { latestTransfer && (
+                      <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
+                        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                          <Text variant='small'>Owned by</Text>
+                          <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
+                            <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${latestTransfer.toAddress}/image`} alternativeText='Avatar' />
+                          </Box>
+                          <Text variant='small'>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
+                        </Stack>
+                      </LinkBase>
+                    )}
+                    {tokenCustomization?.description && (
                       <React.Fragment>
-                        {isTreasureHuntSubmitted ? (
-                          <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
-                        ) : !account ? (
-                          <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
-                        ) : (
-                          <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
-                        )}
-                        {treasureHuntSubmittingError && (
-                          <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
-                        )}
+                        <Spacing variant={PaddingSize.Default} />
+                        <Text variant='note'>Story</Text>
+                        <Text>{tokenCustomization?.description}</Text>
                       </React.Fragment>
                     )}
-                  </Stack>
+                    { isOwner && projectId === 'sprites' && (
+                      <Stack.Item>
+                        <Link variant='small' text="Update your Sprites' story" onClicked={onUpdateStoryClicked} />
+                      </Stack.Item>
+                    )}
+                    <Spacing variant={PaddingSize.Wide} />
+                    { collectionToken.frameImageUrl && frameImageUrl && (
+                      <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
+                        <Text variant='note'>Frame</Text>
+                        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                          <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
+                            <Image source={frameImageUrl} alternativeText='Avatar' />
+                          </Box>
+                          <Link text={truncateEnd(collectionToken.frameImageUrl, 20)} target={frameImageUrl} />
+                        </Stack>
+                      </Stack>
+                    )}
+                    { listing && (
+                      <React.Fragment>
+                        <Text variant='note'>Current price</Text>
+                        <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center}>
+                          <EtherValue textVariant='large-bold' value={longFormatNumber(etherToNumber(listing.value))} />
+                          <Spacing variant={PaddingSize.Wide} />
+                          <Button variant='narrow' text='Purchase' target={getListingUrl(listing)} iconRight={<KibaIcon variant='small' iconId='ion-open-outline' />} />
+                        </Stack>
+                        <Spacing variant={PaddingSize.Wide} />
+                      </React.Fragment>
+                    )}
+                    { airdrop && (
+                      <React.Fragment>
+                        <Text>{`${airdrop.name} ${airdrop.isClaimed ? 'claimed ✅' : 'not claimed...'}`}</Text>
+                        <Stack direction={Direction.Horizontal} shouldAddGutters={true} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignment={Alignment.Center} isFullWidth={false}>
+                          <Text variant='small'>{`${airdrop.isClaimed ? 'Claimed:' : 'To claim:'}`}</Text>
+                          {airdrop.claimToken.imageUrl && (
+                            <Box height='1em' width='1em'>
+                              <Image source={airdrop.claimToken.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText='' />
+                            </Box>
+                          )}
+                          <Text variant='small'>{`${airdrop.claimToken.name}`}</Text>
+                          {!airdrop.isClaimed && isOwner && (
+                            <Link variant='small' text='Claim now' target='https://stormdrop.spriteclubnft.com' />
+                          )}
+                        </Stack>
+                        <Spacing variant={PaddingSize.Wide} />
+                      </React.Fragment>
+                    )}
+                    { isTreasureHuntToken && (
+                      <Stack direction={Direction.Vertical} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} paddingLeft={PaddingSize.Narrow} paddingBottom={PaddingSize.Wide}>
+                        <Text variant='note'>Treasure Hunt</Text>
+                        <Text>You found the chosen Sprite!</Text>
+                        {isTreasureHuntSubmitting ? (
+                          <LoadingSpinner />
+                        ) : (
+                          <React.Fragment>
+                            {isTreasureHuntSubmitted ? (
+                              <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
+                            ) : !account ? (
+                              <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
+                            ) : (
+                              <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
+                            )}
+                            {treasureHuntSubmittingError && (
+                              <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
+                            )}
+                          </React.Fragment>
+                        )}
+                      </Stack>
+                    )}
+                    <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                      {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
+                        <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
+                      ))}
+                    </EqualGrid>
+                  </React.Fragment>
                 )}
-                <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                  {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
-                    <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
-                  ))}
-                </EqualGrid>
               </Stack>
             </Stack.Item>
           </Stack>

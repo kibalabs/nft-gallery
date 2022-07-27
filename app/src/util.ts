@@ -34,11 +34,19 @@ export const getHost = (projectId: string): string | null => {
 };
 
 
-export const getChain = (projectId: string): string | null => {
+export const getChain = (projectId: string): string => {
   if (projectId === 'pepes') {
     return 'avalanche';
   }
   return 'ethereum';
+};
+
+
+export const getShouldAllowCustomization = (projectId: string): boolean => {
+  if (projectId === 'sprites') {
+    return true;
+  }
+  return false;
 };
 
 

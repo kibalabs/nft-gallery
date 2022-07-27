@@ -4,7 +4,7 @@ import { truncateMiddle } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, ColorSettingView, Dialog, Direction, EqualGrid, Head, Image, LoadingSpinner, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { CollectionToken } from '../../client/resources';
+import { GalleryToken } from '../../client/resources';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 
@@ -13,27 +13,27 @@ export const AccountPage = (): React.ReactElement => {
   const location = useLocation();
   const navigator = useNavigator();
   const accountAddress = useStringRouteParam('accountAddress');
-  const [collectionTokens, setCollectionTokens] = React.useState<CollectionToken[] | null | undefined>(undefined);
+  const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
 
   const getCollectionHoldings = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
-      setCollectionTokens(undefined);
+      setGalleryTokens(undefined);
     }
     if (!accountAddress) {
-      setCollectionTokens(null);
+      setGalleryTokens(null);
       return;
     }
     if (!collection) {
-      setCollectionTokens(undefined);
+      setGalleryTokens(undefined);
       return;
     }
-    notdClient.listCollectionTokensByOwner(collection.address, accountAddress).then((retrievedCollectionTokens: CollectionToken[]): void => {
-      setCollectionTokens(retrievedCollectionTokens);
+    notdClient.queryCollectionTokens(collection.address, 100, 0, accountAddress).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      setGalleryTokens(retrievedGalleryTokens);
     }).catch((error: unknown): void => {
       console.error(error);
-      setCollectionTokens(null);
+      setGalleryTokens(null);
     });
   }, [notdClient, collection, accountAddress]);
 
@@ -60,16 +60,17 @@ export const AccountPage = (): React.ReactElement => {
         </Stack>
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-            { collectionTokens === undefined ? (
+            { galleryTokens === undefined ? (
               <LoadingSpinner />
-            ) : collectionTokens === null ? (
+            ) : galleryTokens === null ? (
               <Text variant='error'>Failed to load account tokens</Text>
             ) : (
-              collectionTokens.map((ownerToken: CollectionToken, index: number): React.ReactElement => (
+              galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
                 <TokenCard
                   key={index}
-                  token={ownerToken}
-                  target={`/accounts/${accountAddress}/tokens/${ownerToken.tokenId}`}
+                  token={galleryToken.collectionToken}
+                  tokenCustomization={galleryToken.tokenCustomization}
+                  target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
                 />
               ))
             )}

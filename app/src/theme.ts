@@ -46,18 +46,18 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           },
         },
       },
-      inputWrappers: {
-        default: {
-          normal: {
-            default: {
-              background: {
-                'background-color': 'rgba(255, 255, 255, 0.3)',
-                'border-color': 'rgba(255, 255, 255, 0.4)',
-              },
-            },
-          },
-        },
-      },
+      // inputWrappers: {
+      //   default: {
+      //     normal: {
+      //       default: {
+      //         background: {
+      //           'background-color': 'rgba(255, 255, 255, 0.3)',
+      //           'border-color': 'rgba(255, 255, 255, 0.4)',
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
       boxes: {
         tokenCard: {
           'border-width': '2px',
@@ -128,9 +128,13 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       brandSecondary: '#2D86A3',
       background: '#000000',
       backdrop: 'rgba(0, 0, 0, 0.3)',
+      inputWrapperBackground: 'rgba(255, 255, 255, 0.01)',
+      inputWrapperBorder: 'rgba(255, 255, 255, 0.1)',
     },
     alternateColors: {
       dialog: {
+        inputWrapperBackground: 'rgba(0, 0, 0, 0.01)',
+        inputWrapperBorder: 'rgba(0, 0, 0, 0.1)',
       },
     },
     fonts: {
@@ -258,8 +262,9 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         normal: {
           default: {
             background: {
-              'background-color': '$colors.backgroundDark05',
-              'border-color': '$colors.backgroundDark10',
+              'background-color': '$colors.inputWrapperBackground',
+              'border-color': '$colors.inputWrapperBorder',
+              'border-width': '2px',
             },
           },
         },
@@ -271,6 +276,24 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             text: {
               'font-size': baseTheme.texts.note['font-size'],
+            },
+          },
+        },
+      },
+      small: {
+        normal: {
+          default: {
+            text: {
+              'font-size': baseTheme.texts.small['font-size'],
+            },
+          },
+        },
+      },
+      secondary: {
+        normal: {
+          default: {
+            text: {
+              color: baseTheme.texts.default.color,
             },
           },
         },
