@@ -112,6 +112,7 @@ export class CollectionToken {
     readonly name: string,
     readonly imageUrl: string | null,
     readonly frameImageUrl: string | null,
+    readonly resizableImageUrl: string | null,
     readonly description: string | null,
     readonly attributes: TokenAttribute[],
   // eslint-disable-next-line no-empty-function
@@ -124,6 +125,7 @@ export class CollectionToken {
       String(obj.name),
       obj.imageUrl ? String(obj.imageUrl) : null,
       obj.frameImageUrl ? String(obj.frameImageUrl) : null,
+      obj.resizableImageUrl ? String(obj.resizableImageUrl) : null,
       obj.description ? String(obj.description) : null,
       (obj.attributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => TokenAttribute.fromObject(innerObj)),
     );

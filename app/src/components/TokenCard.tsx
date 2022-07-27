@@ -14,7 +14,7 @@ interface ITokenCardProps {
 }
 
 export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
-  const imageUrl = props.token.imageUrl?.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
+  const imageUrl = props.token.resizableImageUrl ?? props.token.imageUrl?.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
   return (
     <LinkBase target={props.target} isFullWidth={true}>
       <Box variant='tokenCard' shouldClipContent={true}>
