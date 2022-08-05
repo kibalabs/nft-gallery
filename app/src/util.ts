@@ -12,14 +12,6 @@ export const getTreasureHuntTokenId = (projectId: string): string | null => {
 };
 
 
-export const getBannerImageUrl = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return '/assets/sprites/banner.png';
-  }
-  return null;
-};
-
-
 export const getHost = (projectId: string): string | null => {
   if (projectId === 'sprites') {
     return 'https://gallery.spriteclubnft.com';
@@ -93,6 +85,20 @@ export const getLogoImageUrl = (projectId: string): string | null => {
 export const getBackgroundMusic = (projectId: string): string | null => {
   if (projectId === 'goblintown') {
     return '/assets/goblintown/music.mp3';
+  }
+  if (projectId === 'sprites') {
+    return '/assets/sprites/music.mp3';
+  }
+  return null;
+};
+
+
+export const getBannerImageUrl = (projectId: string): string | null => {
+  if (projectId === 'sprites') {
+    return '/assets/sprites/banner.png';
+  }
+  if (projectId === 'pepes') {
+    return '/assets/pepes/banner.png';
   }
   return null;
 };
