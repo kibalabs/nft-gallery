@@ -27,7 +27,8 @@ export const TokenPage = (): React.ReactElement => {
   const [isTreasureHuntSubmitted, setIsTreasureHuntSubmitted] = React.useState<boolean>(false);
   const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
-  const [listing, setListing] = React.useState<TokenListing | null | undefined>(undefined);
+  const [liveListing, setLiveListing] = React.useState<TokenListing | null | undefined>(undefined);
+  const listing = liveListing ?? galleryToken?.tokenListing;
 
   const imageUrl = collectionToken?.resizableImageUrl ?? (collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '');
   const frameImageUrl = collectionToken?.frameImageUrl && resolveUrl(collectionToken.frameImageUrl);
@@ -49,7 +50,7 @@ export const TokenPage = (): React.ReactElement => {
       if (chosenCollectionToken == null) {
         setGalleryToken(null);
       } else {
-        setGalleryToken(new GalleryToken(chosenCollectionToken, null));
+        setGalleryToken(new GalleryToken(chosenCollectionToken, null, null));
       }
     } else {
       await notdClient.getGalleryToken(collection.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
@@ -64,16 +65,16 @@ export const TokenPage = (): React.ReactElement => {
 
   const updateListings = React.useCallback(async (): Promise<void> => {
     if (!collection || !collectionToken) {
-      setListing(null);
+      setLiveListing(null);
       return;
     }
-    setListing(undefined);
-    const listings: TokenListing[] = [];
+    setLiveListing(undefined);
+    const liveListings: TokenListing[] = [];
     if (getChain(projectId) === 'ethereum') {
       try {
         const openseaListing = await (new OpenseaClient().getTokenListing(collection.address, collectionToken.tokenId));
         if (openseaListing) {
-          listings.push(openseaListing);
+          liveListings.push(openseaListing);
         }
       } catch (error: unknown) {
         console.error(error);
@@ -81,16 +82,16 @@ export const TokenPage = (): React.ReactElement => {
       try {
         const looksrareListing = await (new LooksrareClient().getTokenListing(collection.address, collectionToken.tokenId));
         if (looksrareListing) {
-          listings.push(looksrareListing);
+          liveListings.push(looksrareListing);
         }
       } catch (error: unknown) {
         console.error(error);
       }
     }
-    if (listings.length === 0) {
-      setListing(null);
+    if (liveListings.length === 0) {
+      setLiveListing(null);
     } else {
-      setListing(listings.sort((listing1: TokenListing, listing2: TokenListing): number => (listing1.value.gte(listing2.value) ? 1 : -1))[0]);
+      setLiveListing(liveListings.sort((liveListing1: TokenListing, liveListing2: TokenListing): number => (liveListing1.value.gte(liveListing2.value) ? 1 : -1))[0]);
     }
   }, [projectId, collection, collectionToken]);
 
@@ -175,10 +176,10 @@ export const TokenPage = (): React.ReactElement => {
 
   const getListingUrl = (tokenListing: TokenListing): string => {
     if (tokenListing.source.startsWith('opensea')) {
-      return `https://opensea.io/assets/${tokenListing.token.registryAddress}/${tokenListing.token.tokenId}`;
+      return `https://opensea.io/assets/${tokenListing.registryAddress}/${tokenListing.tokenId}`;
     }
     if (tokenListing.source === 'looksrare') {
-      return `https://looksrare.org/collections/${tokenListing.token.registryAddress}/${tokenListing.token.tokenId}`;
+      return `https://looksrare.org/collections/${tokenListing.registryAddress}/${tokenListing.tokenId}`;
     }
     return '';
   };
@@ -386,7 +387,7 @@ export const TokenPage = (): React.ReactElement => {
                               {isTreasureHuntSubmitted ? (
                                 <Text variant='success'>You&apos;re in, jump into the Sprites discord to find out if you won!</Text>
                               ) : !account ? (
-                                <Button variant='primary-small' text='Connect wallet to sumbit' onClicked={onLinkAccountsClicked} />
+                                <Button variant='primary-small' text='Connect wallet to submit' onClicked={onLinkAccountsClicked} />
                               ) : (
                                 <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
                               )}

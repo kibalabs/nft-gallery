@@ -1,7 +1,7 @@
 import { Requester, RestMethod } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
-import { CollectionToken, TokenListing } from './client';
+import { TokenListing } from './client';
 import { getChunks } from './listUtil';
 
 export class OpenseaClient {
@@ -35,7 +35,8 @@ export class OpenseaClient {
           }
           listings.push(new TokenListing(
             -1,
-            new CollectionToken(registryAddress, tokenId, '', null, null, null, null, []),
+            registryAddress,
+            tokenId,
             (sellOrder.maker as Record<string, unknown>).address as string,
             new Date(sellOrder.listing_time as string),
             new Date(sellOrder.expiration_time as string),
@@ -51,7 +52,8 @@ export class OpenseaClient {
           }
           listings.push(new TokenListing(
             -1,
-            new CollectionToken(registryAddress, tokenId, '', null, null, null, null, []),
+            registryAddress,
+            tokenId,
             (seaportSellOrder.maker as Record<string, unknown>).address as string,
             new Date(seaportSellOrder.listing_time as string),
             new Date(seaportSellOrder.expiration_time as string),

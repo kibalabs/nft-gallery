@@ -29,6 +29,7 @@ export const HomePage = (): React.ReactElement => {
   const { notdClient, projectId, collection, collectionAttributes, allTokens } = useGlobals();
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
+  const [showListedTokensOnly, setShowListedTokensOnly] = React.useState<boolean>(false);
   const [filters, setFilters] = React.useState<Record<string, string>>({});
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
@@ -70,10 +71,11 @@ export const HomePage = (): React.ReactElement => {
       const newQuery = {
         collectionAddress,
         limit: tokenLimitRef.current,
+        offset: 0,
         ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
         minPrice: undefined,
         maxPrice: undefined,
-        isListed: undefined,
+        isListed: showListedTokensOnly,
         tokenIdIn: undefined,
         attributeFilters,
       };
@@ -83,7 +85,7 @@ export const HomePage = (): React.ReactElement => {
       // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
       previousQueryRef.current = JSON.stringify(newQuery);
       setGalleryTokens(undefined);
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens(retrievedGalleryTokens);
       }).catch((error: unknown): void => {
         console.error(error);
@@ -104,14 +106,14 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
           }, true);
           if (isMatch) {
-            accumulator.push(new GalleryToken(value, null));
+            accumulator.push(new GalleryToken(value, null, null));
           }
         }
         return accumulator;
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, tokenLimitRef, previousQueryRef, account, allTokens]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, showListedTokensOnly, tokenLimitRef, previousQueryRef, account, allTokens]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -124,7 +126,7 @@ export const HomePage = (): React.ReactElement => {
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
       const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, undefined, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens([...galleryTokens, ...retrievedGalleryTokens]);
       });
     } else {
@@ -142,14 +144,14 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
           }, true);
           if (isMatch) {
-            accumulator.push(new GalleryToken(value, null));
+            accumulator.push(new GalleryToken(value, null, null));
           }
         }
         return accumulator;
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, showOwnedTokensOnly, tokenLimitRef, galleryTokens, account, allTokens]);
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, showListedTokensOnly, tokenLimitRef, galleryTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -203,7 +205,7 @@ export const HomePage = (): React.ReactElement => {
       return;
     }
     const size = eventTarget.scrollHeight - eventTarget.clientHeight;
-    if (size - eventTarget.scrollTop < 300) {
+    if (size - eventTarget.scrollTop < 750) {
       tokenLimitRef.current += 30;
       loadMoreCollectionTokens();
     }
@@ -259,6 +261,8 @@ export const HomePage = (): React.ReactElement => {
                       account={account}
                       showOwnedTokensOnly={showOwnedTokensOnly}
                       setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                      showListedTokensOnly={showListedTokensOnly}
+                      setShowListedTokensOnly={setShowListedTokensOnly}
                       shouldShowMusicOption={backgroundMusic != null}
                       shouldPlayMusic={shouldPlayMusic}
                       setShouldPlayMusic={setShouldPlayMusic}
@@ -295,7 +299,7 @@ export const HomePage = (): React.ReactElement => {
                                         key={galleryToken.collectionToken.tokenId}
                                         token={galleryToken.collectionToken}
                                         tokenCustomization={galleryToken.tokenCustomization}
-                                        tokenListing={tokenListingMap[galleryToken.collectionToken.tokenId]}
+                                        tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
                                         target={`/tokens/${galleryToken.collectionToken.tokenId}`}
                                       />
                                     ))}
@@ -318,6 +322,8 @@ export const HomePage = (): React.ReactElement => {
                                     account={account}
                                     showOwnedTokensOnly={showOwnedTokensOnly}
                                     setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                                    showListedTokensOnly={showListedTokensOnly}
+                                    setShowListedTokensOnly={setShowListedTokensOnly}
                                     shouldShowMusicOption={backgroundMusicSource != null}
                                     shouldPlayMusic={shouldPlayMusic}
                                     setShouldPlayMusic={setShouldPlayMusic}

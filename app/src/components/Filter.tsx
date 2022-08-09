@@ -14,6 +14,8 @@ export interface IFilterProps {
   onAttributeValueClicked: (attributeName: string, attributeValue: string | null | undefined) => void;
   showOwnedTokensOnly: boolean;
   setShowOwnedTokensOnly: (newShowOwnedTokensOnly: boolean) => void;
+  showListedTokensOnly: boolean;
+  setShowListedTokensOnly: (newShowListedTokensOnly: boolean) => void;
   shouldShowMusicOption: boolean;
   shouldPlayMusic: boolean;
   setShouldPlayMusic: (newShouldPlayMusic: boolean) => void;
@@ -35,6 +37,10 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     props.setShowOwnedTokensOnly(!props.showOwnedTokensOnly);
   };
 
+  const onShowListedTokensOnlyToggled = (): void => {
+    props.setShowListedTokensOnly(!props.showListedTokensOnly);
+  };
+
   const onShouldPlayMusicToggled = (): void => {
     props.setShouldPlayMusic(!props.shouldPlayMusic);
   };
@@ -45,7 +51,10 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
       {props.account && (
-        <Checkbox text='Show your tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
+        <Checkbox text='Your tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
+      )}
+      {props.account && (
+        <Checkbox text='Listed tokens only' isChecked={props.showListedTokensOnly} onToggled={onShowListedTokensOnlyToggled} />
       )}
       {props.collectionAttributes && props.collectionAttributes.map((collectionAttribute: CollectionAttribute): React.ReactElement => (
         <Stack key={collectionAttribute.name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>

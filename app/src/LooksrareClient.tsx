@@ -1,7 +1,7 @@
 import { Requester, RestMethod } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
-import { CollectionToken, TokenListing } from './client';
+import { TokenListing } from './client';
 
 export class LooksrareClient {
   private requester: Requester;
@@ -35,7 +35,8 @@ export class LooksrareClient {
     (orders as Record<string, unknown>[] || []).forEach((order: Record<string, unknown>): void => {
       listings.push(new TokenListing(
         -1,
-        new CollectionToken(registryAddress, tokenId, '', null, null, null, null, []),
+        registryAddress,
+        tokenId,
         order.signer as string,
         new Date(order.startTime as string),
         new Date(order.endTime as string),
