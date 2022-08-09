@@ -158,7 +158,8 @@ export class TokenListing {
   // eslint-disable-next-line no-useless-constructor
   public constructor(
     readonly tokenListingId: number,
-    readonly token: CollectionToken,
+    readonly registryAddress: string,
+    readonly tokenId: string,
     readonly offererAddress: string,
     readonly startDate: Date,
     readonly endDate: Date,
@@ -172,7 +173,8 @@ export class TokenListing {
   public static fromObject = (obj: Record<string, unknown>): TokenListing => {
     return new TokenListing(
       Number(obj.tokenListingId),
-      CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      String(obj.registryAddress),
+      String(obj.tokenId),
       String(obj.offererAddress),
       dateFromString(String(obj.startDate)),
       dateFromString(String(obj.endDate)),
@@ -223,6 +225,7 @@ export class GalleryToken {
   public constructor(
     readonly collectionToken: CollectionToken,
     readonly tokenCustomization: TokenCustomization | null,
+    readonly tokenListing: TokenListing | null,
   // eslint-disable-next-line no-empty-function
   ) {}
 
@@ -230,6 +233,7 @@ export class GalleryToken {
     return new GalleryToken(
       CollectionToken.fromObject(obj.collectionToken as Record<string, unknown>),
       obj.tokenCustomization ? TokenCustomization.fromObject(obj.tokenCustomization as Record<string, unknown>) : null,
+      obj.tokenListing ? TokenListing.fromObject(obj.tokenListing as Record<string, unknown>) : null,
     );
   };
 }
