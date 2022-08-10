@@ -1,7 +1,9 @@
 import React from 'react';
 
+import { longFormatEther } from '@kibalabs/core';
 import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { BigNumber } from 'ethers';
 
 import { useAccount } from '../../AccountContext';
 import { CollectionToken, GalleryToken, TokenAttribute, TokenListing } from '../../client';
@@ -30,12 +32,14 @@ export const HomePage = (): React.ReactElement => {
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [showListedTokensOnly, setShowListedTokensOnly] = React.useState<boolean>(false);
-  const [filters, setFilters] = React.useState<Record<string, string>>({});
+  const [filters, setFilters] = React.useState<Record<string, string[]>>({});
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
   const tokenLimitRef = React.useRef<number>(30);
   const previousQueryRef = React.useRef<string | null>(null);
+  const [minPrice, setMinPrice] = React.useState<BigNumber | null>(null);
+  const [maxPrice, setMaxPrice] = React.useState<BigNumber | null>(null);
   const backgroundMusicSource = getBackgroundMusic(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
@@ -65,7 +69,7 @@ export const HomePage = (): React.ReactElement => {
 
   const updateCollectionTokens = React.useCallback((): void => {
     const collectionAddress = getCollectionAddress(projectId);
-    const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
+    const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
     tokenLimitRef.current = 30;
     if (collectionAddress) {
       const newQuery = {
@@ -73,8 +77,8 @@ export const HomePage = (): React.ReactElement => {
         limit: tokenLimitRef.current,
         offset: 0,
         ownerAddress: showOwnedTokensOnly && account ? account.address : undefined,
-        minPrice: undefined,
-        maxPrice: undefined,
+        minPrice,
+        maxPrice,
         isListed: showListedTokensOnly,
         tokenIdIn: undefined,
         attributeFilters,
@@ -85,7 +89,7 @@ export const HomePage = (): React.ReactElement => {
       // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
       previousQueryRef.current = JSON.stringify(newQuery);
       setGalleryTokens(undefined);
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens(retrievedGalleryTokens);
       }).catch((error: unknown): void => {
         console.error(error);
@@ -103,7 +107,7 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator;
           }, {});
           const isMatch = Object.keys(filters).reduce((innerAccumulator: boolean, filterKey: string): boolean => {
-            return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
+            return innerAccumulator && tokenAttributeMap[filterKey] != null && (!filters[filterKey] || filters[filterKey].length === 0 || filters[filterKey].includes(tokenAttributeMap[filterKey]));
           }, true);
           if (isMatch) {
             accumulator.push(new GalleryToken(value, null, null));
@@ -113,7 +117,7 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, showListedTokensOnly, tokenLimitRef, previousQueryRef, account, allTokens]);
+  }, [projectId, notdClient, filters, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, previousQueryRef, account, allTokens]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -125,8 +129,8 @@ export const HomePage = (): React.ReactElement => {
     }
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
-      const attributeFilters = Object.keys(filters).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, [filters[filterKey]]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, undefined, undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens([...galleryTokens, ...retrievedGalleryTokens]);
       });
     } else {
@@ -141,7 +145,7 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator;
           }, {});
           const isMatch = Object.keys(filters).reduce((innerAccumulator: boolean, filterKey: string): boolean => {
-            return innerAccumulator && tokenAttributeMap[filterKey] != null && (filters[filterKey] === tokenAttributeMap[filterKey]);
+            return innerAccumulator && tokenAttributeMap[filterKey] != null && (!filters[filterKey] || filters[filterKey].length === 0 || filters[filterKey].includes(tokenAttributeMap[filterKey]));
           }, true);
           if (isMatch) {
             accumulator.push(new GalleryToken(value, null, null));
@@ -151,14 +155,17 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, showOwnedTokensOnly, showListedTokensOnly, tokenLimitRef, galleryTokens, account, allTokens]);
+  }, [notdClient, projectId, filters, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, galleryTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
-    if (filtersCopy[attributeName] === attributeValue || !attributeValue) {
-      delete filtersCopy[attributeName];
+    if (filtersCopy[attributeName] == null) {
+      filtersCopy[attributeName] = [];
+    }
+    if (!attributeValue || filtersCopy[attributeName].includes(attributeValue)) {
+      filtersCopy[attributeName] = filtersCopy[attributeName].filter((existingValue: string): boolean => existingValue !== attributeValue);
     } else {
-      filtersCopy[attributeName] = attributeValue;
+      filtersCopy[attributeName].push(attributeValue);
     }
     setFilters(filtersCopy);
     if (scrollingRef) {
@@ -268,6 +275,11 @@ export const HomePage = (): React.ReactElement => {
                       setShouldPlayMusic={setShouldPlayMusic}
                       collection={collection}
                       collectionAttributes={collectionAttributes}
+                      shouldShowMarket={getChain(projectId) === 'ethereum'}
+                      minPrice={minPrice}
+                      setMinPrice={setMinPrice}
+                      maxPrice={maxPrice}
+                      setMaxPrice={setMaxPrice}
                     />
                   </Box>
                 </React.Fragment>
@@ -277,19 +289,35 @@ export const HomePage = (): React.ReactElement => {
                   <Stack.Item growthFactor={1} shrinkFactor={1}>
                     <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
                       <LayerContainer>
-                        {galleryTokens === undefined ? (
-                          <LoadingSpinner />
-                        ) : galleryTokens === null ? (
-                          <Text variant='error'>Failed to load</Text>
-                        ) : (
-                          <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
-                            {Object.keys(filters).length > 0 && (
-                              <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
-                                {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                                  <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={filterKey} text={`${filterKey}: ${filters[filterKey]}`} onClicked={(): void => onAttributeValueClicked(filterKey, undefined)} />
-                                ))}
-                              </Stack>
-                            )}
+                        <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
+                          {(showOwnedTokensOnly || showListedTokensOnly || minPrice || maxPrice || Object.keys(filters).length > 0) && (
+                            <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                              {showOwnedTokensOnly && (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Owned'} onClicked={(): void => setShowOwnedTokensOnly(false)} />
+                              )}
+                              {showListedTokensOnly && (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Listed'} onClicked={(): void => setShowListedTokensOnly(false)} />
+                              )}
+                              {minPrice && (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Min price: ${longFormatEther(minPrice)}`} onClicked={(): void => setMinPrice(null)} />
+                              )}
+                              {maxPrice && (
+                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Max price: ${longFormatEther(maxPrice)}`} onClicked={(): void => setMaxPrice(null)} />
+                              )}
+                              {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                                <React.Fragment key={filterKey}>
+                                  {filters[filterKey].map((filterValue: string): React.ReactElement => (
+                                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={`${filterKey}: ${filterValue}`} text={`${filterKey}: ${filterValue}`} onClicked={(): void => onAttributeValueClicked(filterKey, filterValue)} />
+                                  ))}
+                                </React.Fragment>
+                              ))}
+                            </Stack>
+                          )}
+                          {galleryTokens === undefined ? (
+                            <LoadingSpinner />
+                          ) : galleryTokens === null ? (
+                            <Text variant='error'>Failed to load</Text>
+                          ) : (
                             <Stack.Item growthFactor={1} shrinkFactor={1}>
                               <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
                                 {galleryTokens.length > 0 ? (
@@ -309,8 +337,8 @@ export const HomePage = (): React.ReactElement => {
                                 )}
                               </Box>
                             </Stack.Item>
-                          </Stack>
-                        )}
+                          )}
+                        </Stack>
                         {isResponsiveFilterShowing && (
                           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
                             <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
@@ -329,6 +357,11 @@ export const HomePage = (): React.ReactElement => {
                                     setShouldPlayMusic={setShouldPlayMusic}
                                     collection={collection}
                                     collectionAttributes={collectionAttributes}
+                                    shouldShowMarket={getChain(projectId) === 'ethereum'}
+                                    minPrice={minPrice}
+                                    setMinPrice={setMinPrice}
+                                    maxPrice={maxPrice}
+                                    setMaxPrice={setMaxPrice}
                                   />
                                 </Box>
                               </ColorSettingView>

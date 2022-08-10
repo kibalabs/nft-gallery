@@ -1,4 +1,5 @@
 import { RequestData, ResponseData } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 import * as Resources from './resources';
 
@@ -184,13 +185,13 @@ export class QueryCollectionTokensRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
   readonly ownerAddress?: string;
-  readonly minPrice?: number;
-  readonly maxPrice?: number;
+  readonly minPrice?: BigNumber;
+  readonly maxPrice?: BigNumber;
   readonly isListed?: boolean;
   readonly tokenIdIn?: string[];
   readonly attributeFilters?: InQueryParam[];
 
-  public constructor(limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[]) {
+  public constructor(limit?: number, offset?: number, ownerAddress?: string, minPrice?: BigNumber, maxPrice?: BigNumber, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[]) {
     super();
     this.limit = limit;
     this.offset = offset;
@@ -207,8 +208,8 @@ export class QueryCollectionTokensRequest extends RequestData {
       limit: this.limit,
       offset: this.offset,
       ownerAddress: this.ownerAddress,
-      minPrice: this.minPrice,
-      maxPrice: this.maxPrice,
+      minPrice: this.minPrice ? this.minPrice.toString() : null,
+      maxPrice: this.maxPrice ? this.maxPrice.toString() : null,
       isListed: this.isListed,
       tokenIdIn: this.tokenIdIn,
       attributeFilters: this.attributeFilters?.map((param: InQueryParam): Record<string, unknown> => param.toObject()),
