@@ -128,12 +128,12 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       brandSecondary: '#2D86A3',
       background: '#000000',
       backdrop: 'rgba(0, 0, 0, 0.3)',
-      inputWrapperBackground: 'rgba(255, 255, 255, 0.01)',
+      inputWrapperBackground: 'rgba(255, 255, 255, 0.1)',
       inputWrapperBorder: 'rgba(255, 255, 255, 0.1)',
     },
     alternateColors: {
       dialog: {
-        inputWrapperBackground: 'rgba(0, 0, 0, 0.01)',
+        inputWrapperBackground: 'rgba(0, 0, 0, 0.1)',
         inputWrapperBorder: 'rgba(0, 0, 0, 0.1)',
       },
     },
@@ -265,6 +265,31 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
               'background-color': '$colors.inputWrapperBackground',
               'border-color': '$colors.inputWrapperBorder',
               'border-width': '2px',
+            },
+          },
+        },
+      },
+      error: {
+        normal: {
+          default: {
+            background: {
+              'background-color': '$colors.inputWrapperBackground',
+              'border-color': '$colors.errorClear50',
+            },
+          },
+        },
+      },
+    },
+    titledCollapsibleBoxes: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-color': '$colors.inputWrapperBorder',
+              'border-width': '2px',
+            },
+            headerBackground: {
+              'background-color': '$colors.inputWrapperBackground',
             },
           },
         },

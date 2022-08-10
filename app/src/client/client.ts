@@ -1,4 +1,5 @@
 import { Requester, RestMethod, ServiceClient } from '@kibalabs/core';
+import { BigNumber } from 'ethers';
 
 import * as Endpoints from './endpoints';
 import * as Resources from './resources';
@@ -64,7 +65,7 @@ export class NotdClient extends ServiceClient {
     return response.airdrops;
   };
 
-  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: number, maxPrice?: number, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.GalleryToken[]> => {
+  public queryCollectionTokens = async (registryAddress: string, limit?: number, offset?: number, ownerAddress?: string, minPrice?: BigNumber, maxPrice?: BigNumber, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: Endpoints.InQueryParam[]): Promise<Resources.GalleryToken[]> => {
     const method = RestMethod.POST;
     const path = `gallery/v1/collections/${registryAddress}/tokens/query`;
     const request = new Endpoints.QueryCollectionTokensRequest(limit, offset, ownerAddress, minPrice, maxPrice, isListed, tokenIdIn, attributeFilters);
