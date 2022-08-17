@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { truncateMiddle } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, Image, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { GalleryToken, GalleryUser } from '../../client/resources';
+import { AccountView } from '../../components/AccountView';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 
 export const AccountPage = (): React.ReactElement => {
-  const { notdClient, collection, projectId } = useGlobals();
+  const { notdClient, collection } = useGlobals();
   const location = useLocation();
   const navigator = useNavigator();
   const account = useAccount();
@@ -94,29 +94,29 @@ export const AccountPage = (): React.ReactElement => {
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={false} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
         <Spacing />
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-          <Box variant='rounded' shouldClipContent={true} height='40px' width='40px'>
-            <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${accountAddress}/image`} alternativeText='Avatar' />
-          </Box>
-          <Text variant='header2'>{accountAddress === account?.address ? 'Your account' : truncateMiddle(accountAddress, 15)}</Text>
-        </Stack>
-        {projectId === 'goblintown' && (
-          <React.Fragment>
-            { galleryUser?.twitterProfile ? (
-              <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
-                <KibaIcon iconId='ion-logo-twitter' />
-                <Link text={`@${galleryUser.twitterProfile.username}`} target={`https://twitter.com/${galleryUser.twitterProfile.username}`} />
-                <Text variant='note'>{`(${galleryUser.twitterProfile.followerCount} followers)`}</Text>
-              </Stack>
-            ) : accountAddress === account?.address ? (
-              <React.Fragment>
-                <Button variant='primary' text='Connect Twitter' iconLeft={<KibaIcon iconId='ion-logo-twitter' />} onClicked={onConnectTwitterClicked} />
-              </React.Fragment>
-            ) : (
-              null
-            )}
-          </React.Fragment>
-        )}
+        <AccountView
+          accountId={accountAddress}
+          textVariant='header2'
+          imageSize='2em'
+          shouldUseYourAccount={true}
+        />
+        <React.Fragment>
+          { galleryUser === undefined ? (
+            null
+          ) : galleryUser?.twitterProfile ? (
+            <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
+              <KibaIcon iconId='ion-logo-twitter' />
+              <Link text={`@${galleryUser.twitterProfile.username}`} target={`https://twitter.com/${galleryUser.twitterProfile.username}`} />
+              <Text variant='note'>{`(${galleryUser.twitterProfile.followerCount} followers)`}</Text>
+            </Stack>
+          ) : accountAddress === account?.address ? (
+            <React.Fragment>
+              <Button variant='primary' text='Connect Twitter' iconLeft={<KibaIcon iconId='ion-logo-twitter' />} onClicked={onConnectTwitterClicked} />
+            </React.Fragment>
+          ) : (
+            null
+          )}
+        </React.Fragment>
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           { galleryTokens === undefined ? (
             <LoadingSpinner />

@@ -5,8 +5,7 @@ import { Alignment, Box, Button, Direction, Image, LinkBase, PaddingSize, Spacin
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { useGlobals } from '../globalsContext';
 import { getChain, getLogoImageUrl } from '../util';
-import { Account } from './Account';
-
+import { AccountViewLink } from './AccountView';
 
 export const NavBar = (): React.ReactElement => {
   const account = useAccount();
@@ -33,7 +32,7 @@ export const NavBar = (): React.ReactElement => {
       </Stack.Item>
       { chain === 'ethereum' && (
         account ? (
-          <Account accountId={account.address} target={`/accounts/${account.address}`} />
+          <AccountViewLink accountId={account.address} target={`/accounts/${account.address}`} />
         ) : (
           <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
         )
