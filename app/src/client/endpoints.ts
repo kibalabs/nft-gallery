@@ -269,3 +269,21 @@ export class CreateCustomizationForCollectionTokenResponse extends ResponseData 
     );
   };
 }
+
+export class GetGalleryCollectionUserRequest extends RequestData {
+}
+
+export class GetGalleryCollectionUserResponse extends ResponseData {
+  readonly galleryUser: Resources.GalleryUser;
+
+  public constructor(galleryUser: Resources.GalleryUser) {
+    super();
+    this.galleryUser = galleryUser;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetGalleryCollectionUserResponse => {
+    return new GetGalleryCollectionUserResponse(
+      Resources.GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
+    );
+  };
+}
