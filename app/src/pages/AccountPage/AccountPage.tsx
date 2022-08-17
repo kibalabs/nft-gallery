@@ -83,7 +83,7 @@ export const AccountPage = (): React.ReactElement => {
       initialUrl: encodeURIComponent(window.location.toString()),
     };
     // TODO(krishan711): get this from notdClient when its no longer protected access
-    // @ts-ignore 
+    // @ts-ignore
     window.open(`${window.KRT_API_URL}/gallery/v1/twitter-login?${new URLSearchParams(params).toString()}`);
   };
 
