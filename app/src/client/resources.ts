@@ -237,3 +237,71 @@ export class GalleryToken {
     );
   };
 }
+
+export class UserProfile {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly address: string,
+    readonly twitterId: string | null,
+    readonly discordId: string | null,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): UserProfile => {
+    return new UserProfile(
+      String(obj.address),
+      obj.twitterId ? String(obj.twitterId) : null,
+      obj.discordId ? String(obj.discordId) : null,
+    );
+  };
+}
+
+export class TwitterProfile {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly twitterId: string,
+    readonly username: string,
+    readonly name: string,
+    readonly description: string,
+    readonly isVerified: boolean,
+    readonly pinnedTweetId: string | null,
+    readonly followerCount: number,
+    readonly followingCount: number,
+    readonly tweetCount: number,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): TwitterProfile => {
+    return new TwitterProfile(
+      String(obj.twitterId),
+      String(obj.username),
+      String(obj.name),
+      String(obj.description),
+      Boolean(obj.isVerified),
+      obj.pinnedTweetId ? String(obj.pinnedTweetId) : null,
+      Number(obj.followerCount),
+      Number(obj.followingCount),
+      Number(obj.tweetCount),
+    );
+  };
+}
+
+export class GalleryUser {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly address: string,
+    readonly registryAddress: string,
+    readonly userProfile: UserProfile | null,
+    readonly twitterProfile: TwitterProfile | null,
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryUser => {
+    return new GalleryUser(
+      String(obj.address),
+      String(obj.registryAddress),
+      obj.userProfile ? UserProfile.fromObject(obj.userProfile as Record<string, unknown>) : null,
+      obj.twitterProfile ? TwitterProfile.fromObject(obj.twitterProfile as Record<string, unknown>) : null,
+    );
+  };
+}
