@@ -28,7 +28,7 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
               <Spacing variant={PaddingSize.Wide} />
             </Stack.Item>
             <HidingView isInvisible={!props.tokenListing}>
-              <EtherValue textVariant='tokenCardValue' value={props.tokenListing?.value ? longFormatNumber(etherToNumber(props.tokenListing.value)) : '------'} />
+              <EtherValue textVariant='tokenCardValue' value={props.tokenListing?.value ? longFormatNumber(etherToNumber(props.tokenListing.value)) : '-------'} />
             </HidingView>
           </Stack>
         </Stack>
