@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { GalleryToken, GalleryUser } from '../../client/resources';
@@ -92,10 +92,10 @@ export const AccountPage = (): React.ReactElement => {
       <Head>
         <title>{`${accountAddress} | ${collection ? collection.name : 'Token'} Gallery`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={false} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
         <Spacing />
         <AccountView
-          accountId={accountAddress}
+          address={accountAddress}
           textVariant='header2'
           imageSize='2em'
           shouldUseYourAccount={true}
@@ -117,26 +117,28 @@ export const AccountPage = (): React.ReactElement => {
             null
           )}
         </React.Fragment>
-        <Stack.Item growthFactor={1} shrinkFactor={1}>
-          { galleryTokens === undefined ? (
-            <LoadingSpinner />
-          ) : galleryTokens === null ? (
-            <Text variant='error'>Failed to load account tokens</Text>
-          ) : galleryTokens.length === 0 ? (
-            <Text alignment={TextAlignment.Center}>No tokens owned</Text>
-          ) : (
-            <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-              {galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
-                <TokenCard
-                  key={index}
-                  token={galleryToken.collectionToken}
-                  tokenCustomization={galleryToken.tokenCustomization}
-                  target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
-                />
-              ))}
-            </EqualGrid>
-          )}
-        </Stack.Item>
+        { galleryTokens === undefined ? (
+          <LoadingSpinner />
+        ) : galleryTokens === null ? (
+          <Text variant='error'>Failed to load account tokens</Text>
+        ) : galleryTokens.length === 0 ? (
+          <Text alignment={TextAlignment.Center}>No tokens owned</Text>
+        ) : (
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Box variant='unrounded' isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+              <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+                {galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
+                  <TokenCard
+                    key={index}
+                    token={galleryToken.collectionToken}
+                    tokenCustomization={galleryToken.tokenCustomization}
+                    target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
+                  />
+                ))}
+              </EqualGrid>
+            </Box>
+          </Stack.Item>
+        )}
       </Stack>
       <ColorSettingView variant='dialog'>
         <Dialog

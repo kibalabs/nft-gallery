@@ -293,6 +293,9 @@ export class GalleryUser {
     readonly registryAddress: string,
     readonly userProfile: UserProfile | null,
     readonly twitterProfile: TwitterProfile | null,
+    readonly ownedTokenCount: number,
+    readonly joinDate: Date | null,
+
   // eslint-disable-next-line no-empty-function
   ) {}
 
@@ -302,6 +305,25 @@ export class GalleryUser {
       String(obj.registryAddress),
       obj.userProfile ? UserProfile.fromObject(obj.userProfile as Record<string, unknown>) : null,
       obj.twitterProfile ? TwitterProfile.fromObject(obj.twitterProfile as Record<string, unknown>) : null,
+      Number(obj.ownedTokenCount),
+      obj.firstTransfer ? dateFromString(obj.firstTransfer as string) : null,
+    );
+  };
+}
+
+
+export class GalleryUserRow {
+  // eslint-disable-next-line no-useless-constructor
+  public constructor(
+    readonly galleryUser: GalleryUser,
+    readonly chosenOwnedTokens: CollectionToken[],
+  // eslint-disable-next-line no-empty-function
+  ) {}
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryUserRow => {
+    return new GalleryUserRow(
+      GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
+      (obj.chosenOwnedTokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
     );
   };
 }

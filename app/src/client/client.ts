@@ -95,4 +95,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.GetGalleryCollectionUserResponse);
     return response.galleryUser;
   };
+
+  public queryCollectionUsers = async (registryAddress: string, limit?: number, offset?: number, sort?: string): Promise<Resources.GalleryUserRow[]> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/collections/${registryAddress}/users/query`;
+    const request = new Endpoints.QueryCollectionUsersRequest(limit, offset, sort);
+    const response = await this.makeRequest(method, path, request, Endpoints.QueryCollectionUsersResponse);
+    return response.galleryUserRows;
+  };
 }

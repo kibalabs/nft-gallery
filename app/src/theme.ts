@@ -135,6 +135,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       inputWrapperBorder: 'rgba(255, 255, 255, 0.1)',
       tabSelectedBackground: 'rgba(255, 255, 255, 0.2)',
     },
+    dimensions: {
+      paddingInverseNarrow: '-0.25em',
+      paddingInverse: '-0.5em',
+      paddingInverseWide: '-1em',
+    },
     alternateColors: {
       dialog: {
         inputWrapperBackground: 'rgba(0, 0, 0, 0.1)',
@@ -221,6 +226,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'background-color': '$colors.backgroundClear25',
         'border-color': '$colors.backgroundClear05',
         'backdrop-filter': 'blur(3px)',
+      },
+      bordered: {
+        'background-color': 'rgba(0, 0, 0, 0)',
+        'border-width': baseTheme.dimensions.borderWidth,
+        'border-color': '#FFFFFF',
       },
     },
     tabBarItems: {

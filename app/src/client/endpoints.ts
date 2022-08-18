@@ -287,3 +287,39 @@ export class GetGalleryCollectionUserResponse extends ResponseData {
     );
   };
 }
+
+export class QueryCollectionUsersRequest extends RequestData {
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly sort?: string;
+
+  public constructor(limit?: number, offset?: number, sort?: string) {
+    super();
+    this.limit = limit;
+    this.offset = offset;
+    this.sort = sort;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      limit: this.limit,
+      offset: this.offset,
+      sort: this.sort,
+    };
+  };
+}
+
+export class QueryCollectionUsersResponse extends ResponseData {
+  readonly galleryUserRows: Resources.GalleryUserRow[];
+
+  public constructor(galleryUserRows: Resources.GalleryUserRow[]) {
+    super();
+    this.galleryUserRows = galleryUserRows;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): QueryCollectionUsersResponse => {
+    return new QueryCollectionUsersResponse(
+      (obj.galleryUserRows as Record<string, unknown>[]).map((innerObj: Record<string, unknown>):Resources.GalleryUserRow => Resources.GalleryUserRow.fromObject(innerObj)),
+    );
+  };
+}
