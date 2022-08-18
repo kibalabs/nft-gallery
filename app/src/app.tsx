@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { LocalStorageClient, Requester, RestMethod } from '@kibalabs/core';
-import { IRoute, MockStorage, Router, useFavicon, useInitialization } from '@kibalabs/core-react';
+import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Box, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
@@ -15,14 +15,15 @@ import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { IGalleryPageData, PageDataProvider } from './PageDataContext';
-import { AccountPage } from './pages/AccountPage/AccountPage';
+import { AccountPage } from './pages/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
-import { TokenPage } from './pages/TokenPage/TokenPage';
+import { TokenPage } from './pages/TokenPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getCollectionAddress, getEveryviewCode, getIcon } from './util';
 
 import './fonts.css';
+import { MembersPage } from './pages/MembersPage/MembersPage';
 
 
 declare global {
@@ -62,6 +63,9 @@ export const routes: IRoute<IGlobals>[] = [
     subRoutes: [
       { path: 'tokens/:tokenId', page: TokenPage },
     ] },
+  { path: '/members',
+    page: MembersPage,
+    getPageData: getHomePageData },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
@@ -123,14 +127,16 @@ export const App = (props: IAppProps): React.ReactElement => {
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={{ ...globals, collection, allTokens, collectionAttributes }}>
           <AccountControlProvider>
-            <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-              <NavBar />
-              <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                <Box variant='unrounded' shouldClipContent={true}>
-                  <Router staticPath={props.staticPath} routes={routes} />
-                </Box>
-              </Stack.Item>
-            </Stack>
+            <Router staticPath={props.staticPath}>
+              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+                <NavBar />
+                <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                  <Box variant='unrounded' shouldClipContent={true}>
+                    <SubRouter routes={routes} />
+                  </Box>
+                </Stack.Item>
+              </Stack>
+            </Router>
           </AccountControlProvider>
         </GlobalsProvider>
       </PageDataProvider>

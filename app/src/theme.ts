@@ -7,6 +7,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
     return buildTheme(mergeThemePartial(overrideTheme, {
       colors: {
         brandPrimary: '#ffffff',
+        brandSecondary: 'rgb(89,190,144)',
         background: 'rgb(220,137,117)',
         text: '#ffffff',
         spriteGreen: 'rgb(89,190,144)',
@@ -19,6 +20,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           background: '#ffffff',
           text: '#222222',
           brandPrimary: 'rgb(89,190,144)',
+          brandSecondary: '#ffffff',
         },
       },
       dimensions: {
@@ -99,6 +101,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
     return buildTheme(mergeThemePartial(overrideTheme, {
       colors: {
         brandPrimary: 'rgb(245, 91, 32)',
+        brandSecondary: 'rgb(158, 143, 160)',
         background: '#333',
       },
       fonts: {
@@ -130,6 +133,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       backdrop: 'rgba(0, 0, 0, 0.3)',
       inputWrapperBackground: 'rgba(255, 255, 255, 0.1)',
       inputWrapperBorder: 'rgba(255, 255, 255, 0.1)',
+      tabSelectedBackground: 'rgba(255, 255, 255, 0.2)',
     },
     alternateColors: {
       dialog: {
@@ -217,6 +221,32 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'background-color': '$colors.backgroundClear25',
         'border-color': '$colors.backgroundClear05',
         'backdrop-filter': 'blur(3px)',
+      },
+    },
+    tabBarItems: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-width': '0',
+              'border-radius': baseTheme.dimensions.borderRadius,
+            },
+            text: {
+
+            },
+          },
+        },
+        selected: {
+          default: {
+            background: {
+              'border-width': '0',
+              'background-color': '$colors.tabSelectedBackground',
+            },
+            text: {
+
+            },
+          },
+        },
       },
     },
     pills: {
@@ -347,6 +377,15 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             background: {
               'border-radius': '0',
+            },
+          },
+        },
+      },
+      navBarSelected: {
+        normal: {
+          default: {
+            background: {
+              'background-color': '$colors.tabSelectedBackground',
             },
           },
         },
