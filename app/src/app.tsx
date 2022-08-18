@@ -5,7 +5,6 @@ import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization }
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Box, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import { AccountControlProvider } from './AccountContext';
 import { Collection, CollectionAttribute, CollectionToken } from './client';
@@ -18,12 +17,13 @@ import { IGalleryPageData, PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { MembersPage } from './pages/MembersPage/MembersPage';
 import { TokenPage } from './pages/TokenPage';
 import { buildProjectTheme } from './theme';
 import { getBackground, getCollectionAddress, getEveryviewCode, getIcon } from './util';
 
 import './fonts.css';
-import { MembersPage } from './pages/MembersPage/MembersPage';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 declare global {
