@@ -52,7 +52,7 @@ export const NavBar = (): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true}>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Wide}>
+      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
         <Stack.Item shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           <LinkBase target='/' isFullHeight={true}>
             {logoImageUrl ? (
@@ -67,8 +67,10 @@ export const NavBar = (): React.ReactElement => {
         <Spacing />
         <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-            <TabBar.Item tabKey={TAB_KEY_GALLERY} text='Gallery' />
-            {/* <TabBar.Item tabKey={TAB_KEY_MEMBERS} text='Members' /> */}
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
+            {getChain(projectId) === 'ethereum' && projectId === 'mdtp' && (
+              <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
+            )}
           </TabBar>
         </ResponsiveHidingView>
         <Stack.Item shrinkFactor={1} growthFactor={1}>
@@ -79,7 +81,7 @@ export const NavBar = (): React.ReactElement => {
             { chain === 'ethereum' && (
               <React.Fragment>
                 { account ? (
-                  <AccountViewLink accountId={account.address} target={`/accounts/${account.address}`} />
+                  <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
                 ) : (
                   <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
                 )}
@@ -96,11 +98,11 @@ export const NavBar = (): React.ReactElement => {
           <Box variant='unrounded-overlay'>
             <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} shouldAddGutters={true} paddingStart={PaddingSize.Wide} paddingEnd={PaddingSize.Wide}>
               <Button text='Gallery' variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
-              {/* <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} /> */}
+              <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
               { chain === 'ethereum' && (
                 <React.Fragment>
                   { account ? (
-                    <AccountViewLink accountId={account.address} target={`/accounts/${account.address}`} />
+                    <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
                   ) : (
                     <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
                   )}

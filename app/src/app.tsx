@@ -65,7 +65,10 @@ export const routes: IRoute<IGlobals>[] = [
     ] },
   { path: '/members',
     page: MembersPage,
-    getPageData: getHomePageData },
+    getPageData: getHomePageData,
+    subRoutes: [
+      { path: 'tokens/:tokenId', page: TokenPage },
+    ] },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
@@ -131,7 +134,7 @@ export const App = (props: IAppProps): React.ReactElement => {
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
                 <NavBar />
                 <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                  <Box variant='unrounded' shouldClipContent={true}>
+                  <Box variant='unrounded' shouldClipContent={true} isFullHeight={false} isFullWidth={true}>
                     <SubRouter routes={routes} />
                   </Box>
                 </Stack.Item>

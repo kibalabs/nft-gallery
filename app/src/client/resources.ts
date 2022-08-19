@@ -1,8 +1,7 @@
-import { dateFromString } from '@kibalabs/core';
+import { dateFromString, ResponseData } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
-export class TokenTransfer {
-  // eslint-disable-next-line no-useless-constructor
+export class TokenTransfer extends ResponseData {
   public constructor(
     readonly tokenTransferId: number,
     readonly transactionHash: string,
@@ -17,8 +16,8 @@ export class TokenTransfer {
     readonly blockNumber: number,
     readonly blockHash: string,
     readonly blockDate: Date,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
     return new TokenTransfer(
@@ -39,8 +38,7 @@ export class TokenTransfer {
   };
 }
 
-export class Collection {
-  // eslint-disable-next-line no-useless-constructor
+export class Collection extends ResponseData {
   public constructor(
     readonly address: string,
     readonly name: string | null,
@@ -52,8 +50,8 @@ export class Collection {
     readonly discordUrl: string | null,
     readonly instagramUsername: string | null,
     readonly twitterUsername: string | null,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): Collection => {
     return new Collection(
@@ -72,13 +70,12 @@ export class Collection {
 }
 
 
-export class CollectionAttribute {
-  // eslint-disable-next-line no-useless-constructor
+export class CollectionAttribute extends ResponseData {
   public constructor(
     readonly name: string,
     readonly values: string[],
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): CollectionAttribute => {
     return new CollectionAttribute(
@@ -88,13 +85,12 @@ export class CollectionAttribute {
   };
 }
 
-export class TokenAttribute {
-  // eslint-disable-next-line no-useless-constructor
+export class TokenAttribute extends ResponseData {
   public constructor(
     readonly traitType: string,
     readonly value: string,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenAttribute => {
     return new TokenAttribute(
@@ -104,8 +100,7 @@ export class TokenAttribute {
   };
 }
 
-export class CollectionToken {
-  // eslint-disable-next-line no-useless-constructor
+export class CollectionToken extends ResponseData {
   public constructor(
     readonly registryAddress: string,
     readonly tokenId: string,
@@ -115,8 +110,8 @@ export class CollectionToken {
     readonly resizableImageUrl: string | null,
     readonly description: string | null,
     readonly attributes: TokenAttribute[],
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): CollectionToken => {
     return new CollectionToken(
@@ -132,16 +127,15 @@ export class CollectionToken {
   };
 }
 
-export class Airdrop {
-  // eslint-disable-next-line no-useless-constructor
+export class Airdrop extends ResponseData {
   public constructor(
     readonly token: CollectionToken,
     readonly name: string,
     readonly isClaimed: boolean,
     readonly claimToken: CollectionToken,
     readonly claimUrl: string,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): Airdrop => {
     return new Airdrop(
@@ -154,8 +148,7 @@ export class Airdrop {
   };
 }
 
-export class TokenListing {
-  // eslint-disable-next-line no-useless-constructor
+export class TokenListing extends ResponseData {
   public constructor(
     readonly tokenListingId: number,
     readonly registryAddress: string,
@@ -167,8 +160,8 @@ export class TokenListing {
     readonly value: BigNumber,
     readonly source: string,
     readonly sourceId: string,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenListing => {
     return new TokenListing(
@@ -187,8 +180,7 @@ export class TokenListing {
 }
 
 
-export class TokenCustomization {
-  // eslint-disable-next-line no-useless-constructor
+export class TokenCustomization extends ResponseData {
   public constructor(
     readonly tokenCustomizationId: number,
     readonly createdDate: Date,
@@ -200,8 +192,8 @@ export class TokenCustomization {
     readonly signature: string,
     readonly name: string | null,
     readonly description: string | null,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenCustomization => {
     return new TokenCustomization(
@@ -220,14 +212,13 @@ export class TokenCustomization {
 }
 
 
-export class GalleryToken {
-  // eslint-disable-next-line no-useless-constructor
+export class GalleryToken extends ResponseData {
   public constructor(
     readonly collectionToken: CollectionToken,
     readonly tokenCustomization: TokenCustomization | null,
     readonly tokenListing: TokenListing | null,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryToken => {
     return new GalleryToken(
@@ -238,14 +229,13 @@ export class GalleryToken {
   };
 }
 
-export class UserProfile {
-  // eslint-disable-next-line no-useless-constructor
+export class UserProfile extends ResponseData {
   public constructor(
     readonly address: string,
     readonly twitterId: string | null,
     readonly discordId: string | null,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): UserProfile => {
     return new UserProfile(
@@ -256,8 +246,7 @@ export class UserProfile {
   };
 }
 
-export class TwitterProfile {
-  // eslint-disable-next-line no-useless-constructor
+export class TwitterProfile extends ResponseData {
   public constructor(
     readonly twitterId: string,
     readonly username: string,
@@ -268,8 +257,8 @@ export class TwitterProfile {
     readonly followerCount: number,
     readonly followingCount: number,
     readonly tweetCount: number,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TwitterProfile => {
     return new TwitterProfile(
@@ -286,15 +275,17 @@ export class TwitterProfile {
   };
 }
 
-export class GalleryUser {
-  // eslint-disable-next-line no-useless-constructor
+export class GalleryUser extends ResponseData {
   public constructor(
     readonly address: string,
     readonly registryAddress: string,
     readonly userProfile: UserProfile | null,
     readonly twitterProfile: TwitterProfile | null,
-  // eslint-disable-next-line no-empty-function
-  ) {}
+    readonly ownedTokenCount: number,
+    readonly joinDate: Date | null,
+
+
+  ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryUser => {
     return new GalleryUser(
@@ -302,6 +293,44 @@ export class GalleryUser {
       String(obj.registryAddress),
       obj.userProfile ? UserProfile.fromObject(obj.userProfile as Record<string, unknown>) : null,
       obj.twitterProfile ? TwitterProfile.fromObject(obj.twitterProfile as Record<string, unknown>) : null,
+      Number(obj.ownedTokenCount),
+      obj.joinDate ? dateFromString(obj.joinDate as string) : null,
+    );
+  };
+}
+
+
+export class GalleryUserRow extends ResponseData {
+  public constructor(
+    readonly galleryUser: GalleryUser,
+    readonly chosenOwnedTokens: CollectionToken[],
+
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryUserRow => {
+    return new GalleryUserRow(
+      GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
+      (obj.chosenOwnedTokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
+    );
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor<T = Record<string, unknown>> = new (...args: any[]) => T;
+
+
+export class ListResponse<ItemType extends ResponseData> extends ResponseData {
+  public constructor(
+    readonly items: ItemType[],
+    readonly totalCount: number,
+
+  ) { super(); }
+
+  public static fromObject = <ItemTypeInner extends ResponseData>(obj: Record<string, unknown>, responseClass: Constructor<ItemTypeInner>): ListResponse<ItemTypeInner> => {
+    return new ListResponse<ItemTypeInner>(
+      // @ts-ignore
+      (obj.items as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): ItemTypeInner => responseClass.fromObject(innerObj)),
+      Number(obj.totalCount),
     );
   };
 }

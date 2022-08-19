@@ -1,5 +1,5 @@
 import { RecursivePartial } from '@kibalabs/core';
-import { buildTheme, ITheme, mergeThemePartial } from '@kibalabs/ui-react';
+import { buildTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
 
 export const buildProjectTheme = (projectId: string): ITheme => {
   const overrideTheme = buildOverrideTheme();
@@ -103,6 +103,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         brandPrimary: 'rgb(245, 91, 32)',
         brandSecondary: 'rgb(158, 143, 160)',
         background: '#333',
+        tabSelectedBackground: 'rgba(245, 91, 32, 0.2)',
       },
       fonts: {
         main: {
@@ -134,6 +135,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       inputWrapperBackground: 'rgba(255, 255, 255, 0.1)',
       inputWrapperBorder: 'rgba(255, 255, 255, 0.1)',
       tabSelectedBackground: 'rgba(255, 255, 255, 0.2)',
+    },
+    dimensions: {
+      paddingInverseNarrow: '-0.25em',
+      paddingInverse: '-0.5em',
+      paddingInverseWide: '-1em',
     },
     alternateColors: {
       dialog: {
@@ -222,6 +228,16 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'border-color': '$colors.backgroundClear05',
         'backdrop-filter': 'blur(3px)',
       },
+      bordered: {
+        'background-color': 'rgba(0, 0, 0, 0)',
+        'border-width': baseTheme.dimensions.borderWidth,
+        'border-color': '#FFFFFF',
+      },
+      memberToken: {
+        'background-color': 'rgba(0, 0, 0, 0)',
+        'border-width': baseTheme.dimensions.borderWidth,
+        'border-color': '$colors.background',
+      },
     },
     tabBarItems: {
       default: {
@@ -244,6 +260,15 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
             },
             text: {
 
+            },
+          },
+        },
+      },
+      narrow: {
+        normal: {
+          default: {
+            background: {
+              padding: `${baseTheme.dimensions.paddingNarrow} ${baseTheme.dimensions.paddingWide}`,
             },
           },
         },
@@ -386,6 +411,64 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             background: {
               'background-color': '$colors.tabSelectedBackground',
+            },
+          },
+        },
+      },
+    },
+    numberPagerItems: {
+      default: {
+        normal: {
+          default: {
+            background: mergeTheme(baseTheme.boxes.default, baseTheme.boxes.focusable, {
+              padding: `${baseTheme.dimensions.paddingNarrow} ${baseTheme.dimensions.paddingNarrow}`,
+              'background-color': 'transparent',
+            }),
+            text: mergeTheme(baseTheme.texts.default, {
+            }),
+          },
+          hover: {
+            background: {
+              'background-color': '$colors.brandPrimaryClear90',
+            },
+          },
+          press: {
+            background: {
+              'background-color': '$colors.brandPrimaryClear80',
+            },
+          },
+          focus: {
+            background: baseTheme.boxes.focussed,
+          },
+        },
+        active: {
+          default: {
+            background: {
+              'background-color': '$colors.tabSelectedBackground',
+            },
+          },
+        },
+        disabled: {
+          default: {
+            background: {
+              // color: '$colors.disabledText',
+              opacity: '0.2',
+            },
+          },
+          hover: {
+            background: {
+              'background-color': 'transparent',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'transparent',
+            },
+          },
+          focus: {
+            background: {
+              'background-color': 'transparent',
+              border: 'none',
             },
           },
         },

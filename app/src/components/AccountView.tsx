@@ -8,7 +8,7 @@ import { useGlobals } from '../globalsContext';
 import { getChain } from '../util';
 
 export interface AccountViewProps {
-  accountId: string;
+  address: string;
   textVariant?: string;
   imageSize?: string;
   shouldUseYourAccount?: boolean;
@@ -25,26 +25,30 @@ export const AccountView = (props: AccountViewProps): React.ReactElement => {
       setName(null);
       return;
     }
-    if (props.accountId && web3) {
-      const retrievedOwnerName = await web3.lookupAddress(props.accountId);
-      setName(retrievedOwnerName);
+    if (props.address && web3) {
+      try {
+        const retrievedOwnerName = await web3.lookupAddress(props.address);
+        setName(retrievedOwnerName);
+      } catch {
+        setName(null);
+      }
     } else {
       setName(null);
     }
-  }, [props.accountId, web3, projectId]);
+  }, [props.address, web3, projectId]);
 
   React.useEffect((): void => {
     updateName();
   }, [updateName]);
 
   const imageSize = props.imageSize ?? '20px';
-  const defaultText = truncateMiddle(props.accountId, 10);
-  const text = (props.shouldUseYourAccount && account?.address === props.accountId) ? 'Your profile' : (name ?? defaultText);
+  const defaultText = truncateMiddle(props.address, 10);
+  const text = (props.shouldUseYourAccount && account?.address === props.address) ? 'Your profile' : (name ?? defaultText);
 
   return (
     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
       <Box variant='rounded' shouldClipContent={true} height={imageSize} width={imageSize}>
-        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${props.accountId}/image`} alternativeText='Avatar' />
+        <Image isLazyLoadable={true} source={`https://web3-images-api.kibalabs.com/v1/accounts/${props.address}/image`} alternativeText='.' />
       </Box>
       <Text variant={props.textVariant}>{text}</Text>
     </Stack>
