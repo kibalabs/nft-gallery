@@ -10,6 +10,7 @@ import { AccountViewLink } from '../../components/AccountView';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
+import { getChain } from '../../util';
 
 
 // interface TableColumn {
@@ -173,7 +174,7 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
 };
 
 export const MembersPage = (): React.ReactElement => {
-  const { collection, notdClient } = useGlobals();
+  const { collection, notdClient, projectId } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
   const [order, setOrder] = React.useState<string>('TOKENCOUNT_DESC');
@@ -184,6 +185,12 @@ export const MembersPage = (): React.ReactElement => {
   const pageSize = 100;
   const [orderField, orderDirection] = order.split('_');
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
+
+  if (getChain(projectId) !== 'ethereum' || projectId === 'mdtp') {
+    return (
+      <React.Fragment />
+    );
+  }
 
   const updateRows = React.useCallback((): void => {
     setRows(undefined);

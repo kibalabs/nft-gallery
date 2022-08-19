@@ -68,7 +68,9 @@ export const NavBar = (): React.ReactElement => {
         <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
             <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
-            <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
+            {getChain(projectId) === 'ethereum' && projectId === 'mdtp' && (
+              <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
+            )}
           </TabBar>
         </ResponsiveHidingView>
         <Stack.Item shrinkFactor={1} growthFactor={1}>
