@@ -174,7 +174,19 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
 };
 
 export const MembersPage = (): React.ReactElement => {
-  const { collection, notdClient, projectId } = useGlobals();
+  const { projectId } = useGlobals();
+
+  if (getChain(projectId) !== 'ethereum' || projectId !== 'mdtp') {
+    return (
+      <React.Fragment />
+    );
+  }
+
+  return <MembersPageReal />;
+};
+
+export const MembersPageReal = (): React.ReactElement => {
+  const { collection, notdClient } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
   const [order, setOrder] = React.useState<string>('TOKENCOUNT_DESC');
@@ -185,12 +197,6 @@ export const MembersPage = (): React.ReactElement => {
   const pageSize = 100;
   const [orderField, orderDirection] = order.split('_');
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
-
-  if (getChain(projectId) !== 'ethereum' || projectId !== 'mdtp') {
-    return (
-      <React.Fragment />
-    );
-  }
 
   const updateRows = React.useCallback((): void => {
     setRows(undefined);
