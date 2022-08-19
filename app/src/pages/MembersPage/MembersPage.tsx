@@ -186,7 +186,7 @@ export const MembersPage = (): React.ReactElement => {
   const [orderField, orderDirection] = order.split('_');
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
 
-  if (getChain(projectId) !== 'ethereum' || projectId === 'mdtp') {
+  if (getChain(projectId) !== 'ethereum' || projectId !== 'mdtp') {
     return (
       <React.Fragment />
     );
