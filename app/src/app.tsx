@@ -65,7 +65,10 @@ export const routes: IRoute<IGlobals>[] = [
     ] },
   { path: '/members',
     page: MembersPage,
-    getPageData: getHomePageData },
+    getPageData: getHomePageData,
+    subRoutes: [
+      { path: 'tokens/:tokenId', page: TokenPage },
+    ] },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {

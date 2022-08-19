@@ -1,19 +1,21 @@
 import React from 'react';
 
-import { dateToRelativeString } from '@kibalabs/core';
-import { Alignment, Box, Direction, Head, IconButton, Image, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { dateToRelativeString, getClassName } from '@kibalabs/core';
+import { SubRouterOutlet, useLocation, useNavigator } from '@kibalabs/core-react';
+import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, IconButton, Image, KibaIcon, LinkBase, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
-import { CollectionToken, GalleryUserRow } from '../../client';
-import { AccountView } from '../../components/AccountView';
+import { CollectionToken, GalleryUserRow, ListResponse } from '../../client';
+import { AccountViewLink } from '../../components/AccountView';
 import { MarginView } from '../../components/MarginView';
+import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
 
 
 // interface TableColumn {
 //   title: string;
-//   isSortable?: boolean;
-//   sortDirection?: 0 | 1 | -1;
+//   isOrderable?: boolean;
+//   orderDirection?: 0 | 1 | -1;
 // }
 
 interface IStyledTableProps {
@@ -35,8 +37,7 @@ interface IStyledTableHeadProps {
 }
 
 const StyledTableHead = styled.thead<IStyledTableHeadProps>`
-  background-color: rgba(255, 255, 255, 0.1);
-  position: sticky;
+
 `;
 
 interface IStyledTableHeadRowProps {
@@ -52,9 +53,20 @@ interface IStyledTableHeadRowItemProps {
 
 const StyledTableHeadRowItem = styled.td<IStyledTableHeadRowItemProps>`
   padding: 0.5em 1em;
-  border-width: 1px;
+  border-width: 1px 0px;
   border-style: solid;
+  background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 1) rgba(255, 255, 255, 0.2);
+
+  &.clickable {
+    cursor: pointer;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
 `;
 
 interface IStyledTableBodyProps {
@@ -69,6 +81,15 @@ interface IStyledTableBodyRowProps {
 }
 
 const StyledTableBodyRow = styled.tr<IStyledTableBodyRowProps>`
+  &.clickable {
+    cursor: pointer;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    &:active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
 `;
 
 interface IStyledTableBodyRowItemProps {
@@ -76,19 +97,19 @@ interface IStyledTableBodyRowItemProps {
 
 const StyledTableBodyRowItem = styled.td<IStyledTableBodyRowItemProps>`
   padding: 0.5em 1em;
-  border-width: 1px;
+  border-width: 1px 0px;
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.2);
 `;
 
-interface IUserCellProps {
+interface IUserCellContentProps {
   row: GalleryUserRow;
 }
 
-const UserCell = (props: IUserCellProps): React.ReactElement => {
+const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
   return (
-    <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-      <AccountView address={props.row.galleryUser.address} />
+    <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
+      <AccountViewLink address={props.row.galleryUser.address} target={`/accounts/${props.row.galleryUser.address}`} />
       {props.row.galleryUser.twitterProfile && (
         <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
       )}
@@ -96,21 +117,23 @@ const UserCell = (props: IUserCellProps): React.ReactElement => {
   );
 };
 
-interface IOwnedTokensCellProps {
+interface IOwnedTokensCellContentProps {
   row: GalleryUserRow;
 }
 
-const OwnedTokensCell = (props: IOwnedTokensCellProps): React.ReactElement => {
+const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
       <Text alignment={TextAlignment.Center}>{props.row.galleryUser.ownedTokenCount}</Text>
-      <Spacing variant={PaddingSize.Wide} />
+      <Spacing variant={PaddingSize.Default} />
       <React.Fragment>
         {props.row.chosenOwnedTokens.slice(0, 7).map((token: CollectionToken): React.ReactElement => (
           <MarginView key={token.tokenId} marginLeft='inverseWide'>
-            <Box width='1.5em' height='1.5em'>
-              <Image source={token.resizableImageUrl ?? token.imageUrl ?? ''} alternativeText={token.name} />
-            </Box>
+            <LinkBase target={`/members/tokens/${token.tokenId}`}>
+              <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
+                <Image variant='unrounded' isLazyLoadable={true} source={token.resizableImageUrl ?? token.imageUrl ?? ''} alternativeText={token.name} width='1.4em' height='1.4em' />
+              </Box>
+            </LinkBase>
           </MarginView>
         ))}
       </React.Fragment>
@@ -118,59 +141,85 @@ const OwnedTokensCell = (props: IOwnedTokensCellProps): React.ReactElement => {
   );
 };
 
+interface IHeaderCellProps {
+  headerId: string;
+  title: string;
+  isOrderable?: boolean;
+  orderDirection?: -1 | 1 | null;
+  onClicked?: (headerId: string) => void;
+}
+
+const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
+  if (props.isOrderable && !props.onClicked) {
+    throw Error('onClicked must be provided if isOrderable=true');
+  }
+
+  const onClicked = (): void => {
+    if (props.onClicked) {
+      props.onClicked(props.headerId);
+    }
+  };
+
+  return (
+    <StyledTableHeadRowItem className={getClassName(props.onClicked != null && 'clickable')} onClick={onClicked}>
+      <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
+        <Text variant='bold' tag='span' alignment={TextAlignment.Left}>{props.title}</Text>
+        {props.orderDirection && (
+          <KibaIcon variant='small' iconId={props.orderDirection === -1 ? 'ion-caret-down-outline' : 'ion-caret-up-outline'} />
+        )}
+      </Stack>
+    </StyledTableHeadRowItem>
+  );
+};
+
 export const MembersPage = (): React.ReactElement => {
   const { collection, notdClient } = useGlobals();
+  const navigator = useNavigator();
+  const location = useLocation();
+  const [order, setOrder] = React.useState<string>('TOKENCOUNT_DESC');
+  const [page, setPage] = React.useState<number>(0);
+  const [pageCount, setPageCount] = React.useState<number>(0);
   const [rows, setRows] = React.useState<GalleryUserRow[] | undefined | null>(undefined);
 
-  // const columns = React.useMemo((): TableColumn[] => {
-  //   return [
-  //     { title: '#', isSortable: true },
-  //     { title: 'Member', isSortable: false },
-  //     { title: 'Joined', isSortable: true },
-  //     { title: 'Tokens', isSortable: true },
-  //     { title: '# Followers', isSortable: true },
-  //   ];
-  // }, []);
-
-  // const rows = React.useMemo((): GalleryUserRow[] => {
-  //   return !collection ? [] : [
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d031', collection.address, null, null, 123, new Date(2022, 2, 1)), [new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, [])]),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d032', collection.address, null, new TwitterProfile('123456', 'krishan711', '', '', false, null, 1234, 1024, 2209), 45, new Date(2022, 7, 10)), [new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, [])]),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d033', collection.address, null, null, 123, new Date(2022, 2, 1)), [new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, [])]),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d034', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d035', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d036', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d031', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d032', collection.address, null, new TwitterProfile('123456', 'krishan711', '', '', false, null, 1234, 1024, 2209), 45, new Date(2022, 7, 10)), [new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, [])]),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d033', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d034', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d035', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d036', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d031', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d032', collection.address, null, new TwitterProfile('123456', 'krishan711', '', '', false, null, 1234, 1024, 2209), 45, new Date(2022, 7, 10)), [new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "207", "", "https://spriteclub.infura-ipfs.io/ipfs/QmW77gbh5BDv661WoX53XVBkwBX1mrcEnDbHDTUb1DxtSX", null, null, null, []), new CollectionToken("0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3", "208", "", "https://spriteclub.infura-ipfs.io/ipfs/QmUn162TXwSUKeNXNt6EB48Q1FSREaxSbTi5f1SdQtQ3qs", null, null, null, [])]),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d033', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d034', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d035', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //     new GalleryUserRow(new GalleryUser('0x18090cDA49B21dEAffC21b4F886aed3eB787d036', collection.address, null, null, 123, new Date(2022, 2, 1)), []),
-  //   ];
-  // }, [collection]);
+  const pageSize = 100;
+  const [orderField, orderDirection] = order.split('_');
+  const isTokenSubpageShowing = location.pathname.includes('/tokens/');
 
   const updateRows = React.useCallback((): void => {
+    setRows(undefined);
     if (!collection) {
-      setRows(undefined);
       return;
     }
-    notdClient.queryCollectionUsers(collection.address, 50, 0, 'TOKENCOUNT_DESC').then((retrievedGalleryUserRows: GalleryUserRow[]): void => {
-      setRows(retrievedGalleryUserRows);
+    notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
+      setRows(retrievedGalleryUserRows.items);
+      setPageCount(Math.ceil(retrievedGalleryUserRows.totalCount / pageSize));
     }).catch((error: unknown): void => {
       console.error(error);
       setRows(null);
     });
-  }, [collection, notdClient]);
+  }, [collection, notdClient, order, page, pageSize]);
 
   React.useEffect((): void => {
     updateRows();
   }, [updateRows]);
+
+  const onHeaderClicked = (headerId: string): void => {
+    if (headerId !== orderField) {
+      setOrder(`${headerId}_DESC`);
+    } else if (orderDirection === 'DESC') {
+      setOrder(`${headerId}_ASC`);
+    } else {
+      setOrder('TOKENCOUNT_DESC');
+    }
+  };
+
+  const onCloseSubpageClicked = (): void => {
+    navigator.navigateTo('/members');
+  };
+
+  const onPageClicked = (newPage: number): void => {
+    setPage(newPage);
+  };
 
   return (
     <React.Fragment>
@@ -183,25 +232,35 @@ export const MembersPage = (): React.ReactElement => {
         <Text variant='error'>Failed to load</Text>
       ) : (
         <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
+          <Stack.Item alignment={Alignment.End}>
+            <Box maxWidth={'400px'}>
+              <NumberPager
+                pageCount={pageCount}
+                activePage={page}
+                siblingPageCount={1}
+                onPageClicked={onPageClicked}
+              />
+            </Box>
+          </Stack.Item>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Box variant='bordered-unpadded' isScrollableVertically={true}>
               <StyledTable>
                 <StyledTableHead>
                   <StyledTableHeadRow>
-                    <StyledTableHeadRowItem style={{ maxWidth: '4em' }}><Text variant='bold' tag='span' alignment={TextAlignment.Center}>#</Text></StyledTableHeadRowItem>
-                    <StyledTableHeadRowItem><Text variant='bold' tag='span' alignment={TextAlignment.Left}>Member</Text></StyledTableHeadRowItem>
-                    <StyledTableHeadRowItem><Text variant='bold' tag='span' alignment={TextAlignment.Center}>Joined</Text></StyledTableHeadRowItem>
-                    <StyledTableHeadRowItem><Text variant='bold' tag='span' alignment={TextAlignment.Center}>Tokens</Text></StyledTableHeadRowItem>
-                    <StyledTableHeadRowItem><Text variant='bold' tag='span' alignment={TextAlignment.Center}># Followers</Text></StyledTableHeadRowItem>
+                    <HeaderCell headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
+                    <HeaderCell headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
+                    <HeaderCell headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                    <HeaderCell headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                    <HeaderCell headerId='FOLLOWERCOUNT' title='# Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                   </StyledTableHeadRow>
                 </StyledTableHead>
                 <StyledTableBody>
                   {rows.map((row: GalleryUserRow, index: number): React.ReactFragment => (
                     <StyledTableBodyRow key={index}>
-                      <StyledTableBodyRowItem style={{ maxWidth: '4em' }}>
-                        <Text alignment={TextAlignment.Center}>{index}</Text>
+                      <StyledTableBodyRowItem>
+                        <Text alignment={TextAlignment.Center}>{(pageSize * page) + index}</Text>
                       </StyledTableBodyRowItem>
-                      <StyledTableBodyRowItem><UserCell row={row} /></StyledTableBodyRowItem>
+                      <StyledTableBodyRowItem><UserCellContent row={row} /></StyledTableBodyRowItem>
                       <StyledTableBodyRowItem>
                         {row.galleryUser.joinDate ? (
                           <Text alignment={TextAlignment.Center}>{dateToRelativeString(row.galleryUser.joinDate)}</Text>
@@ -209,7 +268,7 @@ export const MembersPage = (): React.ReactElement => {
                           <Text alignment={TextAlignment.Center} variant={'note'}>{'-'}</Text>
                         )}
                       </StyledTableBodyRowItem>
-                      <StyledTableBodyRowItem><OwnedTokensCell row={row} /></StyledTableBodyRowItem>
+                      <StyledTableBodyRowItem><OwnedTokensCellContent row={row} /></StyledTableBodyRowItem>
                       <StyledTableBodyRowItem>
                         {row.galleryUser.twitterProfile ? (
                           <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
@@ -225,6 +284,16 @@ export const MembersPage = (): React.ReactElement => {
           </Stack.Item>
         </Stack>
       )}
+      <ColorSettingView variant='dialog'>
+        <Dialog
+          isOpen={isTokenSubpageShowing}
+          onCloseClicked={onCloseSubpageClicked}
+          maxWidth='1000px'
+          maxHeight='90%'
+        >
+          <SubRouterOutlet />
+        </Dialog>
+      </ColorSettingView>
     </React.Fragment>
   );
 };

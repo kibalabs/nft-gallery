@@ -291,35 +291,35 @@ export class GetGalleryCollectionUserResponse extends ResponseData {
 export class QueryCollectionUsersRequest extends RequestData {
   readonly limit?: number;
   readonly offset?: number;
-  readonly sort?: string;
+  readonly order?: string;
 
-  public constructor(limit?: number, offset?: number, sort?: string) {
+  public constructor(limit?: number, offset?: number, order?: string) {
     super();
     this.limit = limit;
     this.offset = offset;
-    this.sort = sort;
+    this.order = order;
   }
 
   public toObject = (): Record<string, unknown> => {
     return {
       limit: this.limit,
       offset: this.offset,
-      sort: this.sort,
+      order: this.order,
     };
   };
 }
 
 export class QueryCollectionUsersResponse extends ResponseData {
-  readonly galleryUserRows: Resources.GalleryUserRow[];
+  readonly galleryUserRowListResponse: Resources.ListResponse<Resources.GalleryUserRow>;
 
-  public constructor(galleryUserRows: Resources.GalleryUserRow[]) {
+  public constructor(galleryUserRowListResponse: Resources.ListResponse<Resources.GalleryUserRow>) {
     super();
-    this.galleryUserRows = galleryUserRows;
+    this.galleryUserRowListResponse = galleryUserRowListResponse;
   }
 
   public static fromObject = (obj: Record<string, unknown>): QueryCollectionUsersResponse => {
     return new QueryCollectionUsersResponse(
-      (obj.galleryUserRows as Record<string, unknown>[]).map((innerObj: Record<string, unknown>):Resources.GalleryUserRow => Resources.GalleryUserRow.fromObject(innerObj)),
+      Resources.ListResponse.fromObject(obj.galleryUserRowListResponse as Record<string, unknown>, Resources.GalleryUserRow),
     );
   };
 }

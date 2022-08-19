@@ -48,7 +48,7 @@ export const AccountView = (props: AccountViewProps): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
       <Box variant='rounded' shouldClipContent={true} height={imageSize} width={imageSize}>
-        <Image source={`https://web3-images-api.kibalabs.com/v1/accounts/${props.address}/image`} alternativeText='Avatar' />
+        <Image isLazyLoadable={true} source={`https://web3-images-api.kibalabs.com/v1/accounts/${props.address}/image`} alternativeText='.' />
       </Box>
       <Text variant={props.textVariant}>{text}</Text>
     </Stack>

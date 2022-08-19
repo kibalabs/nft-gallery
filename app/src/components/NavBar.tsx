@@ -52,7 +52,7 @@ export const NavBar = (): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true}>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Wide}>
+      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true} isFullWidth={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
         <Stack.Item shrinkFactor={1} shouldShrinkBelowContentSize={true}>
           <LinkBase target='/' isFullHeight={true}>
             {logoImageUrl ? (
@@ -67,8 +67,8 @@ export const NavBar = (): React.ReactElement => {
         <Spacing />
         <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-            <TabBar.Item tabKey={TAB_KEY_GALLERY} text='Gallery' />
-            <TabBar.Item tabKey={TAB_KEY_MEMBERS} text='Members' />
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
           </TabBar>
         </ResponsiveHidingView>
         <Stack.Item shrinkFactor={1} growthFactor={1}>
