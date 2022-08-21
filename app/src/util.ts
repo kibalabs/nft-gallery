@@ -26,6 +26,11 @@ export const getHost = (projectId: string): string | null => {
 };
 
 
+export const isMembersEnabled = (projectId: string): boolean => {
+  return projectId === 'mdtp' || projectId === 'goblintown';
+};
+
+
 export const getChain = (projectId: string): string => {
   if (projectId === 'pepes') {
     return 'avalanche';
@@ -77,6 +82,9 @@ export const getLogoImageUrl = (projectId: string): string | null => {
   }
   if (projectId === 'goblintown') {
     return '/assets/goblintown/logo-animated-inverse.gif';
+  }
+  if (projectId === 'mdtp') {
+    return '/assets/mdtp/logo.png';
   }
   return null;
 };
