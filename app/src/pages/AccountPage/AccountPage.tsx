@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, IconButton, KibaIcon, Link, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { GalleryToken, GalleryUser } from '../../client/resources';
@@ -94,12 +94,15 @@ export const AccountPage = (): React.ReactElement => {
       </Head>
       <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
         <Spacing />
-        <AccountView
-          address={accountAddress}
-          textVariant='header2'
-          imageSize='2em'
-          shouldUseYourAccount={true}
-        />
+        <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
+          <AccountView
+            address={accountAddress}
+            textVariant='header2'
+            imageSize='2em'
+            shouldUseYourAccount={true}
+          />
+          <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/address/${accountAddress}`} />
+        </Stack>
         <React.Fragment>
           { galleryUser === undefined || galleryTokens?.length === 0 ? (
             null

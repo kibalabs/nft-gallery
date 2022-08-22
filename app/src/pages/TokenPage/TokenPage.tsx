@@ -11,7 +11,7 @@ import { KeyValue } from '../../components/KeyValue';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
-import { getChain, getTreasureHuntTokenId } from '../../util';
+import { getChain, getTreasureHuntTokenId, isCustomizationEnabled } from '../../util';
 
 export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
@@ -330,7 +330,7 @@ export const TokenPage = (): React.ReactElement => {
                           <Text>{tokenCustomization?.description}</Text>
                         </React.Fragment>
                       )}
-                      { isOwner && projectId === 'sprites' && (
+                      { isOwner && isCustomizationEnabled(projectId) && (
                         <Stack.Item>
                           <Link variant='small' text="Update your Sprites' story" onClicked={onUpdateStoryClicked} />
                         </Stack.Item>
