@@ -283,8 +283,6 @@ export class GalleryUser extends ResponseData {
     readonly twitterProfile: TwitterProfile | null,
     readonly ownedTokenCount: number,
     readonly joinDate: Date | null,
-
-
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryUser => {

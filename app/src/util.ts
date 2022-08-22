@@ -39,7 +39,7 @@ export const getChain = (projectId: string): string => {
 };
 
 
-export const getShouldAllowCustomization = (projectId: string): boolean => {
+export const isCustomizationEnabled = (projectId: string): boolean => {
   if (projectId === 'sprites') {
     return true;
   }
