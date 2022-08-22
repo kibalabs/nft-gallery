@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useTheme } from '@kibalabs/ui-react';
+import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 import { CollectionToken, GalleryUserRow, ListResponse } from '../../client';
