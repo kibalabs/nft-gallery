@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useTheme } from '@kibalabs/ui-react';
+import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useTheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 import { CollectionToken, GalleryUserRow, ListResponse } from '../../client';
@@ -246,12 +246,14 @@ export const MembersPage = (): React.ReactElement => {
 };
 
 export const MembersPageReal = (): React.ReactElement => {
-  const theme = useTheme();
+  const tableTheme = useBuiltTheme<ITableTheme>('tables');
+  const tableHeaderCellTheme = useBuiltTheme<ITableCellTheme>('tableCells', 'header');
+  const tableCellTheme = useBuiltTheme<ITableCellTheme>('tableCells');
   const { collection, notdClient } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
   const [queryOrder, setOrder] = useUrlQueryState('order', undefined, 'TOKENCOUNT_DESC');
-  const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined, 0);
+  const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);
   const [pageCount, setPageCount] = React.useState<number>(0);
   const [rows, setRows] = React.useState<GalleryUserRow[] | undefined | null>(undefined);
 
@@ -357,36 +359,36 @@ export const MembersPageReal = (): React.ReactElement => {
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             <Box variant='bordered-unpadded' isScrollableVertically={true}>
               <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                <StyledTable $theme={theme.tables.default as ITableTheme}>
+                <StyledTable $theme={tableTheme}>
                   <StyledTableHead>
                     <StyledTableHeadRow>
-                      <HeaderCell theme={theme.tableCells.header as ITableCellTheme} headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
-                      <HeaderCell theme={theme.tableCells.header as ITableCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
-                      <HeaderCell theme={theme.tableCells.header as ITableCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                      <HeaderCell theme={theme.tableCells.header as ITableCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                      <HeaderCell theme={theme.tableCells.header as ITableCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                      <HeaderCell theme={tableHeaderCellTheme} headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
+                      <HeaderCell theme={tableHeaderCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
+                      <HeaderCell theme={tableHeaderCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                      <HeaderCell theme={tableHeaderCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                      <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                     </StyledTableHeadRow>
                   </StyledTableHead>
                   <StyledTableBody>
                     {rows.map((row: GalleryUserRow, index: number): React.ReactFragment => (
                       <StyledTableBodyRow key={row.galleryUser.address}>
-                        <StyledTableBodyRowItem $theme={theme.tableCells.default as ITableCellTheme}>
+                        <StyledTableBodyRowItem $theme={tableCellTheme}>
                           <Text alignment={TextAlignment.Center}>{(pageSize * page) + index}</Text>
                         </StyledTableBodyRowItem>
-                        <StyledTableBodyRowItem $theme={theme.tableCells.default as ITableCellTheme}>
+                        <StyledTableBodyRowItem $theme={tableCellTheme}>
                           <UserCellContent row={row} />
                         </StyledTableBodyRowItem>
-                        <StyledTableBodyRowItem $theme={theme.tableCells.default as ITableCellTheme}>
+                        <StyledTableBodyRowItem $theme={tableCellTheme}>
                           {row.galleryUser.joinDate ? (
                             <Text alignment={TextAlignment.Center}>{dateToRelativeString(row.galleryUser.joinDate)}</Text>
                           ) : (
                             <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
                           )}
                         </StyledTableBodyRowItem>
-                        <StyledTableBodyRowItem $theme={theme.tableCells.default as ITableCellTheme}>
+                        <StyledTableBodyRowItem $theme={tableCellTheme}>
                           <OwnedTokensCellContent row={row} />
                         </StyledTableBodyRowItem>
-                        <StyledTableBodyRowItem $theme={theme.tableCells.default as ITableCellTheme}>
+                        <StyledTableBodyRowItem $theme={tableCellTheme}>
                           {row.galleryUser.twitterProfile ? (
                             <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
                           ) : (
