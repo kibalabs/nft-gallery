@@ -1,6 +1,8 @@
 import { RecursivePartial } from '@kibalabs/core';
-import { buildTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
+import { buildTheme, IBoxTheme, ITextTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
 
+// NOTE(krishan711): the ordering here is wrong cos buildOverrideTheme uses baseTheme many times
+// but that doesn't take into account anything changed in this function.
 export const buildProjectTheme = (projectId: string): ITheme => {
   const overrideTheme = buildOverrideTheme();
   if (projectId === 'sprites') {
@@ -121,6 +123,13 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
     }));
   }
+  if (projectId === 'mdtp') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      dimensions: {
+        borderRadius: '1px',
+      },
+    }));
+  }
   return buildTheme(overrideTheme);
 };
 
@@ -150,6 +159,11 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
     fonts: {
       main: {
         url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap',
+      },
+    },
+    dividers: {
+      default: {
+        color: '$colors.tabSelectedBackground',
       },
     },
     texts: {
@@ -237,6 +251,78 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'background-color': 'rgba(0, 0, 0, 0)',
         'border-width': baseTheme.dimensions.borderWidth,
         'border-color': '$colors.background',
+      },
+      unbordered: {
+        'border-width': '0',
+      },
+    },
+    tables: {
+      default: {
+        background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+          'border-width': '0',
+        }),
+      },
+    },
+    tableCells: {
+      default: {
+        normal: {
+          default: {
+            background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+              'border-radius': '0',
+              'border-width': '1px 0px',
+              'border-style': 'solid',
+              'border-color': 'rgba(255, 255, 255, 0.2)',
+              'background-color': 'rgba(255, 255, 255, 0)',
+              padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+            }),
+            text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+            }),
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.2)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.3)',
+            },
+          },
+          focus: {
+            background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+            }),
+          },
+        },
+      },
+      header: {
+        normal: {
+          default: {
+            background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+              'border-radius': '0',
+              'border-width': '1px 0px',
+              'border-style': 'solid',
+              'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 1) rgba(255, 255, 255, 0.2)',
+              'background-color': 'rgba(255, 255, 255, 0.1)',
+              padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+            }),
+            text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+            }),
+          },
+          hover: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.2)',
+            },
+          },
+          press: {
+            background: {
+              'background-color': 'rgba(255, 255, 255, 0.3)',
+            },
+          },
+          focus: {
+            background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+            }),
+          },
+        },
       },
     },
     tabBarItems: {
@@ -330,6 +416,15 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
             background: {
               'background-color': '$colors.inputWrapperBackground',
               'border-color': '$colors.errorClear50',
+            },
+          },
+        },
+      },
+      smallPadding: {
+        normal: {
+          default: {
+            background: {
+              padding: `${baseTheme.dimensions.paddingNarrow} ${baseTheme.dimensions.padding}`,
             },
           },
         },

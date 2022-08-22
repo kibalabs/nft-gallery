@@ -5,7 +5,7 @@ import { Alignment, Box, Button, Direction, getVariant, HidingView, IconButton, 
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { useGlobals } from '../globalsContext';
-import { getChain, getLogoImageUrl } from '../util';
+import { getChain, getLogoImageUrl, isMembersEnabled } from '../util';
 import { AccountViewLink } from './AccountView';
 
 const TAB_KEY_GALLERY = 'TAB_KEY_GALLERY';
@@ -68,10 +68,19 @@ export const NavBar = (): React.ReactElement => {
         <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
             <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
-            {getChain(projectId) === 'ethereum' && projectId === 'mdtp' && (
+            {getChain(projectId) === 'ethereum' && isMembersEnabled(projectId) && (
               <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
             )}
           </TabBar>
+        </ResponsiveHidingView>
+        <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+          {selectedTabKey === TAB_KEY_GALLERY ? (
+            <Text variant='branded'>Gallery</Text>
+          ) : selectedTabKey === TAB_KEY_MEMBERS ? (
+            <Text variant='branded'>Members</Text>
+          ) : (
+            <React.Fragment />
+          )}
         </ResponsiveHidingView>
         <Stack.Item shrinkFactor={1} growthFactor={1}>
           <Spacing />
