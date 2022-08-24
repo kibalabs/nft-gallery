@@ -277,7 +277,7 @@ export const MembersPageReal = (): React.ReactElement => {
 
   const updateRows = React.useCallback((): void => {
     setRows(undefined);
-    if (!collection) {
+    if (!collection?.address) {
       return;
     }
     notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
@@ -287,7 +287,7 @@ export const MembersPageReal = (): React.ReactElement => {
       console.error(error);
       setRows(null);
     });
-  }, [collection, notdClient, order, page, pageSize]);
+  }, [collection?.address, notdClient, order, page, pageSize]);
 
   React.useEffect((): void => {
     updateRows();

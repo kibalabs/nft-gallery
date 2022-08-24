@@ -37,11 +37,11 @@ export const TokenPage = (): React.ReactElement => {
   const isTreasureHuntToken = collectionToken?.tokenId === getTreasureHuntTokenId(projectId);
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
-    if (collection === undefined) {
+    if (collection?.address === undefined) {
       setGalleryToken(undefined);
       return;
     }
-    if (collection === null) {
+    if (collection?.address === null) {
       setGalleryToken(null);
       return;
     }
@@ -53,18 +53,18 @@ export const TokenPage = (): React.ReactElement => {
         setGalleryToken(new GalleryToken(chosenCollectionToken, null, null));
       }
     } else {
-      await notdClient.getGalleryToken(collection.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
+      await notdClient.getGalleryToken(collection?.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
         setGalleryToken(retrievedGalleryToken);
       });
     }
-  }, [notdClient, collection, allTokens, tokenId]);
+  }, [notdClient, collection?.address, allTokens, tokenId]);
 
   React.useEffect((): void => {
     updateCollectionToken();
   }, [updateCollectionToken]);
 
   const updateListings = React.useCallback(async (): Promise<void> => {
-    if (!collection || !collectionToken) {
+    if (!collection?.address || !collectionToken?.tokenId) {
       setLiveListing(null);
       return;
     }
@@ -93,14 +93,14 @@ export const TokenPage = (): React.ReactElement => {
     } else {
       setLiveListing(liveListings.sort((liveListing1: TokenListing, liveListing2: TokenListing): number => (liveListing1.value.gte(liveListing2.value) ? 1 : -1))[0]);
     }
-  }, [projectId, collection, collectionToken]);
+  }, [projectId, collection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateListings();
   }, [updateListings]);
 
   const updateAirdropStatus = React.useCallback(async (): Promise<void> => {
-    if (!collection || !collectionToken) {
+    if (!collection?.address || !collectionToken?.tokenId) {
       setAirdrop(null);
       return;
     }
@@ -115,14 +115,14 @@ export const TokenPage = (): React.ReactElement => {
       console.error(error);
       setAirdrop(null);
     });
-  }, [notdClient, collection, collectionToken]);
+  }, [notdClient, collection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateAirdropStatus();
   }, [updateAirdropStatus]);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    if (!collection || !collectionToken) {
+    if (!collection?.address || !collectionToken?.tokenId) {
       setTokenTransfers(null);
       return;
     }
@@ -137,7 +137,7 @@ export const TokenPage = (): React.ReactElement => {
         setTokenTransfers(null);
       });
     }
-  }, [notdClient, projectId, collection, collectionToken]);
+  }, [notdClient, projectId, collection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateTokenSales();

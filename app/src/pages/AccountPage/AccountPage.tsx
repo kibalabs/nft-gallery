@@ -26,7 +26,7 @@ export const AccountPage = (): React.ReactElement => {
     if (shouldClear) {
       setGalleryTokens(undefined);
     }
-    if (!accountAddress || !collection) {
+    if (!accountAddress || !collection?.address) {
       setGalleryTokens(undefined);
       return;
     }
@@ -36,7 +36,7 @@ export const AccountPage = (): React.ReactElement => {
       console.error(error);
       setGalleryTokens(null);
     });
-  }, [notdClient, collection, accountAddress]);
+  }, [notdClient, collection?.address, accountAddress]);
 
   React.useEffect((): void => {
     updateTokens();
@@ -46,7 +46,7 @@ export const AccountPage = (): React.ReactElement => {
     if (shouldClear) {
       setGalleryUser(undefined);
     }
-    if (!accountAddress || !collection) {
+    if (!accountAddress || !collection?.address) {
       setGalleryUser(undefined);
       return;
     }
@@ -56,7 +56,7 @@ export const AccountPage = (): React.ReactElement => {
       console.error(error);
       setGalleryUser(null);
     });
-  }, [notdClient, collection, accountAddress]);
+  }, [notdClient, collection?.address, accountAddress]);
 
   React.useEffect((): void => {
     updateUser();
