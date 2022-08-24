@@ -256,6 +256,8 @@ const DUMMY_ROW = new GalleryUserRow(
   ],
 );
 
+export const DEFAULT_SORT = 'FOLLOWERCOUNT_DESC';
+
 export const MembersPageReal = (): React.ReactElement => {
   const screenSize = useResponsiveScreenSize();
   const tableTheme = useBuiltTheme<ITableTheme>('tables');
@@ -264,12 +266,12 @@ export const MembersPageReal = (): React.ReactElement => {
   const { collection, notdClient } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
-  const [queryOrder, setOrder] = useUrlQueryState('order', undefined, 'TOKENCOUNT_DESC');
+  const [queryOrder, setOrder] = useUrlQueryState('order', undefined, DEFAULT_SORT);
   const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);
   const [pageCount, setPageCount] = React.useState<number>(0);
   const [rows, setRows] = React.useState<GalleryUserRow[] | undefined | null>(undefined);
 
-  const order = queryOrder ?? 'TOKENCOUNT_DESC';
+  const order = queryOrder ?? DEFAULT_SORT;
   const page = queryPage ?? 0;
   const pageSize = 50;
   const [orderField, orderDirection] = order.split('_');
@@ -299,7 +301,7 @@ export const MembersPageReal = (): React.ReactElement => {
     } else if (orderDirection === 'DESC') {
       setOrder(`${headerId}_ASC`);
     } else {
-      setOrder('TOKENCOUNT_DESC');
+      setOrder(DEFAULT_SORT);
     }
   };
 
