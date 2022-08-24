@@ -277,7 +277,7 @@ export const MembersPageReal = (): React.ReactElement => {
 
   const updateRows = React.useCallback((): void => {
     setRows(undefined);
-    if (!collection) {
+    if (!collection?.address) {
       return;
     }
     notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
@@ -287,7 +287,7 @@ export const MembersPageReal = (): React.ReactElement => {
       console.error(error);
       setRows(null);
     });
-  }, [collection, notdClient, order, page, pageSize]);
+  }, [collection?.address, notdClient, order, page, pageSize]);
 
   React.useEffect((): void => {
     updateRows();
@@ -373,7 +373,7 @@ export const MembersPageReal = (): React.ReactElement => {
               </ResponsiveHidingView>
             </Stack>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Box variant='bordered-unpadded' isScrollableVertically={true}>
+              <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
                 {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
                   <List shouldShowDividers={true}>
                     {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (

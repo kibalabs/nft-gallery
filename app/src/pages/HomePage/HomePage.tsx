@@ -174,7 +174,7 @@ export const HomePage = (): React.ReactElement => {
   };
 
   const updateTokenListings = React.useCallback(async (): Promise<void> => {
-    if (!collection || !galleryTokens) {
+    if (!collection?.address || !galleryTokens) {
       return;
     }
     const filteredTokenIds = galleryTokens.map((galleryToken: GalleryToken): string => galleryToken.collectionToken.tokenId);
@@ -200,7 +200,7 @@ export const HomePage = (): React.ReactElement => {
       });
     }
     setTokenListMap(newListingMap);
-  }, [projectId, collection, galleryTokens, tokenListingMap]);
+  }, [projectId, collection?.address, galleryTokens, tokenListingMap]);
 
   React.useEffect((): void => {
     updateTokenListings();
