@@ -245,7 +245,12 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       bordered: {
         'background-color': 'rgba(0, 0, 0, 0)',
         'border-width': baseTheme.dimensions.borderWidth,
-        'border-color': '#FFFFFF',
+        'border-color': 'rgba(255, 255, 255)',
+      },
+      borderedLight: {
+        'background-color': 'rgba(0, 0, 0, 0)',
+        'border-width': baseTheme.dimensions.borderWidth,
+        'border-color': 'rgba(255, 255, 255, 0.4)',
       },
       memberToken: {
         'background-color': 'rgba(0, 0, 0, 0)',
@@ -301,7 +306,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
               'border-radius': '0',
               'border-width': '1px 0px',
               'border-style': 'solid',
-              'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 1) rgba(255, 255, 255, 0.2)',
+              'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.2)',
               'background-color': 'rgba(255, 255, 255, 0.1)',
               padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
             }),
