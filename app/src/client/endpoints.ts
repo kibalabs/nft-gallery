@@ -346,8 +346,8 @@ export class FollowGalleryUserRequest extends RequestData {
 }
 
 export class FollowGalleryUserResponse extends ResponseData {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   public static fromObject = (obj: Record<string, unknown>): FollowGalleryUserResponse => {
-    return new FollowGalleryUserResponse(
-    );
+    return new FollowGalleryUserResponse();
   };
 }

@@ -5,13 +5,13 @@ import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, us
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
-import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse, TwitterProfile } from '../../client';
+import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
+import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
 import { getChain, isMembersEnabled } from '../../util';
-import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 
 
 interface ITableTheme extends ThemeType {
@@ -339,7 +339,6 @@ export const MembersPageReal = (): React.ReactElement => {
     if (!galleryUser || !galleryUser.twitterProfile || !collection) {
       return;
     }
-    console.log('account', account);
     if (!account) {
       window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
       return;
@@ -348,7 +347,6 @@ export const MembersPageReal = (): React.ReactElement => {
     if (!signature) {
       signature = await onLoginClicked();
     }
-    console.log('signature', signature);
     if (!signature) {
       window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
       return;
@@ -360,7 +358,6 @@ export const MembersPageReal = (): React.ReactElement => {
     } catch (error: unknown) {
       console.error(error);
       window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
-      return;
     }
   };
 
