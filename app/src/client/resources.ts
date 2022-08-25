@@ -1,4 +1,4 @@
-import { dateFromString, ResponseData } from '@kibalabs/core';
+import { dateFromString, RequestData, ResponseData } from '@kibalabs/core';
 import { BigNumber } from 'ethers';
 
 export class TokenTransfer extends ResponseData {

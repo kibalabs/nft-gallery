@@ -27,7 +27,7 @@ export const getHost = (projectId: string): string | null => {
 
 
 export const isMembersEnabled = (projectId: string): boolean => {
-  return projectId === 'mdtp' || projectId === 'goblintown' || projectId == 'sprites';
+  return projectId === 'mdtp' || projectId === 'goblintown' || projectId === 'sprites';
 };
 
 

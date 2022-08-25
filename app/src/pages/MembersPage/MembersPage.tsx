@@ -2,15 +2,16 @@ import React from 'react';
 
 import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
-import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
+import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse, TwitterProfile } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
 import { getChain, isMembersEnabled } from '../../util';
+import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 
 
 interface ITableTheme extends ThemeType {
@@ -192,14 +193,20 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
 interface IMemberRowContentProps {
   index: number;
   row: GalleryUserRow;
+  isFollowing: boolean;
+  onFollowClicked: (galleryUser: GalleryUser) => void;
 }
 
 const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => {
+  const onFollowClicked = (): void => {
+    props.onFollowClicked(props.row.galleryUser);
+  };
+
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
       <Text>{`#${props.index}`}</Text>
       <Stack.Item growthFactor={1} shrinkFactor={1}>
-        <Stack direction={Direction.Vertical}>
+        <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start}>
           <AccountViewLink address={props.row.galleryUser.address} target={`/accounts/${props.row.galleryUser.address}`} />
           {props.row.galleryUser.joinDate ? (
             <Text variant='small'>{`joined ${dateToRelativeString(props.row.galleryUser.joinDate)}`}</Text>
@@ -209,7 +216,7 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
         </Stack>
       </Stack.Item>
       <Box width='3em'>
-        <Stack direction={Direction.Vertical} childAlignment={Alignment.End}>
+        <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
           <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
             <Text>{props.row.galleryUser.ownedTokenCount}</Text>
             <Spacing variant={PaddingSize.Narrow} />
@@ -222,10 +229,17 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
             )}
           </Stack>
           {props.row.galleryUser.twitterProfile && (
-            <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
-              <Text>{props.row.galleryUser.twitterProfile.followerCount}</Text>
-              <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
-            </Stack>
+            <React.Fragment>
+              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
+                <Text>{props.row.galleryUser.twitterProfile.followerCount}</Text>
+                <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
+              </Stack>
+              {props.isFollowing ? (
+                <Text variant='note' shouldBreakAnywhere={false} shouldBreakOnWords={false}>Following</Text>
+              ) : (
+                <Button variant='small' text='Follow' onClicked={onFollowClicked} />
+              )}
+            </React.Fragment>
           )}
         </Stack>
       </Box>
@@ -236,7 +250,7 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
 export const MembersPage = (): React.ReactElement => {
   const { projectId } = useGlobals();
 
-  if (getChain(projectId) !== 'ethereum' && isMembersEnabled(projectId)) {
+  if (getChain(projectId) !== 'ethereum' || !isMembersEnabled(projectId)) {
     return (
       <React.Fragment />
     );
@@ -266,6 +280,10 @@ export const MembersPageReal = (): React.ReactElement => {
   const { collection, notdClient } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
+  const account = useAccount();
+  const loginSignature = useLoginSignature();
+  const onLoginClicked = useOnLoginClicked();
+  const [followedUsers, setFollowedUsers] = React.useState<string[]>([]);
   const [queryOrder, setOrder] = useUrlQueryState('order', undefined, DEFAULT_SORT);
   const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);
   const [pageCount, setPageCount] = React.useState<number>(0);
@@ -315,6 +333,35 @@ export const MembersPageReal = (): React.ReactElement => {
 
   const onPageClicked = (newPage: number): void => {
     setPage(newPage);
+  };
+
+  const onFollowClicked = async (galleryUser: GalleryUser): Promise<void> => {
+    if (!galleryUser || !galleryUser.twitterProfile || !collection) {
+      return;
+    }
+    console.log('account', account);
+    if (!account) {
+      window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
+      return;
+    }
+    let signature = loginSignature;
+    if (!signature) {
+      signature = await onLoginClicked();
+    }
+    console.log('signature', signature);
+    if (!signature) {
+      window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
+      return;
+    }
+    // NOTE(krishan711): this would be better if we knew if the user had logged into twitter already or not
+    try {
+      await notdClient.followGalleryUser(collection?.address, galleryUser.address, account.address, signature.message, signature.signature);
+      setFollowedUsers([...followedUsers, galleryUser.address]);
+    } catch (error: unknown) {
+      console.error(error);
+      window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
+      return;
+    }
   };
 
   return (
@@ -380,7 +427,7 @@ export const MembersPageReal = (): React.ReactElement => {
                   <List shouldShowDividers={true}>
                     {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
                       <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
-                        <MemberRowContent row={row} index={(pageSize * page) + index} />
+                        <MemberRowContent row={row} index={(pageSize * page) + index} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                       </List.Item>
                     ))}
                   </List>
@@ -415,8 +462,15 @@ export const MembersPageReal = (): React.ReactElement => {
                             <OwnedTokensCellContent row={row} />
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            {row.galleryUser.twitterProfile ? (
-                              <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
+                            {row.galleryUser.twitterProfile != null ? (
+                              <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
+                                <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
+                                {followedUsers.includes(row.galleryUser.address) ? (
+                                  <Text variant='note'>Following</Text>
+                                ) : (
+                                  <Button variant='small' text='Follow' onClicked={(): Promise<void> => onFollowClicked(row.galleryUser)} />
+                                )}
+                              </Stack>
                             ) : (
                               <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
                             )}
