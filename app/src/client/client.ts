@@ -103,4 +103,11 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.QueryCollectionUsersResponse);
     return response.galleryUserRowListResponse;
   };
+
+  public followGalleryUser = async (registryAddress: string, userAddress: string, account: string, signatureMessage: string, signature: string): Promise<void> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/collections/${registryAddress}/users/${userAddress}/follow`;
+    const request = new Endpoints.FollowGalleryUserRequest(account, signatureMessage, signature);
+    await this.makeRequest(method, path, request, Endpoints.FollowGalleryUserResponse);
+  };
 }

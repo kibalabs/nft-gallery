@@ -323,3 +323,31 @@ export class QueryCollectionUsersResponse extends ResponseData {
     );
   };
 }
+
+export class FollowGalleryUserRequest extends RequestData {
+  readonly account: string;
+  readonly signatureMessage: string;
+  readonly signature: string;
+
+  public constructor(account: string, signatureMessage: string, signature: string) {
+    super();
+    this.account = account;
+    this.signatureMessage = signatureMessage;
+    this.signature = signature;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      account: this.account,
+      signatureMessage: this.signatureMessage,
+      signature: this.signature,
+    };
+  };
+}
+
+export class FollowGalleryUserResponse extends ResponseData {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  public static fromObject = (obj: Record<string, unknown>): FollowGalleryUserResponse => {
+    return new FollowGalleryUserResponse();
+  };
+}
