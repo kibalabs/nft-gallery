@@ -424,7 +424,7 @@ export const MembersPageReal = (): React.ReactElement => {
                   <List shouldShowDividers={true}>
                     {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
                       <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
-                        <MemberRowContent row={row} index={(pageSize * page) + index} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
+                        <MemberRowContent row={row} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                       </List.Item>
                     ))}
                   </List>
@@ -443,7 +443,7 @@ export const MembersPageReal = (): React.ReactElement => {
                       {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactFragment => (
                         <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`}>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <Text alignment={TextAlignment.Center}>{(pageSize * page) + index}</Text>
+                            <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
                             <UserCellContent row={row} />

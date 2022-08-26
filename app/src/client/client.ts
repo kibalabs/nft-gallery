@@ -110,4 +110,12 @@ export class NotdClient extends ServiceClient {
     const request = new Endpoints.FollowGalleryUserRequest(account, signatureMessage, signature);
     await this.makeRequest(method, path, request, Endpoints.FollowGalleryUserResponse);
   };
+
+  public listCollectionRecentTransfers = async (address: string, userAddress?: string, limit?: number, offset?: number): Promise<Resources.TokenTransfer[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${address}/recent-transfers`;
+    const request = new Endpoints.GetCollectionRecentTransfersRequest(userAddress, limit, offset);
+    const response = await this.makeRequest(method, path, request, Endpoints.GetCollectionRecentTransfersResponse);
+    return response.tokenTransfers;
+  };
 }
