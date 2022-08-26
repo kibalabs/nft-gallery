@@ -351,3 +351,40 @@ export class FollowGalleryUserResponse extends ResponseData {
     return new FollowGalleryUserResponse();
   };
 }
+
+
+export class GetCollectionRecentTransfersRequest extends RequestData {
+  readonly userAddress?: string;
+  readonly limit?: number;
+  readonly offset?: number;
+
+  constructor(userAddress?: string, limit?: number, offset?: number) {
+    super();
+    this.userAddress = userAddress;
+    this.limit = limit;
+    this.offset = offset;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      userAddress: this.userAddress,
+      limit: this.limit,
+      offset: this.offset,
+    };
+  };
+}
+
+export class GetCollectionRecentTransfersResponse extends ResponseData {
+  readonly tokenTransfers: Resources.TokenTransfer[];
+
+  public constructor(tokenTransfers: Resources.TokenTransfer[]) {
+    super();
+    this.tokenTransfers = tokenTransfers;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetCollectionRecentTransfersResponse => {
+    return new GetCollectionRecentTransfersResponse(
+      (obj.tokenTransfers as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenTransfer.fromObject(innerObj)),
+    );
+  };
+}

@@ -16,7 +16,7 @@ export class TokenTransfer extends ResponseData {
     readonly blockNumber: number,
     readonly blockHash: string,
     readonly blockDate: Date,
-
+    readonly token: CollectionToken,
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -34,6 +34,7 @@ export class TokenTransfer extends ResponseData {
       Number(obj.blockNumber),
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
+      CollectionToken.fromObject(obj.token as Record<string, unknown>),
     );
   };
 }
