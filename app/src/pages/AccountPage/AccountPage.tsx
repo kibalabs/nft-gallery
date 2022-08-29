@@ -25,9 +25,16 @@ const TokenTransferRow = (props: ITokenTransferRowProps): React.ReactElement => 
   const isSender = props.tokenTransfer.fromAddress === props.userAddress;
   const hasValue = props.tokenTransfer.value.gt(BigNumber.from(0));
   let iconId = '';
-  if (props.tokenTransfer.toAddress === '0x0000000000000000000000000000000000000000') {
+  if (props.tokenTransfer.isSwap || props.tokenTransfer.isMultiAddress) {
+    action = 'Swapped';
+    iconId = 'ion-trail-sign';
+    actionSecondary = 'with';
+}  else if (props.tokenTransfer.fromAddress === '0x0000000000000000000000000000000000000000') {
     action = 'Minted';
     iconId = 'ion-star';
+  } else if (props.tokenTransfer.toAddress === '0x0000000000000000000000000000000000000000') {
+    action = 'Burned';
+    iconId = 'ion-flame';
   } else if (!hasValue) {
     iconId = 'ion-gift';
     if (isSender) {
@@ -153,7 +160,7 @@ export const AccountPage = (): React.ReactElement => {
   }, [notdClient, collection?.address, accountAddress]);
 
   React.useEffect((): void => {
-    updateUser();
+    updateUser(true);
   }, [updateUser]);
 
   const onCloseSubpageClicked = (): void => {
