@@ -17,6 +17,12 @@ export class TokenTransfer extends ResponseData {
     readonly blockHash: string,
     readonly blockDate: Date,
     readonly token: CollectionToken,
+    readonly isMultiAddress: boolean,
+    readonly isInterstitial: boolean,
+    readonly isSwap: boolean,
+    readonly isBatch: boolean,
+    readonly isOutbound: boolean,
+
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): TokenTransfer => {
@@ -35,6 +41,11 @@ export class TokenTransfer extends ResponseData {
       String(obj.blockHash),
       dateFromString(obj.blockDate as string),
       CollectionToken.fromObject(obj.token as Record<string, unknown>),
+      Boolean(obj.isMultiAddress),
+      Boolean(obj.isInterstitial),
+      Boolean(obj.isSwap),
+      Boolean(obj.isBatch),
+      Boolean(obj.isOutbound),
     );
   };
 }

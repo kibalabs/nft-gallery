@@ -21,6 +21,7 @@ export const AccountView = (props: AccountViewProps): React.ReactElement => {
   const [name, setName] = React.useState<string | null | undefined>(undefined);
 
   const updateName = React.useCallback(async (): Promise<void> => {
+    setName(undefined);
     if (getChain(projectId) !== 'ethereum') {
       setName(null);
       return;
