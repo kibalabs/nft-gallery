@@ -29,7 +29,7 @@ const TokenTransferRow = (props: ITokenTransferRowProps): React.ReactElement => 
     action = 'Swapped';
     iconId = 'ion-trail-sign';
     actionSecondary = 'with';
-}  else if (props.tokenTransfer.fromAddress === '0x0000000000000000000000000000000000000000') {
+  } else if (props.tokenTransfer.fromAddress === '0x0000000000000000000000000000000000000000') {
     action = 'Minted';
     iconId = 'ion-star';
   } else if (props.tokenTransfer.toAddress === '0x0000000000000000000000000000000000000000') {
