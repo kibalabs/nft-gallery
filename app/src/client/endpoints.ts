@@ -388,3 +388,22 @@ export class GetCollectionRecentTransfersResponse extends ResponseData {
     );
   };
 }
+
+
+export class GetGalleryUserOwnedCollectionsRequest extends RequestData {
+}
+
+export class GetGalleryUserOwnedCollectionsResponse extends ResponseData {
+  readonly ownedCollections: Resources.GalleryOwnedCollection[];
+
+  public constructor(ownedCollections: Resources.GalleryOwnedCollection[]) {
+    super();
+    this.ownedCollections = ownedCollections;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): GetGalleryUserOwnedCollectionsResponse => {
+    return new GetGalleryUserOwnedCollectionsResponse(
+      (obj.ownedCollections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.GalleryOwnedCollection.fromObject(innerObj)),
+    );
+  };
+}

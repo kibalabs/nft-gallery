@@ -344,3 +344,18 @@ export class ListResponse<ItemType extends ResponseData> extends ResponseData {
     );
   };
 }
+
+
+export class GalleryOwnedCollection extends ResponseData {
+  public constructor(
+    readonly collection: Collection,
+    readonly tokens: CollectionToken[],
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryOwnedCollection => {
+    return new GalleryOwnedCollection(
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      (obj.tokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
+    );
+  };
+}

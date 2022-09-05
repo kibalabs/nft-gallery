@@ -52,7 +52,7 @@ jobs:
           check-name: type-app
           fail-on-error: false
           path-prefix: ./app/
-  build-app-sprites:
+  build-app-goblintown:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -66,4 +66,4 @@ jobs:
           load: true
           cache-from: type=gha,scope=app
           cache-to: type=gha,mode=max,scope=app
-          build-args: KRT_PROJECT=sprites
+          build-args: KRT_PROJECT=goblintown

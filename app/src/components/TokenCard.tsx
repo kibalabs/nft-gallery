@@ -19,7 +19,7 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
     <LinkBase target={props.target} isFullWidth={true}>
       <Box variant='tokenCard' shouldClipContent={true}>
         <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Start} paddingBottom={PaddingSize.Default}>
-          <Box maxHeight='20em' minHeight='7em' shouldClipContent={true} variant='unrounded'>
+          <Box maxHeight={'20em'} minHeight={'7em'} shouldClipContent={true} variant='unrounded'>
             <Image source={imageUrl || ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
           </Box>
           <Stack direction={Direction.Horizontal} paddingHorizontal={PaddingSize.Wide} isFullWidth={true} childAlignment={Alignment.Center} shouldWrapItems={true}>

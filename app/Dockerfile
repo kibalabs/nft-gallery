@@ -12,7 +12,6 @@ RUN npm ci
 COPY . .
 
 ARG KRT_PROJECT
-ENV OWNER=${KRT_PROJECT:-mdtp}
 
 RUN npm run build-static
 
