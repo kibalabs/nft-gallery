@@ -2,7 +2,7 @@ import React from 'react';
 
 import { getClassName } from '@kibalabs/core';
 import { ISingleAnyChildProps } from '@kibalabs/core-react';
-import { defaultComponentProps, HidingView, ITitledCollapsibleBoxTheme, IComponentProps, KibaIcon, themeToCss, useBuiltTheme } from '@kibalabs/ui-react';
+import { defaultComponentProps, HidingView, IComponentProps, ITitledCollapsibleBoxTheme, KibaIcon, themeToCss, useBuiltTheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToRelativeString, dateToString, shortFormatEther } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, List, LoadingSpinner, PaddingSize, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, List, LoadingSpinner, PaddingSize, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
@@ -220,123 +220,125 @@ export const AccountPage = (): React.ReactElement => {
       <Head>
         <title>{`${accountAddress} | ${collection ? collection.name : 'Token'} Gallery`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-        <Spacing />
-        <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
-          <AccountView
-            address={accountAddress}
-            textVariant='header2'
-            imageSize='2em'
-            shouldUseYourAccount={true}
-          />
-          <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/address/${accountAddress}`} />
-        </Stack>
-        <React.Fragment>
-          {galleryUser && galleryUser.joinDate ? (
-            <Text>{`Joined on ${dateToString(galleryUser.joinDate, 'dd MMM yyyy')}`}</Text>
-          ) : galleryUser && !galleryUser.joinDate && (
-            <Text variant='note'>{'Never joined'}</Text>
-          )}
-        </React.Fragment>
-        <React.Fragment>
-          { galleryUser === undefined || galleryTokens?.length === 0 ? (
-            null
-          ) : galleryUser?.twitterProfile ? (
-            <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
-              <KibaIcon iconId='ion-logo-twitter' />
-              <Link text={`@${galleryUser.twitterProfile.username}`} target={`https://twitter.com/${galleryUser.twitterProfile.username}`} />
-              <Text variant='note'>{`(${galleryUser.twitterProfile.followerCount} followers)`}</Text>
-            </Stack>
-          ) : accountAddress === account?.address ? (
-            <React.Fragment>
-              <Button variant='primary' text='Connect Twitter' iconLeft={<KibaIcon iconId='ion-logo-twitter' />} onClicked={onConnectTwitterClicked} />
-            </React.Fragment>
-          ) : (
-            null
-          )}
-        </React.Fragment>
-        <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-          <TabBar.Item variant='narrow' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
-          <TabBar.Item variant='narrow' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
-          <TabBar.Item variant='narrow' tabKey={TAB_KEY_OTHER} text='Other Projects' />
-        </TabBar>
-        <Stack.Item growthFactor={1} shrinkFactor={1}>
-          {selectedTabKey === TAB_KEY_OWNED ? (
-            <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-              { galleryTokens === undefined ? (
-                <LoadingSpinner />
-              ) : galleryTokens === null ? (
-                <Text variant='error' alignment={TextAlignment.Center}>Failed to load account tokens</Text>
-              ) : galleryTokens.length === 0 ? (
-                <Text alignment={TextAlignment.Center}>No tokens owned</Text>
-              ) : (
-                <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
-                  {galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
-                    <TokenCard
-                      key={index}
-                      token={galleryToken.collectionToken}
-                      tokenCustomization={galleryToken.tokenCustomization}
-                      target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
-                    />
-                  ))}
-                </EqualGrid>
-              )}
-            </Stack>
-          ) : selectedTabKey === TAB_KEY_TRANSACTIONS ? (
-            <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-              { recentTransfers === undefined ? (
-                <LoadingSpinner />
-              ) : recentTransfers === null ? (
-                <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
-              ) : recentTransfers.length === 0 ? (
-                <Text alignment={TextAlignment.Center}>No activity</Text>
-              ) : (
-                <React.Fragment>
-                  <List shouldShowDividers={true} isFullWidth={true}>
-                    {recentTransfers.map((tokenTransfer: TokenTransfer): React.ReactElement => (
-                      <List.Item key={tokenTransfer.tokenTransferId} itemKey={String(tokenTransfer.tokenTransferId)}>
-                        <TokenTransferRow userAddress={accountAddress} tokenTransfer={tokenTransfer} />
-                      </List.Item>
+      <ContainingView>
+        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+          <Spacing />
+          <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
+            <AccountView
+              address={accountAddress}
+              textVariant='header2'
+              imageSize='2em'
+              shouldUseYourAccount={true}
+            />
+            <IconButton icon={<KibaIcon iconId='ion-open-outline' />} target={`https://etherscan.io/address/${accountAddress}`} />
+          </Stack>
+          <React.Fragment>
+            {galleryUser && galleryUser.joinDate ? (
+              <Text>{`Joined on ${dateToString(galleryUser.joinDate, 'dd MMM yyyy')}`}</Text>
+            ) : galleryUser && !galleryUser.joinDate && (
+              <Text variant='note'>{'Never joined'}</Text>
+            )}
+          </React.Fragment>
+          <React.Fragment>
+            { galleryUser === undefined || galleryTokens?.length === 0 ? (
+              null
+            ) : galleryUser?.twitterProfile ? (
+              <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                <KibaIcon iconId='ion-logo-twitter' />
+                <Link text={`@${galleryUser.twitterProfile.username}`} target={`https://twitter.com/${galleryUser.twitterProfile.username}`} />
+                <Text variant='note'>{`(${galleryUser.twitterProfile.followerCount} followers)`}</Text>
+              </Stack>
+            ) : accountAddress === account?.address ? (
+              <React.Fragment>
+                <Button variant='primary' text='Connect Twitter' iconLeft={<KibaIcon iconId='ion-logo-twitter' />} onClicked={onConnectTwitterClicked} />
+              </React.Fragment>
+            ) : (
+              null
+            )}
+          </React.Fragment>
+          <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
+            <TabBar.Item variant='narrow' tabKey={TAB_KEY_OTHER} text='Other Projects' />
+          </TabBar>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            {selectedTabKey === TAB_KEY_OWNED ? (
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                { galleryTokens === undefined ? (
+                  <LoadingSpinner />
+                ) : galleryTokens === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load account tokens</Text>
+                ) : galleryTokens.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No tokens owned</Text>
+                ) : (
+                  <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                    {galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
+                      <TokenCard
+                        key={index}
+                        token={galleryToken.collectionToken}
+                        tokenCustomization={galleryToken.tokenCustomization}
+                        target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
+                      />
                     ))}
-                  </List>
-                </React.Fragment>
-              )}
-            </Stack>
-          ) : (
-            <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
-              { ownedCollections === undefined ? (
-                <LoadingSpinner />
-              ) : ownedCollections === null ? (
-                <Text variant='error' alignment={TextAlignment.Center}>Failed to load other projects</Text>
-              ) : ownedCollections.length === 0 ? (
-                <Text alignment={TextAlignment.Center}>No other projects</Text>
-              ) : (
-                <React.Fragment>
-                  {ownedCollections.map((ownedCollection: GalleryOwnedCollection): React.ReactElement => (
-                    <StatefulCollapsibleBox
-                      key={ownedCollection.collection.address}
-                      isCollapsedInitially={true}
-                      headerView={(
-                        <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                          <Image source={ownedCollection.collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
-                          <Text>{ownedCollection.collection.name}</Text>
-                          <Text variant='bold'>{`x${ownedCollection.tokens.length}`}</Text>
-                        </Stack>
-                      )}
-                    >
-                      <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true}>
-                        {ownedCollection.tokens.map((token: CollectionToken): React.ReactElement => (
-                          <TokenCard key={`${token.registryAddress}-${token.tokenId}`} token={token} target='' />
-                        ))}
-                      </EqualGrid>
-                    </StatefulCollapsibleBox>
-                  ))}
-                </React.Fragment>
-              )}
-            </Stack>
-          )}
-        </Stack.Item>
-      </Stack>
+                  </EqualGrid>
+                )}
+              </Stack>
+            ) : selectedTabKey === TAB_KEY_TRANSACTIONS ? (
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+                { recentTransfers === undefined ? (
+                  <LoadingSpinner />
+                ) : recentTransfers === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
+                ) : recentTransfers.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No activity</Text>
+                ) : (
+                  <React.Fragment>
+                    <List shouldShowDividers={true} isFullWidth={true}>
+                      {recentTransfers.map((tokenTransfer: TokenTransfer): React.ReactElement => (
+                        <List.Item key={tokenTransfer.tokenTransferId} itemKey={String(tokenTransfer.tokenTransferId)}>
+                          <TokenTransferRow userAddress={accountAddress} tokenTransfer={tokenTransfer} />
+                        </List.Item>
+                      ))}
+                    </List>
+                  </React.Fragment>
+                )}
+              </Stack>
+            ) : (
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+                { ownedCollections === undefined ? (
+                  <LoadingSpinner />
+                ) : ownedCollections === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load other projects</Text>
+                ) : ownedCollections.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No other projects</Text>
+                ) : (
+                  <React.Fragment>
+                    {ownedCollections.map((ownedCollection: GalleryOwnedCollection): React.ReactElement => (
+                      <StatefulCollapsibleBox
+                        key={ownedCollection.collection.address}
+                        isCollapsedInitially={true}
+                        headerView={(
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                            <Image source={ownedCollection.collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
+                            <Text>{ownedCollection.collection.name}</Text>
+                            <Text variant='bold'>{`x${ownedCollection.tokens.length}`}</Text>
+                          </Stack>
+                        )}
+                      >
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                          {ownedCollection.tokens.map((token: CollectionToken): React.ReactElement => (
+                            <TokenCard key={`${token.registryAddress}-${token.tokenId}`} token={token} target='' />
+                          ))}
+                        </EqualGrid>
+                      </StatefulCollapsibleBox>
+                    ))}
+                  </React.Fragment>
+                )}
+              </Stack>
+            )}
+          </Stack.Item>
+        </Stack>
+      </ContainingView>
       <ColorSettingView variant='dialog'>
         <Dialog
           isOpen={isTokenSubpageShowing}
