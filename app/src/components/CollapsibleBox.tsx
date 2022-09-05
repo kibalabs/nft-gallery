@@ -2,12 +2,12 @@ import React from 'react';
 
 import { getClassName } from '@kibalabs/core';
 import { ISingleAnyChildProps } from '@kibalabs/core-react';
-import { defaultComponentProps, HidingView, ICollapsibleBoxTheme, IComponentProps, KibaIcon, themeToCss, useBuiltTheme } from '@kibalabs/ui-react';
+import { defaultComponentProps, HidingView, ITitledCollapsibleBoxTheme, IComponentProps, KibaIcon, themeToCss, useBuiltTheme } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 
 interface IStyledCollapsibleBoxProps {
-  $theme: ICollapsibleBoxTheme;
+  $theme: ITitledCollapsibleBoxTheme;
 }
 
 const StyledCollapsibleBox = styled.div<IStyledCollapsibleBoxProps>`
@@ -59,7 +59,7 @@ const StyledContent = styled.div<IStyledCollapsibleBoxProps>`
   }
 `;
 
-interface ICollapsibleBoxProps extends IComponentProps<ICollapsibleBoxTheme>, ISingleAnyChildProps {
+interface ICollapsibleBoxProps extends IComponentProps<ITitledCollapsibleBoxTheme>, ISingleAnyChildProps {
   headerView: React.ReactNode;
   isCollapsed: boolean;
   onCollapseToggled(): void;
@@ -100,7 +100,7 @@ CollapsibleBox.defaultProps = {
 };
 
 
-interface IStatefulCollapsibleBoxProps extends IComponentProps<ICollapsibleBoxTheme>, ISingleAnyChildProps {
+interface IStatefulCollapsibleBoxProps extends IComponentProps<ITitledCollapsibleBoxTheme>, ISingleAnyChildProps {
   headerView: React.ReactNode;
   isCollapsedInitially?: boolean;
 }
