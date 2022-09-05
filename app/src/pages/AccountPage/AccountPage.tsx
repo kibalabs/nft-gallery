@@ -6,13 +6,15 @@ import { Alignment, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head
 import { BigNumber } from 'ethers';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
+import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
 import { AccountView, AccountViewLink } from '../../components/AccountView';
+import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
+const TAB_KEY_OTHER = 'TAB_KEY_OTHER';
 
 interface ITokenTransferRowProps {
   userAddress: string;
@@ -97,6 +99,7 @@ export const AccountPage = (): React.ReactElement => {
   const onLoginClicked = useOnLoginClicked();
   const accountAddress = useStringRouteParam('accountAddress');
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
+  const [ownedCollections, setOwnedCollections] = React.useState<GalleryOwnedCollection[] | null | undefined>(undefined);
   const [galleryUser, setGalleryUser] = React.useState<GalleryUser | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OWNED);
   const [recentTransfers, setRecentTransfers] = React.useState<TokenTransfer[] | null | undefined>(undefined);
@@ -122,6 +125,26 @@ export const AccountPage = (): React.ReactElement => {
   React.useEffect((): void => {
     updateTokens();
   }, [updateTokens]);
+
+  const updateOwnedCollections = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setOwnedCollections(undefined);
+    }
+    if (!accountAddress || !collection?.address) {
+      setOwnedCollections(undefined);
+      return;
+    }
+    notdClient.getOwnedCollections(collection.address, accountAddress).then((retrievedOwnedCollections: GalleryOwnedCollection[]): void => {
+      setOwnedCollections(retrievedOwnedCollections);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setOwnedCollections(null);
+    });
+  }, [notdClient, collection?.address, accountAddress]);
+
+  React.useEffect((): void => {
+    updateOwnedCollections();
+  }, [updateOwnedCollections]);
 
   const updateTransfers = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -235,6 +258,7 @@ export const AccountPage = (): React.ReactElement => {
         <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
           <TabBar.Item variant='narrow' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
           <TabBar.Item variant='narrow' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
+          <TabBar.Item variant='narrow' tabKey={TAB_KEY_OTHER} text='Other Projects' />
         </TabBar>
         <Stack.Item growthFactor={1} shrinkFactor={1}>
           {selectedTabKey === TAB_KEY_OWNED ? (
@@ -258,7 +282,7 @@ export const AccountPage = (): React.ReactElement => {
                 </EqualGrid>
               )}
             </Stack>
-          ) : (
+          ) : selectedTabKey === TAB_KEY_TRANSACTIONS ? (
             <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
               { recentTransfers === undefined ? (
                 <LoadingSpinner />
@@ -275,6 +299,38 @@ export const AccountPage = (): React.ReactElement => {
                       </List.Item>
                     ))}
                   </List>
+                </React.Fragment>
+              )}
+            </Stack>
+          ) : (
+            <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+              { ownedCollections === undefined ? (
+                <LoadingSpinner />
+              ) : ownedCollections === null ? (
+                <Text variant='error' alignment={TextAlignment.Center}>Failed to load other projects</Text>
+              ) : ownedCollections.length === 0 ? (
+                <Text alignment={TextAlignment.Center}>No other projects</Text>
+              ) : (
+                <React.Fragment>
+                  {ownedCollections.map((ownedCollection: GalleryOwnedCollection): React.ReactElement => (
+                    <StatefulCollapsibleBox
+                      key={ownedCollection.collection.address}
+                      isCollapsedInitially={true}
+                      headerView={(
+                        <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                          <Image source={ownedCollection.collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
+                          <Text>{ownedCollection.collection.name}</Text>
+                          <Text variant='bold'>{`x${ownedCollection.tokens.length}`}</Text>
+                        </Stack>
+                      )}
+                    >
+                      <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                        {ownedCollection.tokens.map((token: CollectionToken): React.ReactElement => (
+                          <TokenCard key={`${token.registryAddress}-${token.tokenId}`} token={token} target='' />
+                        ))}
+                      </EqualGrid>
+                    </StatefulCollapsibleBox>
+                  ))}
                 </React.Fragment>
               )}
             </Stack>
