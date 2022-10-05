@@ -229,6 +229,9 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       },
       tokenCard: {
       },
+      tokenCardQuantity: {
+        'background-color': 'rgba(255, 255, 255, 0.05)',
+      },
       unrounded: {
         'border-radius': '0',
       },
