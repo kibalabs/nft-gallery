@@ -60,7 +60,7 @@ export const TokenPage = (): React.ReactElement => {
       if (chosenCollectionToken == null) {
         setGalleryToken(null);
       } else {
-        setGalleryToken(new GalleryToken(chosenCollectionToken, null, null));
+        setGalleryToken(new GalleryToken(chosenCollectionToken, null, null, 1));
       }
     } else {
       await notdClient.getGalleryToken(collection?.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
