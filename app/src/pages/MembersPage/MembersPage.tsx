@@ -110,6 +110,8 @@ interface IStyledTableBodyRowItemProps {
 }
 
 const StyledTableBodyRowItem = styled.td<IStyledTableBodyRowItemProps>`
+  overflow: hidden;
+  vertical-align: middle;
   ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.text)};
   ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.background)};
   /* TODO(krishan711): add the clickable styles */
@@ -121,7 +123,7 @@ interface IUserCellContentProps {
 
 const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
   return (
-    <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
+    <Stack direction={Direction.Horizontal} isFullWidth={false} isFullHeight={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
       <AccountViewLink address={props.row.galleryUser.address} target={`/accounts/${props.row.galleryUser.address}`} />
       {props.row.galleryUser.twitterProfile && (
         <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
@@ -132,6 +134,7 @@ const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
 
 interface IOwnedTokensCellContentProps {
   row: GalleryUserRow;
+  shouldHideTokens?: boolean;
 }
 
 const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.ReactElement => {
@@ -139,17 +142,19 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
       <Text alignment={TextAlignment.Center}>{props.row.galleryUser.ownedTokenCount}</Text>
       <Spacing variant={PaddingSize.Default} />
-      <React.Fragment>
-        {props.row.chosenOwnedTokens.slice(0, 7).map((token: CollectionToken): React.ReactElement => (
-          <MarginView key={token.tokenId} marginLeft='inverseWide'>
-            <LinkBase target={`/members/tokens/${token.tokenId}`}>
-              <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
-                <Image variant='unrounded' isLazyLoadable={true} source={token.resizableImageUrl ?? token.imageUrl ?? ''} alternativeText={token.name} width='1.4em' height='1.4em' />
-              </Box>
-            </LinkBase>
-          </MarginView>
-        ))}
-      </React.Fragment>
+      {!props.shouldHideTokens && (
+        <React.Fragment>
+          {props.row.chosenOwnedTokens.slice(0, 7).map((token: CollectionToken): React.ReactElement => (
+            <MarginView key={token.tokenId} marginLeft='inverseWide'>
+              <LinkBase target={`/members/tokens/${token.tokenId}`}>
+                <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
+                  <Image variant='unrounded' isLazyLoadable={true} source={(token.resizableImageUrl ?? token.imageUrl ?? '').replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText={token.name} width='1.4em' height='1.4em' />
+                </Box>
+              </LinkBase>
+            </MarginView>
+          ))}
+        </React.Fragment>
+      )}
     </Stack>
   );
 };
@@ -277,7 +282,7 @@ export const MembersPageReal = (): React.ReactElement => {
   const tableTheme = useBuiltTheme<ITableTheme>('tables');
   const tableHeaderCellTheme = useBuiltTheme<ITableCellTheme>('tableCells', 'header');
   const tableCellTheme = useBuiltTheme<ITableCellTheme>('tableCells');
-  const { collection, notdClient } = useGlobals();
+  const { collection, notdClient, projectId } = useGlobals();
   const navigator = useNavigator();
   const location = useLocation();
   const account = useAccount();
@@ -456,7 +461,7 @@ export const MembersPageReal = (): React.ReactElement => {
                             )}
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <OwnedTokensCellContent row={row} />
+                            <OwnedTokensCellContent row={row} shouldHideTokens={projectId === 'rudeboys'} />
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
                             {row.galleryUser.twitterProfile != null ? (
