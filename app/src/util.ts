@@ -27,7 +27,7 @@ export const getHost = (projectId: string): string | null => {
 
 
 export const isMembersEnabled = (projectId: string): boolean => {
-  return projectId === 'mdtp' || projectId === 'goblintown' || projectId === 'sprites';
+  return projectId === 'mdtp' || projectId === 'goblintown' || projectId === 'sprites' || projectId === 'rudeboys';
 };
 
 
@@ -152,6 +152,9 @@ export const getCollectionAddress = (projectId: string): string | null => {
   }
   if (projectId === 'sprites') {
     return '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3';
+  }
+  if (projectId === 'rudeboys') {
+    return '0x5351105753Bdbc3Baa908A0c04F1468535749c3D';
   }
   return null;
 };

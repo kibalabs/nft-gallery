@@ -17,17 +17,17 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
   const imageUrl = props.token.resizableImageUrl ?? props.token.imageUrl?.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
   return (
     <LinkBase target={props.target} isFullWidth={true}>
-      <Box variant='tokenCard' shouldClipContent={true}>
-        <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Start} paddingBottom={PaddingSize.Default}>
+      <Box variant='tokenCard' shouldClipContent={true} isFullHeight={true}>
+        <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Default} isFullHeight={true}>
           <Box maxHeight={'20em'} minHeight={'7em'} shouldClipContent={true} variant='unrounded'>
             <Image source={imageUrl || ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
           </Box>
-          <Stack direction={Direction.Horizontal} paddingHorizontal={PaddingSize.Wide} isFullWidth={true} childAlignment={Alignment.Center} shouldWrapItems={true}>
-            <Text variant='tokenCardName'>{props.tokenCustomization?.name || props.token.name}</Text>
+          <Stack direction={Direction.Horizontal} paddingHorizontal={PaddingSize.Wide} isFullWidth={true} childAlignment={Alignment.Center}>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Spacing variant={PaddingSize.Wide} />
+              <Text variant='tokenCardName' shouldBreakOnWords={true}>{props.tokenCustomization?.name || props.token.name}</Text>
             </Stack.Item>
             <HidingView isInvisible={!props.tokenListing}>
+              <Spacing />
               <EtherValue textVariant='tokenCardValue' value={props.tokenListing?.value ? longFormatNumber(etherToNumber(props.tokenListing.value)) : '-------'} />
             </HidingView>
           </Stack>

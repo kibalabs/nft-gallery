@@ -62,7 +62,6 @@ export class Collection extends ResponseData {
     readonly discordUrl: string | null,
     readonly instagramUsername: string | null,
     readonly twitterUsername: string | null,
-
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): Collection => {

@@ -11,6 +11,16 @@ import { AccountViewLink } from './AccountView';
 const TAB_KEY_GALLERY = 'TAB_KEY_GALLERY';
 const TAB_KEY_MEMBERS = 'TAB_KEY_MEMBERS';
 
+const getTabKey = (locationPath): string => {
+  if (locationPath === '/') {
+    return TAB_KEY_GALLERY;
+  }
+  if (locationPath === '/members') {
+    return TAB_KEY_MEMBERS;
+  }
+  return '';
+};
+
 export const NavBar = (): React.ReactElement => {
   const account = useAccount();
   const { projectId, collection } = useGlobals();
@@ -19,7 +29,7 @@ export const NavBar = (): React.ReactElement => {
   const chain = getChain(projectId);
   const navigator = useNavigator();
   const location = useLocation();
-  const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_GALLERY);
+  const [selectedTabKey, setSelectedTabKey] = React.useState<string>(getTabKey(location.pathname));
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
 
   // TODO(krishan711): change tabbar to allow setting targets on tabs directly when updated in ui-react
@@ -34,17 +44,6 @@ export const NavBar = (): React.ReactElement => {
     setSelectedTabKey(newSelectedTabKey);
     setIsMenuOpen(false);
   };
-
-  React.useEffect((): void => {
-    if (location.pathname === '/') {
-      setSelectedTabKey(TAB_KEY_GALLERY);
-    } else if (location.pathname === '/members') {
-      setSelectedTabKey(TAB_KEY_MEMBERS);
-    } else {
-      setSelectedTabKey('');
-    }
-    setIsMenuOpen(false);
-  }, [location]);
 
   const onMenuClicked = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -110,6 +109,7 @@ export const NavBar = (): React.ReactElement => {
               <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
               { chain === 'ethereum' && (
                 <React.Fragment>
+``
                   { account ? (
                     <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
                   ) : (

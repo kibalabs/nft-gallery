@@ -245,7 +245,9 @@ export const HomePage = (): React.ReactElement => {
         )}
       </Head>
       {collection === undefined || collectionAttributes === undefined ? (
-        <LoadingSpinner />
+        <Stack isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
+          <LoadingSpinner />
+        </Stack>
       ) : collection === null || collectionAttributes === null ? (
         <Text variant='error'>Failed to load</Text>
       ) : (
@@ -314,7 +316,9 @@ export const HomePage = (): React.ReactElement => {
                             </Stack>
                           )}
                           {galleryTokens === undefined ? (
-                            <LoadingSpinner />
+                            <Stack isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
+                              <LoadingSpinner />
+                            </Stack>
                           ) : galleryTokens === null ? (
                             <Text variant='error'>Failed to load</Text>
                           ) : (
