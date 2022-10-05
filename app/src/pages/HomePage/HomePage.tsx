@@ -110,7 +110,7 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (!filters[filterKey] || filters[filterKey].length === 0 || filters[filterKey].includes(tokenAttributeMap[filterKey]));
           }, true);
           if (isMatch) {
-            accumulator.push(new GalleryToken(value, null, null));
+            accumulator.push(new GalleryToken(value, null, null, 1));
           }
         }
         return accumulator;
@@ -148,7 +148,7 @@ export const HomePage = (): React.ReactElement => {
             return innerAccumulator && tokenAttributeMap[filterKey] != null && (!filters[filterKey] || filters[filterKey].length === 0 || filters[filterKey].includes(tokenAttributeMap[filterKey]));
           }, true);
           if (isMatch) {
-            accumulator.push(new GalleryToken(value, null, null));
+            accumulator.push(new GalleryToken(value, null, null, 1));
           }
         }
         return accumulator;
@@ -332,6 +332,7 @@ export const HomePage = (): React.ReactElement => {
                                         token={galleryToken.collectionToken}
                                         tokenCustomization={galleryToken.tokenCustomization}
                                         tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
+                                        tokenQuantity={galleryToken.quantity}
                                         target={`/tokens/${galleryToken.collectionToken.tokenId}`}
                                       />
                                     ))}

@@ -277,6 +277,7 @@ export const AccountPage = (): React.ReactElement => {
                         key={index}
                         token={galleryToken.collectionToken}
                         tokenCustomization={galleryToken.tokenCustomization}
+                        tokenQuantity={galleryToken.quantity}
                         target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
                       />
                     ))}
@@ -327,7 +328,12 @@ export const AccountPage = (): React.ReactElement => {
                       >
                         <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true}>
                           {ownedCollection.tokens.map((token: CollectionToken): React.ReactElement => (
-                            <TokenCard key={`${token.registryAddress}-${token.tokenId}`} token={token} target='' />
+                            <TokenCard
+                              key={`${token.registryAddress}-${token.tokenId}`}
+                              token={token}
+                              tokenQuantity={1}
+                              target=''
+                            />
                           ))}
                         </EqualGrid>
                       </StatefulCollapsibleBox>

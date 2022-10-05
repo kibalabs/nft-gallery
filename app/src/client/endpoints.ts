@@ -99,6 +99,25 @@ export class ListTokenRecentTransfersResponse extends ResponseData {
 }
 
 
+export class ListTokenOwnershipsRequest extends RequestData {
+}
+
+export class ListTokenOwnershipsResponse extends ResponseData {
+  readonly tokenOwnerships: Resources.TokenOwnership[];
+
+  public constructor(tokenOwnerships: Resources.TokenOwnership[]) {
+    super();
+    this.tokenOwnerships = tokenOwnerships;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListTokenOwnershipsResponse => {
+    return new ListTokenOwnershipsResponse(
+      (obj.tokenOwnerships as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenOwnership.fromObject(innerObj)),
+    );
+  };
+}
+
+
 export class ListCollectionTokensByOwnersRequest extends RequestData {
 }
 

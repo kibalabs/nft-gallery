@@ -62,6 +62,8 @@ export class Collection extends ResponseData {
     readonly discordUrl: string | null,
     readonly instagramUsername: string | null,
     readonly twitterUsername: string | null,
+    readonly doesSupportErc721: boolean,
+    readonly doesSupportErc1155: boolean,
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): Collection => {
@@ -76,6 +78,8 @@ export class Collection extends ResponseData {
       obj.discordUrl ? String(obj.discordUrl) : null,
       obj.instagramUsername ? String(obj.instagramUsername) : null,
       obj.twitterUsername ? String(obj.twitterUsername) : null,
+      Boolean(obj.doesSupportErc721),
+      Boolean(obj.doesSupportErc1155),
     );
   };
 }
@@ -191,6 +195,26 @@ export class TokenListing extends ResponseData {
 }
 
 
+export class TokenOwnership extends ResponseData {
+  public constructor(
+    readonly registryAddress: string,
+    readonly tokenId: string,
+    readonly ownerAddress: string,
+    readonly quantity: BigNumber,
+
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): TokenOwnership => {
+    return new TokenOwnership(
+      String(obj.registryAddress),
+      String(obj.tokenId),
+      String(obj.ownerAddress),
+      BigNumber.from(String(obj.quantity)),
+    );
+  };
+}
+
+
 export class TokenCustomization extends ResponseData {
   public constructor(
     readonly tokenCustomizationId: number,
@@ -228,7 +252,7 @@ export class GalleryToken extends ResponseData {
     readonly collectionToken: CollectionToken,
     readonly tokenCustomization: TokenCustomization | null,
     readonly tokenListing: TokenListing | null,
-
+    readonly quantity: number,
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryToken => {
@@ -236,6 +260,7 @@ export class GalleryToken extends ResponseData {
       CollectionToken.fromObject(obj.collectionToken as Record<string, unknown>),
       obj.tokenCustomization ? TokenCustomization.fromObject(obj.tokenCustomization as Record<string, unknown>) : null,
       obj.tokenListing ? TokenListing.fromObject(obj.tokenListing as Record<string, unknown>) : null,
+      Number(obj.quantity),
     );
   };
 }
