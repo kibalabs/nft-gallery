@@ -299,7 +299,7 @@ export const TokenPage = (): React.ReactElement => {
                 )}
               </Stack>
             </Stack.Item>
-            <Spacing variant={PaddingSize.Wide} />
+            <Spacing variant={PaddingSize.Wide2} />
             <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
               <Box maxWidth='400px' isFullWidth={true}>
                 <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true}>

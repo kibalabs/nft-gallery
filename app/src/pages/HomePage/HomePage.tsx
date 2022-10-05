@@ -332,6 +332,7 @@ export const HomePage = (): React.ReactElement => {
                                         token={galleryToken.collectionToken}
                                         tokenCustomization={galleryToken.tokenCustomization}
                                         tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
+                                        tokenQuantity={galleryToken.quantity}
                                         target={`/tokens/${galleryToken.collectionToken.tokenId}`}
                                       />
                                     ))}

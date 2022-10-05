@@ -252,7 +252,7 @@ export class GalleryToken extends ResponseData {
     readonly collectionToken: CollectionToken,
     readonly tokenCustomization: TokenCustomization | null,
     readonly tokenListing: TokenListing | null,
-
+    readonly quantity: number,
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryToken => {
@@ -260,6 +260,7 @@ export class GalleryToken extends ResponseData {
       CollectionToken.fromObject(obj.collectionToken as Record<string, unknown>),
       obj.tokenCustomization ? TokenCustomization.fromObject(obj.tokenCustomization as Record<string, unknown>) : null,
       obj.tokenListing ? TokenListing.fromObject(obj.tokenListing as Record<string, unknown>) : null,
+      Number(obj.quantity),
     );
   };
 }
