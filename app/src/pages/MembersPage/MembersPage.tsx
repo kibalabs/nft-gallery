@@ -440,7 +440,7 @@ export const MembersPageReal = (): React.ReactElement => {
                       </StyledTableHeadRow>
                     </StyledTableHead>
                     <StyledTableBody>
-                      {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactFragment => (
+                      {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
                         <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`}>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
                             <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>

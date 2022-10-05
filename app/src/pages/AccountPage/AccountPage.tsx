@@ -334,6 +334,7 @@ export const AccountPage = (): React.ReactElement => {
                     ))}
                   </React.Fragment>
                 )}
+                <Stack.Item growthFactor={1} shrinkFactor={1} />
               </Stack>
             )}
           </Stack.Item>
