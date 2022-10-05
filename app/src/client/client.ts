@@ -57,6 +57,14 @@ export class NotdClient extends ServiceClient {
     return response.tokenTransfers;
   };
 
+  public listCollectionTokenOwnerships = async (registryAddress: string, tokenId: string): Promise<Resources.TokenOwnership[]> => {
+    const method = RestMethod.GET;
+    const path = `v1/collections/${registryAddress}/tokens/${tokenId}/ownerships`;
+    const request = new Endpoints.ListTokenOwnershipsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListTokenOwnershipsResponse);
+    return response.tokenOwnerships;
+  };
+
   public listCollectionTokenAirdrops = async (registryAddress: string, tokenId: string): Promise<Resources.Airdrop[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${registryAddress}/tokens/${tokenId}/airdrops`;

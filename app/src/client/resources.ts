@@ -62,6 +62,8 @@ export class Collection extends ResponseData {
     readonly discordUrl: string | null,
     readonly instagramUsername: string | null,
     readonly twitterUsername: string | null,
+    readonly doesSupportErc721: boolean,
+    readonly doesSupportErc1155: boolean,
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): Collection => {
@@ -76,6 +78,8 @@ export class Collection extends ResponseData {
       obj.discordUrl ? String(obj.discordUrl) : null,
       obj.instagramUsername ? String(obj.instagramUsername) : null,
       obj.twitterUsername ? String(obj.twitterUsername) : null,
+      Boolean(obj.doesSupportErc721),
+      Boolean(obj.doesSupportErc1155),
     );
   };
 }
@@ -186,6 +190,26 @@ export class TokenListing extends ResponseData {
       BigNumber.from(String(obj.value)),
       String(obj.source),
       String(obj.sourceId),
+    );
+  };
+}
+
+
+export class TokenOwnership extends ResponseData {
+  public constructor(
+    readonly registryAddress: string,
+    readonly tokenId: string,
+    readonly ownerAddress: string,
+    readonly quantity: BigNumber,
+
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): TokenOwnership => {
+    return new TokenOwnership(
+      String(obj.registryAddress),
+      String(obj.tokenId),
+      String(obj.ownerAddress),
+      BigNumber.from(String(obj.quantity)),
     );
   };
 }

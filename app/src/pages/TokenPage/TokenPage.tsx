@@ -3,9 +3,10 @@ import React from 'react';
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, IconButton, Image, KibaIcon, Link, LinkBase, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { BigNumber } from 'ethers';
 
 import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountContext';
-import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenTransfer } from '../../client';
+import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
 import { EtherValue } from '../../components/EtherValue';
 import { KeyValue } from '../../components/KeyValue';
 import { useGlobals } from '../../globalsContext';
@@ -23,6 +24,7 @@ export const TokenPage = (): React.ReactElement => {
   const tokenCustomization = galleryToken?.tokenCustomization;
   const onLinkAccountsClicked = useOnLinkAccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
+  const [tokenOwnerships, setTokenOwnerships] = React.useState<TokenOwnership[] | null | undefined>(undefined);
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);
   const [isTreasureHuntSubmitted, setIsTreasureHuntSubmitted] = React.useState<boolean>(false);
   const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
@@ -33,7 +35,15 @@ export const TokenPage = (): React.ReactElement => {
   const imageUrl = collectionToken?.resizableImageUrl ?? (collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '');
   const frameImageUrl = collectionToken?.frameImageUrl && resolveUrl(collectionToken.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
-  const isOwner = latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
+  const isOwner = collection?.doesSupportErc721 && latestTransfer?.toAddress && account && latestTransfer.toAddress === account.address;
+  const tokenQuantity = React.useMemo((): BigNumber => {
+    if (!collection?.doesSupportErc1155 || !tokenOwnerships) {
+      return BigNumber.from(1);
+    }
+    return tokenOwnerships.reduce((accumulator: BigNumber, current: TokenOwnership): BigNumber => {
+      return accumulator.add(current.quantity);
+    }, BigNumber.from(0));
+  }, [collection, tokenOwnerships]);
   const isTreasureHuntToken = collectionToken?.tokenId === getTreasureHuntTokenId(projectId);
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
@@ -143,7 +153,29 @@ export const TokenPage = (): React.ReactElement => {
     updateTokenSales();
   }, [updateTokenSales]);
 
-  const onSubmitClicked = async (): Promise<void> => {
+  const updateTokenOwnerships = React.useCallback(async (): Promise<void> => {
+    if (!collection?.address || !collectionToken?.tokenId || !collection?.doesSupportErc1155) {
+      setTokenOwnerships(null);
+      return;
+    }
+    setTokenOwnerships(undefined);
+    if (getChain(projectId) !== 'ethereum') {
+      setTokenOwnerships([]);
+    } else {
+      notdClient.listCollectionTokenOwnerships(collection.address, collectionToken.tokenId).then((retrievedTokenOwnerships: TokenOwnership[]): void => {
+        setTokenOwnerships(retrievedTokenOwnerships);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setTokenOwnerships(null);
+      });
+    }
+  }, [notdClient, projectId, collection?.address, collectionToken?.tokenId, collection?.doesSupportErc1155]);
+
+  React.useEffect((): void => {
+    updateTokenOwnerships();
+  }, [updateTokenOwnerships]);
+
+  const onTreasureHuntSubmitClicked = async (): Promise<void> => {
     if (!collection || !collectionToken) {
       return;
     }
@@ -312,7 +344,7 @@ export const TokenPage = (): React.ReactElement => {
                       )}
                       <Text variant='header2'>{tokenCustomization?.name || collectionToken.name}</Text>
                       <Spacing variant={PaddingSize.Narrow2} />
-                      { latestTransfer && (
+                      { collection.doesSupportErc721 && latestTransfer && (
                         <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
                           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                             <Text variant='small'>Owned by</Text>
@@ -322,6 +354,15 @@ export const TokenPage = (): React.ReactElement => {
                             <Text variant='small'>{isOwner ? 'You' : truncateMiddle(latestTransfer.toAddress, 10)}</Text>
                           </Stack>
                         </LinkBase>
+                      )}
+                      { collection.doesSupportErc1155 && tokenOwnerships && (
+                        <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                          <KibaIcon variant='small' iconId='ion-person' />
+                          <Text>{`${tokenOwnerships.length} owners`}</Text>
+                          <Spacing />
+                          <KibaIcon variant='small' iconId='ion-grid' />
+                          <Text>{`${tokenQuantity.toString()} total`}</Text>
+                        </Stack>
                       )}
                       {tokenCustomization?.description && (
                         <React.Fragment>
@@ -389,7 +430,7 @@ export const TokenPage = (): React.ReactElement => {
                               ) : !account ? (
                                 <Button variant='primary-small' text='Connect wallet to submit' onClicked={onLinkAccountsClicked} />
                               ) : (
-                                <Button variant='primary-small' text='Submit claim' onClicked={onSubmitClicked} />
+                                <Button variant='primary-small' text='Submit claim' onClicked={onTreasureHuntSubmitClicked} />
                               )}
                               {treasureHuntSubmittingError && (
                                 <Text variant='error'>{treasureHuntSubmittingError.message}</Text>
