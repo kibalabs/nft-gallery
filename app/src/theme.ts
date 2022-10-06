@@ -125,6 +125,23 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
     }));
   }
+  if (projectId === 'rudeboys') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      dimensions: {
+        borderRadius: '1rem',
+      },
+      texts: {
+        default: {
+          'font-family': 'RudeText, sans-serif',
+          'font-weight': '400',
+        },
+        header1: {
+          'font-family': '"RudeScript", sans-serif',
+          'font-weight': '500',
+        },
+      },
+    }));
+  }
   return buildTheme(overrideTheme);
 };
 
@@ -336,9 +353,6 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
               'border-width': '0',
               'border-radius': baseTheme.dimensions.borderRadius,
             },
-            text: {
-
-            },
           },
         },
         selected: {
@@ -347,8 +361,25 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
               'border-width': '0',
               'background-color': '$colors.tabSelectedBackground',
             },
-            text: {
-
+          },
+        },
+      },
+      lined: {
+        normal: {
+          default: {
+            background: {
+              'border-radius': `${baseTheme.dimensions.borderRadius} ${baseTheme.dimensions.borderRadius} 0 0`,
+              'border-width': '0 0 2px 0',
+              'background-color': 'transparent',
+            },
+          },
+        },
+        selected: {
+          default: {
+            background: {
+              'border-color': '$colors.brandPrimary',
+              'border-width': '0 0 2px 0',
+              'background-color': 'transparent',
             },
           },
         },

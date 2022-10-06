@@ -86,6 +86,9 @@ export const getLogoImageUrl = (projectId: string): string | null => {
   if (projectId === 'mdtp') {
     return '/assets/mdtp/logo.png';
   }
+  if (projectId === 'rudeboys') {
+    return '/assets/rudeboys/logo.svg';
+  }
   return null;
 };
 
