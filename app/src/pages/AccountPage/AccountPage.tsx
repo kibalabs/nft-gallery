@@ -9,7 +9,7 @@ import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, Tok
 import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { TokenCard } from '../../components/TokenCard';
-import { TokenTransferRow } from '../../components/UserTokenTransferRow';
+import { UserTokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
@@ -223,7 +223,7 @@ export const AccountPage = (): React.ReactElement => {
                     <List shouldShowDividers={true} isFullWidth={true}>
                       {recentTransfers.map((tokenTransfer: TokenTransfer): React.ReactElement => (
                         <List.Item key={tokenTransfer.tokenTransferId} itemKey={String(tokenTransfer.tokenTransferId)}>
-                          <TokenTransferRow userAddress={accountAddress} tokenTransfer={tokenTransfer} />
+                          <UserTokenTransferRow userAddress={accountAddress} tokenTransfer={tokenTransfer} />
                         </List.Item>
                       ))}
                     </List>

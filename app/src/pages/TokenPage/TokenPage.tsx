@@ -10,7 +10,7 @@ import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, T
 import { AccountViewLink } from '../../components/AccountView';
 import { EtherValue } from '../../components/EtherValue';
 import { KeyValue } from '../../components/KeyValue';
-import { TokenTransferRow } from '../../components/UserTokenTransferRow';
+import { TokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
