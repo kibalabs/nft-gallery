@@ -135,16 +135,18 @@ const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
 interface IOwnedTokensCellContentProps {
   row: GalleryUserRow;
   shouldHideTokens?: boolean;
+  maxTokenCount?: number;
 }
 
 const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.ReactElement => {
+  const maxTokenCount = props.maxTokenCount ?? 5;
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
       <Text alignment={TextAlignment.Center}>{props.row.galleryUser.ownedTokenCount}</Text>
       <Spacing variant={PaddingSize.Default} />
       {!props.shouldHideTokens && (
         <React.Fragment>
-          {props.row.chosenOwnedTokens.slice(0, 7).map((token: CollectionToken): React.ReactElement => (
+          {props.row.chosenOwnedTokens.slice(0, maxTokenCount).map((token: CollectionToken): React.ReactElement => (
             <MarginView key={token.tokenId} marginLeft='inverseWide'>
               <LinkBase target={`/members/tokens/${token.tokenId}`}>
                 <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
@@ -461,7 +463,7 @@ export const MembersPageReal = (): React.ReactElement => {
                             )}
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <OwnedTokensCellContent row={row} shouldHideTokens={projectId === 'rudeboys'} />
+                            <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
                           </StyledTableBodyRowItem>
                           <StyledTableBodyRowItem $theme={tableCellTheme}>
                             {row.galleryUser.twitterProfile != null ? (

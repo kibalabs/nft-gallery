@@ -451,7 +451,7 @@ export const TokenPage = (): React.ReactElement => {
                         </Stack>
                       )}
                       <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ATTRIBUTES} text='Attributes' />
+                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ATTRIBUTES} text='Traits' />
                         {collection.doesSupportErc1155 && tokenOwnerships && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
                         )}
