@@ -1,94 +1,20 @@
 import React from 'react';
 
-import { dateToRelativeString, dateToString, shortFormatEther } from '@kibalabs/core';
+import { dateToString } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, List, LoadingSpinner, PaddingSize, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
-import { BigNumber } from 'ethers';
+import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, List, LoadingSpinner, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
-import { AccountView, AccountViewLink } from '../../components/AccountView';
+import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { TokenCard } from '../../components/TokenCard';
+import { TokenTransferRow } from '../../components/UserTokenTransferRow';
 import { useGlobals } from '../../globalsContext';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
 const TAB_KEY_OTHER = 'TAB_KEY_OTHER';
-
-interface ITokenTransferRowProps {
-  userAddress: string;
-  tokenTransfer: TokenTransfer;
-}
-
-const TokenTransferRow = (props: ITokenTransferRowProps): React.ReactElement => {
-  let action = '';
-  let actionSecondary: string | null = null;
-  const isSender = props.tokenTransfer.fromAddress === props.userAddress;
-  const hasValue = props.tokenTransfer.value.gt(BigNumber.from(0));
-  let iconId = '';
-  if (props.tokenTransfer.isSwap || props.tokenTransfer.isMultiAddress) {
-    action = 'Swapped';
-    iconId = 'ion-trail-sign';
-    actionSecondary = 'with';
-  } else if (props.tokenTransfer.fromAddress === '0x0000000000000000000000000000000000000000') {
-    action = 'Minted';
-    iconId = 'ion-star';
-  } else if (props.tokenTransfer.toAddress === '0x0000000000000000000000000000000000000000') {
-    action = 'Burned';
-    iconId = 'ion-flame';
-  } else if (!hasValue) {
-    iconId = 'ion-gift';
-    if (isSender) {
-      action = 'Gave';
-      actionSecondary = 'to';
-    } else {
-      action = 'Given';
-      actionSecondary = 'by';
-    }
-  } else {
-    iconId = 'ion-pricetag';
-    if (isSender) {
-      action = 'Sold';
-      actionSecondary = 'to';
-    } else {
-      action = 'Bought';
-      actionSecondary = 'from';
-    }
-  }
-  return (
-    <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} shouldAddGutters={false} isFullWidth={true}>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} isFullWidth={true}>
-        <Text variant='note'>{dateToRelativeString(props.tokenTransfer.blockDate)}</Text>
-        <IconButton variant='small' icon={<KibaIcon iconId='ion-open-outline' variant='small' />} target={`https://etherscan.io/tx/${props.tokenTransfer.transactionHash}`} />
-      </Stack>
-      <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} isFullWidth={true}>
-        <KibaIcon iconId={iconId} />
-        <Spacing variant={PaddingSize.Default} />
-        <Text>{action}</Text>
-        <Spacing variant={PaddingSize.Default} />
-        <Image height='1em' width='1em' source={props.tokenTransfer.token.resizableImageUrl || props.tokenTransfer.token.imageUrl || ''} alternativeText='.' />
-        <Spacing variant={PaddingSize.Narrow} />
-        <Text>{props.tokenTransfer.token.name}</Text>
-        <Spacing variant={PaddingSize.Default} />
-      </Stack>
-      {actionSecondary && (
-        <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} isFullWidth={true}>
-          <Text>{actionSecondary}</Text>
-          <Spacing variant={PaddingSize.Default} />
-          {isSender ? (
-            <AccountViewLink address={props.tokenTransfer.toAddress} target={`/accounts/${props.tokenTransfer.toAddress}`} />
-          ) : (
-            <AccountViewLink address={props.tokenTransfer.fromAddress} target={`/accounts/${props.tokenTransfer.fromAddress}`} />
-          )}
-        </Stack>
-      )}
-      {hasValue && (
-        <Text>{`for ${shortFormatEther(props.tokenTransfer.value)}`}</Text>
-      )}
-    </Stack>
-  );
-};
 
 export const AccountPage = (): React.ReactElement => {
   const { notdClient, collection } = useGlobals();
@@ -257,9 +183,9 @@ export const AccountPage = (): React.ReactElement => {
             )}
           </React.Fragment>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-            <TabBar.Item variant='narrow' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
-            <TabBar.Item variant='narrow' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
-            <TabBar.Item variant='narrow' tabKey={TAB_KEY_OTHER} text='Other Projects' />
+            <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
+            <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
+            <TabBar.Item variant='lined' tabKey={TAB_KEY_OTHER} text='Other Projects' />
           </TabBar>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             {selectedTabKey === TAB_KEY_OWNED ? (

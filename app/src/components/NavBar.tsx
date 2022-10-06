@@ -109,7 +109,6 @@ export const NavBar = (): React.ReactElement => {
               <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
               { chain === 'ethereum' && (
                 <React.Fragment>
-``
                   { account ? (
                     <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
                   ) : (

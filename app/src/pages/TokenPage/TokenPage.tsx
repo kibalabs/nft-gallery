@@ -2,17 +2,23 @@ import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, IconButton, Image, KibaIcon, Link, LinkBase, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, HidingView, IconButton, Image, KibaIcon, Link, LinkBase, List, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountContext';
 import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
+import { AccountViewLink } from '../../components/AccountView';
 import { EtherValue } from '../../components/EtherValue';
 import { KeyValue } from '../../components/KeyValue';
+import { TokenTransferRow } from '../../components/UserTokenTransferRow';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
 import { getChain, getTreasureHuntTokenId, isCustomizationEnabled } from '../../util';
+
+const TAB_KEY_ATTRIBUTES = 'TAB_KEY_ATTRIBUTES';
+const TAB_KEY_OWNERSHIPS = 'TAB_KEY_OWNERSHIPS';
+const TAB_KEY_ACTIVITY = 'TAB_KEY_ACITIVTY';
 
 export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
@@ -30,8 +36,9 @@ export const TokenPage = (): React.ReactElement => {
   const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
   const [liveListing, setLiveListing] = React.useState<TokenListing | null | undefined>(undefined);
-  const listing = liveListing ?? galleryToken?.tokenListing;
+  const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_ATTRIBUTES);
 
+  const listing = liveListing ?? galleryToken?.tokenListing;
   const imageUrl = collectionToken?.resizableImageUrl ?? (collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '');
   const frameImageUrl = collectionToken?.frameImageUrl && resolveUrl(collectionToken.frameImageUrl);
   const latestTransfer = tokenTransfers && tokenTransfers.length > 0 ? tokenTransfers[0] : null;
@@ -45,6 +52,10 @@ export const TokenPage = (): React.ReactElement => {
     }, BigNumber.from(0));
   }, [collection, tokenOwnerships]);
   const isTreasureHuntToken = collectionToken?.tokenId === getTreasureHuntTokenId(projectId);
+
+  const onTabKeySelected = (newSelectedTabKey: string): void => {
+    setSelectedTabKey(newSelectedTabKey);
+  };
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
     if (collection?.address === undefined) {
@@ -301,8 +312,8 @@ export const TokenPage = (): React.ReactElement => {
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
             <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-              <Box maxWidth='400px' isFullWidth={true}>
-                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true}>
+              <Box maxWidth='400px' isFullWidth={true} isFullHeight={true}>
+                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true} isFullHeight={true} isScrollableVertically={true}>
                   {isUpdatingStory ? (
                     <Box maxWidth='350px'>
                       <Form onFormSubmitted={onUpdateStorySaveClicked} isLoading={isSavingStory}>
@@ -439,11 +450,56 @@ export const TokenPage = (): React.ReactElement => {
                           )}
                         </Stack>
                       )}
-                      <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                        {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
-                          <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
-                        ))}
-                      </EqualGrid>
+                      <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
+                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ATTRIBUTES} text='Attributes' />
+                        {collection.doesSupportErc1155 && tokenOwnerships && (
+                          <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
+                        )}
+                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                      </TabBar>
+                      <Spacing />
+                      <Stack.Item growthFactor={1} shrinkFactor={1}>
+                        <HidingView isHidden={selectedTabKey !== TAB_KEY_ATTRIBUTES}>
+                          <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                            {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
+                              <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
+                            ))}
+                          </EqualGrid>
+                        </HidingView>
+                        <HidingView isHidden={selectedTabKey !== TAB_KEY_OWNERSHIPS}>
+                          <List isFullWidth={true}>
+                            {tokenOwnerships?.map((tokenOwnership: TokenOwnership): React.ReactElement => (
+                              <List.Item variant='slim' key={tokenOwnership.ownerAddress} itemKey={tokenOwnership.ownerAddress}>
+                                <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true}>
+                                  <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                                    <AccountViewLink address={tokenOwnership.ownerAddress} target={`/accounts/${tokenOwnership.ownerAddress}`} />
+                                  </Stack.Item>
+                                  <Text>{tokenOwnership.quantity.toString()}</Text>
+                                </Stack>
+                              </List.Item>
+                            ))}
+                          </List>
+                        </HidingView>
+                        <HidingView isHidden={selectedTabKey !== TAB_KEY_ACTIVITY}>
+                          { tokenTransfers === undefined ? (
+                            <LoadingSpinner />
+                          ) : tokenTransfers === null ? (
+                            <Text variant='error' alignment={TextAlignment.Center}>Failed to load activity</Text>
+                          ) : tokenTransfers.length === 0 ? (
+                            <Text alignment={TextAlignment.Center}>No activity</Text>
+                          ) : (
+                            <React.Fragment>
+                              <List shouldShowDividers={true} isFullWidth={true}>
+                                {tokenTransfers.map((tokenTransfer: TokenTransfer): React.ReactElement => (
+                                  <List.Item key={tokenTransfer.tokenTransferId} itemKey={String(tokenTransfer.tokenTransferId)}>
+                                    <TokenTransferRow tokenTransfer={tokenTransfer} />
+                                  </List.Item>
+                                ))}
+                              </List>
+                            </React.Fragment>
+                          )}
+                        </HidingView>
+                      </Stack.Item>
                     </React.Fragment>
                   )}
                 </Stack>

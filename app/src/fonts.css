@@ -7,3 +7,44 @@
     font-weight: normal;
     font-style: normal;
 }
+
+@font-face {
+    font-family: "RudeDisplay";
+    src: url("/assets/rudeboys/fonts/RudeDisplay-Regular.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeDisplay-Regular.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeDisplay-Closed";
+    src: url("/assets/rudeboys/fonts/RudeDisplay-Closed.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeDisplay-Closed.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeDisplay-Corset";
+    src: url("/assets/rudeboys/fonts/RudeDisplay-Corset.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeDisplay-Corset.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeDisplay-Straight";
+    src: url("/assets/rudeboys/fonts/RudeDisplay-Straight.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeDisplay-Straight.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeDisplay-VariableVF";
+    src: url("/assets/rudeboys/fonts/RudeDisplay-VariableVF.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeDisplay-VariableVF.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeScript";
+    src: url("/assets/rudeboys/fonts/RudeScript-Regular.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeScript-Regular.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeText";
+    src: url("/assets/rudeboys/fonts/RudeText-Regular.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeText-Regular.woff") format('woff');
+}
+
+@font-face {
+    font-family: "RudeText";
+    font-style: oblique;
+    src: url("/assets/rudeboys/fonts/RudeText-Bold.woff2") format('woff2'), url("/assets/rudeboys/fonts/RudeText-Bold.woff") format('woff');
+}
