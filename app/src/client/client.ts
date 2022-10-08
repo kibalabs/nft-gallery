@@ -134,4 +134,20 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.GetGalleryUserOwnedCollectionsResponse);
     return response.ownedCollections;
   };
+
+  public getCollectionOverlaps = async (address: string, otherRegistryAddress?: string): Promise<Resources.CollectionOverlap[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${address}/overlaps`;
+    const request = new Endpoints.ListGalleryCollectionOverlapsRequest(otherRegistryAddress);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryCollectionOverlapsResponse);
+    return response.collectionOverlaps;
+  };
+
+  public getCollectionOverlapSummaries = async (address: string): Promise<Resources.CollectionOverlapSummary[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${address}/overlap-summaries`;
+    const request = new Endpoints.ListGalleryCollectionOverlapSummariesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryCollectionOverlapSummariesResponse);
+    return response.collectionOverlapSummaries;
+  };
 }

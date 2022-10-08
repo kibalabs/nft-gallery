@@ -383,3 +383,43 @@ export class GalleryOwnedCollection extends ResponseData {
     );
   };
 }
+
+export class CollectionOverlap extends ResponseData {
+  public constructor(
+    readonly registryAddress: string,
+    readonly otherRegistryAddress: string,
+    readonly ownerAddress: string,
+    readonly registryTokenCount: number,
+    readonly otherRegistryTokenCount: number,
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionOverlap => {
+    return new CollectionOverlap(
+      String(obj.registryAddress),
+      String(obj.otherRegistryAddress),
+      String(obj.ownerAddress),
+      Number(obj.registryTokenCount),
+      Number(obj.otherRegistryTokenCount),
+    );
+  };
+}
+
+export class CollectionOverlapSummary extends ResponseData {
+  public constructor(
+    readonly registryAddress: string,
+    readonly otherCollection: Collection,
+    readonly ownerCount: number,
+    readonly registryTokenCount: number,
+    readonly otherRegistryTokenCount: number,
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): CollectionOverlapSummary => {
+    return new CollectionOverlapSummary(
+      String(obj.registryAddress),
+      Collection.fromObject(obj.otherCollection as Record<string, unknown>),
+      Number(obj.ownerCount),
+      Number(obj.registryTokenCount),
+      Number(obj.otherRegistryTokenCount),
+    );
+  };
+}

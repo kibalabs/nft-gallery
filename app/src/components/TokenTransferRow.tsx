@@ -1,11 +1,12 @@
 import React from 'react';
 
 import { dateToRelativeString, shortFormatEther } from '@kibalabs/core';
-import { Alignment, Direction, IconButton, Image, KibaIcon, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Direction, IconButton, KibaIcon, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { TokenTransfer } from '../client/resources';
 import { AccountViewLink } from './AccountView';
+import { IpfsImage } from './IpfsImage';
 
 interface IUserTokenTransferRowProps {
   userAddress: string;
@@ -58,7 +59,7 @@ export const UserTokenTransferRow = (props: IUserTokenTransferRowProps): React.R
         <Spacing variant={PaddingSize.Default} />
         <Text>{action}</Text>
         <Spacing variant={PaddingSize.Default} />
-        <Image height='1em' width='1em' source={props.tokenTransfer.token.resizableImageUrl || props.tokenTransfer.token.imageUrl || ''} alternativeText='.' />
+        <IpfsImage height='1em' width='1em' source={props.tokenTransfer.token.resizableImageUrl || props.tokenTransfer.token.imageUrl || ''} alternativeText='.' />
         <Spacing variant={PaddingSize.Narrow} />
         <Text>{props.tokenTransfer.token.name}</Text>
       </Stack>

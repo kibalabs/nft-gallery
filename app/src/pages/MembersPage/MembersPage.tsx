@@ -2,16 +2,17 @@ import React from 'react';
 
 import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, Image, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
+import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
-import { getChain, isMembersEnabled } from '../../util';
+import { getChain } from '../../util';
 
 
 interface ITableTheme extends ThemeType {
@@ -150,7 +151,7 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
             <MarginView key={token.tokenId} marginLeft='inverseWide'>
               <LinkBase target={`/members/tokens/${token.tokenId}`}>
                 <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
-                  <Image variant='unrounded' isLazyLoadable={true} source={(token.resizableImageUrl ?? token.imageUrl ?? '').replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText={token.name} width='1.4em' height='1.4em' />
+                  <IpfsImage variant='unrounded' isLazyLoadable={true} source={(token.resizableImageUrl ?? token.imageUrl ?? '')} alternativeText={token.name} width='1.4em' height='1.4em' />
                 </Box>
               </LinkBase>
             </MarginView>
@@ -230,7 +231,7 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
             {props.row.chosenOwnedTokens.length > 0 && (
               <LinkBase target={`/members/tokens/${props.row.chosenOwnedTokens[0].tokenId}`}>
                 <Box variant='memberToken-unbordered' isFullWidth={false} shouldClipContent={true}>
-                  <Image variant='unrounded' isLazyLoadable={true} source={props.row.chosenOwnedTokens[0].resizableImageUrl ?? props.row.chosenOwnedTokens[0].imageUrl ?? ''} alternativeText={props.row.chosenOwnedTokens[0].name} width='1.4em' height='1.4em' />
+                  <IpfsImage variant='unrounded' isLazyLoadable={true} source={props.row.chosenOwnedTokens[0].resizableImageUrl ?? props.row.chosenOwnedTokens[0].imageUrl ?? ''} alternativeText={props.row.chosenOwnedTokens[0].name} width='1.4em' height='1.4em' />
                 </Box>
               </LinkBase>
             )}
@@ -257,7 +258,7 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
 export const MembersPage = (): React.ReactElement => {
   const { projectId } = useGlobals();
 
-  if (getChain(projectId) !== 'ethereum' || !isMembersEnabled(projectId)) {
+  if (getChain(projectId) !== 'ethereum') {
     return (
       <React.Fragment />
     );

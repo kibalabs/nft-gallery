@@ -1,10 +1,11 @@
 import React from 'react';
 
 import { etherToNumber, longFormatNumber } from '@kibalabs/core';
-import { Alignment, Box, Direction, HidingView, Image, LinkBase, PaddingSize, PaddingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Direction, HidingView, LinkBase, PaddingSize, PaddingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
 import { CollectionToken, TokenCustomization, TokenListing } from '../client';
 import { EtherValue } from './EtherValue';
+import { IpfsImage } from './IpfsImage';
 
 interface ITokenCardProps {
   target: string;
@@ -15,13 +16,12 @@ interface ITokenCardProps {
 }
 
 export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
-  const imageUrl = props.token.resizableImageUrl ?? props.token.imageUrl?.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/');
   return (
     <LinkBase target={props.target} isFullWidth={true}>
       <Box variant='tokenCard' shouldClipContent={true} isFullHeight={true}>
         <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Default} isFullHeight={true}>
           <Box maxHeight={'20em'} minHeight={'10em'} shouldClipContent={true} variant='unrounded'>
-            <Image source={imageUrl || ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
+            <IpfsImage source={props.token.resizableImageUrl ?? props.token.imageUrl ?? ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
             {props.tokenQuantity > 1 && (
               <div style={{ position: 'absolute', top: 0, right: 0 }}>
                 <Box variant='tokenCardQuantity' shouldClipContent={true}>

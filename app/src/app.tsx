@@ -17,6 +17,7 @@ import { IGalleryPageData, PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage';
 import { HomePage } from './pages/HomePage';
 import { getHomePageData } from './pages/HomePage/getHomePageData';
+import { MemberHoldingsPage } from './pages/MemberHoldingsPage';
 import { MembersPage } from './pages/MembersPage/MembersPage';
 import { TokenPage } from './pages/TokenPage';
 import { buildProjectTheme } from './theme';
@@ -65,6 +66,12 @@ export const routes: IRoute<IGlobals>[] = [
     ] },
   { path: '/members',
     page: MembersPage,
+    getPageData: getHomePageData,
+    subRoutes: [
+      { path: 'tokens/:tokenId', page: TokenPage },
+    ] },
+  { path: '/member-holdings',
+    page: MemberHoldingsPage,
     getPageData: getHomePageData,
     subRoutes: [
       { path: 'tokens/:tokenId', page: TokenPage },
