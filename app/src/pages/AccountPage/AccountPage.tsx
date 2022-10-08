@@ -2,12 +2,13 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, Image, KibaIcon, Link, List, LoadingSpinner, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
+import { IpfsImage } from '../../components/IpfsImage';
 import { TokenCard } from '../../components/TokenCard';
 import { UserTokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
@@ -246,7 +247,7 @@ export const AccountPage = (): React.ReactElement => {
                         isCollapsedInitially={true}
                         headerView={(
                           <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
-                            <Image source={ownedCollection.collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
+                            <IpfsImage source={ownedCollection.collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
                             <Text>{ownedCollection.collection.name}</Text>
                             <Text variant='bold'>{`x${ownedCollection.tokens.length}`}</Text>
                           </Stack>

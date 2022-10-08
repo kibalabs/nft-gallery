@@ -9,6 +9,7 @@ import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountCont
 import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { EtherValue } from '../../components/EtherValue';
+import { IpfsImage } from '../../components/IpfsImage';
 import { KeyValue } from '../../components/KeyValue';
 import { TokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
@@ -299,7 +300,7 @@ export const TokenPage = (): React.ReactElement => {
           <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
               <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
-                <Image source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={true} alternativeText={collectionToken.name} isFullWidth={true} />
+                <IpfsImage source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={true} alternativeText={collectionToken.name} isFullWidth={true} />
                 {getChain(projectId) === 'ethereum' && (
                   <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
                     <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
@@ -393,7 +394,7 @@ export const TokenPage = (): React.ReactElement => {
                           <Text variant='note'>Frame</Text>
                           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                             <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
-                              <Image source={frameImageUrl} alternativeText='Avatar' />
+                              <IpfsImage source={frameImageUrl} alternativeText='Avatar' />
                             </Box>
                             <Link text={truncateEnd(collectionToken.frameImageUrl, 20)} target={frameImageUrl} />
                           </Stack>
@@ -417,7 +418,7 @@ export const TokenPage = (): React.ReactElement => {
                             <Text variant='small'>{`${airdrop.isClaimed ? 'Claimed:' : 'To claim:'}`}</Text>
                             {airdrop.claimToken.imageUrl && (
                               <Box height='1em' width='1em'>
-                                <Image source={airdrop.claimToken.imageUrl.replace('ipfs://', 'https://pablo-images.kibalabs.com/v1/ipfs/')} alternativeText='' />
+                                <IpfsImage source={airdrop.claimToken.imageUrl} alternativeText='' />
                               </Box>
                             )}
                             <Text variant='small'>{`${airdrop.claimToken.name}`}</Text>

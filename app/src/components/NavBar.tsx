@@ -1,15 +1,17 @@
 import React from 'react';
 
 import { useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, Box, Button, Direction, getVariant, HidingView, IconButton, Image, KibaIcon, LinkBase, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, Direction, getVariant, HidingView, IconButton, KibaIcon, LinkBase, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text } from '@kibalabs/ui-react';
 
 import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
 import { useGlobals } from '../globalsContext';
-import { getChain, getLogoImageUrl, isMembersEnabled } from '../util';
+import { getChain, getLogoImageUrl } from '../util';
 import { AccountViewLink } from './AccountView';
+import { IpfsImage } from './IpfsImage';
 
 const TAB_KEY_GALLERY = 'TAB_KEY_GALLERY';
 const TAB_KEY_MEMBERS = 'TAB_KEY_MEMBERS';
+const TAB_KEY_HOLDINGS = 'TAB_KEY_HOLDINGS';
 
 const getTabKey = (locationPath): string => {
   if (locationPath === '/') {
@@ -17,6 +19,9 @@ const getTabKey = (locationPath): string => {
   }
   if (locationPath === '/members') {
     return TAB_KEY_MEMBERS;
+  }
+  if (locationPath === '/member-holdings') {
+    return TAB_KEY_HOLDINGS;
   }
   return '';
 };
@@ -39,6 +44,8 @@ export const NavBar = (): React.ReactElement => {
       newLocation = '/';
     } else if (newSelectedTabKey === TAB_KEY_MEMBERS) {
       newLocation = '/members';
+    } else if (newSelectedTabKey === TAB_KEY_HOLDINGS) {
+      newLocation = '/member-holdings';
     }
     navigator.navigateTo(newLocation);
     setSelectedTabKey(newSelectedTabKey);
@@ -56,7 +63,7 @@ export const NavBar = (): React.ReactElement => {
           <LinkBase target='/' isFullHeight={true}>
             {logoImageUrl ? (
               <Box height='100%' width='100%' maxHeight={projectId === 'pepes' ? '3rem' : '2rem'} shouldClipContent={true}>
-                <Image source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} Gallery`} isFullHeight={true} isFullWidth={true} />
+                <IpfsImage source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} Gallery`} isFullHeight={true} isFullWidth={true} />
               </Box>
             ) : (
               <Text variant='header1'>{`${collection ? collection.name : ''} Gallery`}</Text>
@@ -67,8 +74,11 @@ export const NavBar = (): React.ReactElement => {
         <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
           <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
             <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
-            {getChain(projectId) === 'ethereum' && isMembersEnabled(projectId) && (
+            {getChain(projectId) === 'ethereum' && (
               <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
+            )}
+            {getChain(projectId) === 'ethereum' && (
+              <TabBar.Item variant='narrow' tabKey={TAB_KEY_HOLDINGS} text='Member Holdings' />
             )}
           </TabBar>
         </ResponsiveHidingView>
@@ -77,6 +87,8 @@ export const NavBar = (): React.ReactElement => {
             <Text variant='branded'>Gallery</Text>
           ) : selectedTabKey === TAB_KEY_MEMBERS ? (
             <Text variant='branded'>Members</Text>
+          ) : selectedTabKey === TAB_KEY_HOLDINGS ? (
+            <Text variant='branded'>Member Holdings</Text>
           ) : (
             <React.Fragment />
           )}
