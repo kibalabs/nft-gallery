@@ -359,7 +359,7 @@ export const TokenPage = (): React.ReactElement => {
                       <Text variant='header2'>{tokenCustomization?.name || collectionToken.name}</Text>
                       <Spacing variant={PaddingSize.Narrow2} />
                       { collection.doesSupportErc721 && latestTransfer && (
-                        <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
+                        <LinkBase target={`/members/${latestTransfer.toAddress}`}>
                           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                             <Text variant='small'>Owned by</Text>
                             <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
@@ -475,7 +475,7 @@ export const TokenPage = (): React.ReactElement => {
                               <List.Item variant='slim' key={tokenOwnership.ownerAddress} itemKey={tokenOwnership.ownerAddress}>
                                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true}>
                                   <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                                    <AccountViewLink address={tokenOwnership.ownerAddress} target={`/accounts/${tokenOwnership.ownerAddress}`} />
+                                    <AccountViewLink address={tokenOwnership.ownerAddress} target={`/members/${tokenOwnership.ownerAddress}`} />
                                   </Stack.Item>
                                   <Text>{tokenOwnership.quantity.toString()}</Text>
                                 </Stack>

@@ -125,7 +125,7 @@ interface IUserCellContentProps {
 const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} isFullHeight={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
-      <AccountViewLink address={props.row.galleryUser.address} target={`/accounts/${props.row.galleryUser.address}`} />
+      <AccountViewLink address={props.row.galleryUser.address} target={`/members/${props.row.galleryUser.address}`} />
       {props.row.galleryUser.twitterProfile && (
         <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
       )}
@@ -215,7 +215,7 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
       <Text>{`#${props.index}`}</Text>
       <Stack.Item growthFactor={1} shrinkFactor={1}>
         <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start}>
-          <AccountViewLink address={props.row.galleryUser.address} target={`/accounts/${props.row.galleryUser.address}`} />
+          <AccountViewLink address={props.row.galleryUser.address} target={`/members/${props.row.galleryUser.address}`} />
           {props.row.galleryUser.joinDate ? (
             <Text variant='small'>{`joined ${dateToRelativeString(props.row.galleryUser.joinDate)}`}</Text>
           ) : (

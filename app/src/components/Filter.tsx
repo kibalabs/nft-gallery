@@ -27,7 +27,7 @@ export interface IFilterProps {
   maxPrice: BigNumber | null;
   setMaxPrice: (value: BigNumber | null) => void;
   shouldShowDoneButton?: boolean;
-  onDoneClicked: () => void;
+  onDoneClicked?: () => void;
 }
 
 export const Filter = (props: IFilterProps): React.ReactElement => {

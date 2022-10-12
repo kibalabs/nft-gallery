@@ -64,6 +64,12 @@ export const routes: IRoute<IGlobals>[] = [
     subRoutes: [
       { path: 'tokens/:tokenId', page: TokenPage },
     ] },
+  { path: '/members/:accountAddress',
+    page: AccountPage,
+    getPageData: getHomePageData,
+    subRoutes: [
+      { path: 'tokens/:tokenId', page: TokenPage },
+    ] },
   { path: '/members',
     page: MembersPage,
     getPageData: getHomePageData,

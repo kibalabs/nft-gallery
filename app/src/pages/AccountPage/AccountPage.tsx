@@ -114,7 +114,7 @@ export const AccountPage = (): React.ReactElement => {
   }, [updateUser]);
 
   const onCloseSubpageClicked = (): void => {
-    navigator.navigateTo(`/accounts/${accountAddress}`);
+    navigator.navigateTo(`/members/${accountAddress}`);
   };
 
   const onConnectTwitterClicked = async (): Promise<void> => {
@@ -202,7 +202,7 @@ export const AccountPage = (): React.ReactElement => {
                         token={galleryToken.collectionToken}
                         tokenCustomization={galleryToken.tokenCustomization}
                         tokenQuantity={galleryToken.quantity}
-                        target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
+                        target={`/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
                       />
                     ))}
                   </EqualGrid>

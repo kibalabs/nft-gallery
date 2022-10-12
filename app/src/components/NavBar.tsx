@@ -15,14 +15,14 @@ const TAB_KEY_MEMBERS = 'TAB_KEY_MEMBERS';
 const TAB_KEY_HOLDINGS = 'TAB_KEY_HOLDINGS';
 
 const getTabKey = (locationPath): string => {
-  if (locationPath === '/') {
-    return TAB_KEY_GALLERY;
+  if (locationPath.startsWith('/member-holdings')) {
+    return TAB_KEY_HOLDINGS;
   }
-  if (locationPath === '/members' || locationPath.startsWith('/accounts')) {
+  if (locationPath.startsWith('/members') || locationPath.startsWith('/accounts')) {
     return TAB_KEY_MEMBERS;
   }
-  if (locationPath === '/member-holdings') {
-    return TAB_KEY_HOLDINGS;
+  if (locationPath === '/') {
+    return TAB_KEY_GALLERY;
   }
   return '';
 };
@@ -108,7 +108,7 @@ export const NavBar = (): React.ReactElement => {
               { chain === 'ethereum' && (
                 <React.Fragment>
                   { account ? (
-                    <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
+                    <AccountViewLink address={account.address} target={`/members/${account.address}`} />
                   ) : (
                     <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
                   )}
@@ -129,7 +129,7 @@ export const NavBar = (): React.ReactElement => {
                 { chain === 'ethereum' && (
                   <React.Fragment>
                     { account ? (
-                      <AccountViewLink address={account.address} target={`/accounts/${account.address}`} />
+                      <AccountViewLink address={account.address} target={`/members/${account.address}`} />
                     ) : (
                       <Button variant='secondary' text='Connect Wallet' onClicked={onLinkAccountsClicked} />
                     )}
