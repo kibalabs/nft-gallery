@@ -458,7 +458,9 @@ export const TokenPage = (): React.ReactElement => {
                         {collection.doesSupportErc1155 && tokenOwnerships && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
                         )}
-                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                        {getChain(projectId) === 'ethereum' && (
+                          <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                        )}
                       </TabBar>
                       <Spacing />
                       <Stack.Item growthFactor={1} shrinkFactor={1}>
