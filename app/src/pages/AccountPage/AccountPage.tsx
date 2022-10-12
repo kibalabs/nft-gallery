@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
 import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
@@ -114,7 +114,7 @@ export const AccountPage = (): React.ReactElement => {
   }, [updateUser]);
 
   const onCloseSubpageClicked = (): void => {
-    navigator.navigateTo(`/accounts/${accountAddress}`);
+    navigator.navigateTo(`/members/${accountAddress}`);
   };
 
   const onConnectTwitterClicked = async (): Promise<void> => {
@@ -133,9 +133,7 @@ export const AccountPage = (): React.ReactElement => {
       signatureJson: encodeURIComponent(JSON.stringify(signature)),
       initialUrl: encodeURIComponent(window.location.toString()),
     };
-    // TODO(krishan711): get this from notdClient when its no longer protected access
-    // @ts-ignore
-    window.open(`${window.KRT_API_URL}/gallery/v1/twitter-login?${new URLSearchParams(params).toString()}`);
+    window.open(`${notdClient.baseUrl}/gallery/v1/twitter-login?${new URLSearchParams(params).toString()}`);
   };
 
   const onTabKeySelected = (newSelectedTabKey: string): void => {
@@ -148,8 +146,7 @@ export const AccountPage = (): React.ReactElement => {
         <title>{`${accountAddress} | ${collection ? collection.name : 'Token'} Gallery`}</title>
       </Head>
       <ContainingView>
-        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-          <Spacing />
+        <Stack direction={Direction.Vertical} isFullHeight={false} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
           <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
             <AccountView
               address={accountAddress}
@@ -190,7 +187,7 @@ export const AccountPage = (): React.ReactElement => {
           </TabBar>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             {selectedTabKey === TAB_KEY_OWNED ? (
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true}>
                 { galleryTokens === undefined ? (
                   <LoadingSpinner />
                 ) : galleryTokens === null ? (
@@ -205,14 +202,14 @@ export const AccountPage = (): React.ReactElement => {
                         token={galleryToken.collectionToken}
                         tokenCustomization={galleryToken.tokenCustomization}
                         tokenQuantity={galleryToken.quantity}
-                        target={`/accounts/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
+                        target={`/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
                       />
                     ))}
                   </EqualGrid>
                 )}
               </Stack>
             ) : selectedTabKey === TAB_KEY_TRANSACTIONS ? (
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true}>
                 { recentTransfers === undefined ? (
                   <LoadingSpinner />
                 ) : recentTransfers === null ? (
@@ -232,7 +229,7 @@ export const AccountPage = (): React.ReactElement => {
                 )}
               </Stack>
             ) : (
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
                 { ownedCollections === undefined ? (
                   <LoadingSpinner />
                 ) : ownedCollections === null ? (

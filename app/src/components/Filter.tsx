@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ETHER } from '@kibalabs/core';
-import { Alignment, Checkbox, Direction, PaddingSize, SingleLineInput, Spacing, Stack, StatefulTitledCollapsibleBox, Text } from '@kibalabs/ui-react';
+import { Alignment, Button, Checkbox, Direction, PaddingSize, SingleLineInput, Spacing, Stack, StatefulTitledCollapsibleBox, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { Account } from '../AccountContext';
@@ -26,6 +26,8 @@ export interface IFilterProps {
   setMinPrice: (value: BigNumber | null) => void;
   maxPrice: BigNumber | null;
   setMaxPrice: (value: BigNumber | null) => void;
+  shouldShowDoneButton?: boolean;
+  onDoneClicked?: () => void;
 }
 
 export const Filter = (props: IFilterProps): React.ReactElement => {
@@ -74,7 +76,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
       {props.account && (
-        <Checkbox text='Your tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
+        <Checkbox text='Your tokens' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}
       <Spacing />
       {props.shouldShowMarket && (
@@ -108,21 +110,23 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       )}
       <Spacing />
       {props.collectionAttributes && props.collectionAttributes.map((collectionAttribute: CollectionAttribute): React.ReactElement => (
-        <Stack key={collectionAttribute.name} direction={Direction.Vertical} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Wide} shouldAddGutters={true}>
-          <StatefulTitledCollapsibleBox title={collectionAttribute.name} isCollapsedInitially={true}>
-            <Stack direction={Direction.Vertical}>
-              {collectionAttribute.values.map((value: string): React.ReactElement => (
-                <Checkbox
-                  key={value}
-                  text={value}
-                  isChecked={props.filters[collectionAttribute.name] && props.filters[collectionAttribute.name].includes(value)}
-                  onToggled={(): void => props.onAttributeValueClicked(collectionAttribute.name, value)}
-                />
-              ))}
-            </Stack>
-          </StatefulTitledCollapsibleBox>
-        </Stack>
+        <StatefulTitledCollapsibleBox key={collectionAttribute.name} title={collectionAttribute.name} isCollapsedInitially={true}>
+          <Stack direction={Direction.Vertical}>
+            {collectionAttribute.values.map((value: string): React.ReactElement => (
+              <Checkbox
+                key={value}
+                text={value}
+                isChecked={props.filters[collectionAttribute.name] && props.filters[collectionAttribute.name].includes(value)}
+                onToggled={(): void => props.onAttributeValueClicked(collectionAttribute.name, value)}
+              />
+            ))}
+          </Stack>
+        </StatefulTitledCollapsibleBox>
       ))}
+      <Spacing />
+      {props.shouldShowDoneButton && (
+        <Button variant='tertiary' text={'DONE'} onClicked={props.onDoneClicked} />
+      )}
     </Stack>
   );
 };

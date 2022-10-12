@@ -236,8 +236,8 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'border-color': '#FFFFFF',
       },
       filterOverlay: {
-        'background-color': '$colors.backgroundClear10',
-        'backdrop-filter': 'blur(3px)',
+        'background-color': '$colors.backgroundClear05',
+        'backdrop-filter': 'blur(4px)',
         'border-radius': '1em 1em 0 0',
       },
       backdrop: {
@@ -274,6 +274,27 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       },
       unbordered: {
         'border-width': '0',
+      },
+      navBar: {
+        position: 'sticky',
+        top: '0',
+        'background-color': 'transparent',
+        'border-radius': '0',
+        height: '3.4em',
+        'transition-duration': '0.3s',
+      },
+      navBarScrolled: {
+        'background-color': '$colors.backgroundClear20',
+        'backdrop-filter': 'blur(4px)',
+      },
+      sideMenu: {
+        position: 'sticky',
+        // NOTE(krishan711): from navBar.height
+        top: '3.4em',
+      },
+      sticky: {
+        position: 'sticky',
+        top: '0',
       },
     },
     tables: {
@@ -540,6 +561,16 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           default: {
             background: {
               'background-color': '$colors.tabSelectedBackground',
+            },
+          },
+        },
+      },
+      overlay: {
+        normal: {
+          default: {
+            background: {
+              'background-color': '$colors.backgroundClear20',
+              'backdrop-filter': 'blur(4px)',
             },
           },
         },

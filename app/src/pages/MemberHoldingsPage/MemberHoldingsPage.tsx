@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SubRouterOutlet, useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, ColorSettingView, ContainingView, Dialog, Direction, Head, KibaIcon, LoadingSpinner, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, ColorSettingView, ContainingView, Dialog, Direction, Head, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { CollectionOverlap, CollectionOverlapSummary } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
@@ -67,7 +67,7 @@ export const MemberHoldingsPage = (): React.ReactElement => {
         <title>{`Member Holdings | ${collection ? collection.name : 'Token'} Gallery`}</title>
       </Head>
       <ContainingView>
-        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
+        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
           {collection === undefined || collectionOverlapSummaries === undefined ? (
             <LoadingSpinner />
           ) : collection === null || collectionOverlapSummaries === null ? (
@@ -75,7 +75,7 @@ export const MemberHoldingsPage = (): React.ReactElement => {
           ) : collectionOverlapSummaries.length === 0 ? (
             <Text alignment={TextAlignment.Center}>No other projects</Text>
           ) : (
-            <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={true} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+            <React.Fragment>
               {collectionOverlapSummaries.map((collectionOverlapSummary: CollectionOverlapSummary): React.ReactElement => (
                 <CollapsibleBox
                   key={collectionOverlapSummary.registryAddress}
@@ -100,7 +100,7 @@ export const MemberHoldingsPage = (): React.ReactElement => {
                     <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.Start} shouldAddGutters={true}>
                       {collectionOverlapsMap[collectionOverlapSummary.otherCollection.address].map((collectionOverlap: CollectionOverlap): React.ReactElement => (
                         <Stack key={collectionOverlap.ownerAddress} direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true}>
-                          <AccountViewLink address={collectionOverlap.ownerAddress} target={`/accounts/${collectionOverlap.ownerAddress}`} />
+                          <AccountViewLink address={collectionOverlap.ownerAddress} target={`/members/${collectionOverlap.ownerAddress}`} />
                           <Spacing />
                           <IpfsImage source={collection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
                           <Text>{collectionOverlap.registryTokenCount}</Text>
@@ -113,8 +113,7 @@ export const MemberHoldingsPage = (): React.ReactElement => {
                   )}
                 </CollapsibleBox>
               ))}
-              <Stack.Item growthFactor={1} shrinkFactor={1} />
-            </Stack>
+            </React.Fragment>
           )}
         </Stack>
       </ContainingView>

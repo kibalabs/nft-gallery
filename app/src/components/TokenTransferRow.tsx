@@ -68,9 +68,9 @@ export const UserTokenTransferRow = (props: IUserTokenTransferRowProps): React.R
           <Text>{actionSecondary}</Text>
           <Spacing variant={PaddingSize.Default} />
           {isSender ? (
-            <AccountViewLink address={props.tokenTransfer.toAddress} target={`/accounts/${props.tokenTransfer.toAddress}`} />
+            <AccountViewLink address={props.tokenTransfer.toAddress} target={`/members/${props.tokenTransfer.toAddress}`} />
           ) : (
-            <AccountViewLink address={props.tokenTransfer.fromAddress} target={`/accounts/${props.tokenTransfer.fromAddress}`} />
+            <AccountViewLink address={props.tokenTransfer.fromAddress} target={`/members/${props.tokenTransfer.fromAddress}`} />
           )}
         </Stack>
       )}
@@ -140,13 +140,13 @@ export const TokenTransferRow = (props: ITokenTransferRowProps): React.ReactElem
       {actionSecondary && (
         <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} isFullWidth={true} shouldAddGutters={true}>
           {address1 && (
-            <AccountViewLink address={address1} target={`/accounts/${address1}`} />
+            <AccountViewLink address={address1} target={`/members/${address1}`} />
           )}
           {actionSecondary && (
             <Text>{actionSecondary}</Text>
           )}
           {address2 && (
-            <AccountViewLink address={address2} target={`/accounts/${address2}`} />
+            <AccountViewLink address={address2} target={`/members/${address2}`} />
           )}
         </Stack>
       )}

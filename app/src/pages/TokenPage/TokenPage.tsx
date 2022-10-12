@@ -297,24 +297,26 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Failed to load</Text>
       ) : (
         <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={false} childAlignment={Alignment.Start}>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
-                <IpfsImage source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={true} alternativeText={collectionToken.name} isFullWidth={true} />
-                {getChain(projectId) === 'ethereum' && (
-                  <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
-                  </Stack>
-                )}
-              </Stack>
+              <Box variant='sticky'>
+                <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                  <IpfsImage source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={false} alternativeText={collectionToken.name} isFullWidth={true} />
+                  {getChain(projectId) === 'ethereum' && (
+                    <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
             <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-              <Box maxWidth='400px' isFullWidth={true} isFullHeight={true}>
-                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true} isFullHeight={true} isScrollableVertically={true}>
+              <Box maxWidth='400px'>
+                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true} isFullHeight={false} isScrollableVertically={false}>
                   {isUpdatingStory ? (
                     <Box maxWidth='350px'>
                       <Form onFormSubmitted={onUpdateStorySaveClicked} isLoading={isSavingStory}>
@@ -357,7 +359,7 @@ export const TokenPage = (): React.ReactElement => {
                       <Text variant='header2'>{tokenCustomization?.name || collectionToken.name}</Text>
                       <Spacing variant={PaddingSize.Narrow2} />
                       { collection.doesSupportErc721 && latestTransfer && (
-                        <LinkBase target={`/accounts/${latestTransfer.toAddress}`}>
+                        <LinkBase target={`/members/${latestTransfer.toAddress}`}>
                           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                             <Text variant='small'>Owned by</Text>
                             <Box variant='rounded' shouldClipContent={true} height='1em' width='1em'>
@@ -456,7 +458,9 @@ export const TokenPage = (): React.ReactElement => {
                         {collection.doesSupportErc1155 && tokenOwnerships && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
                         )}
-                        <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                        {getChain(projectId) === 'ethereum' && (
+                          <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                        )}
                       </TabBar>
                       <Spacing />
                       <Stack.Item growthFactor={1} shrinkFactor={1}>
@@ -473,7 +477,7 @@ export const TokenPage = (): React.ReactElement => {
                               <List.Item variant='slim' key={tokenOwnership.ownerAddress} itemKey={tokenOwnership.ownerAddress}>
                                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true}>
                                   <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                                    <AccountViewLink address={tokenOwnership.ownerAddress} target={`/accounts/${tokenOwnership.ownerAddress}`} />
+                                    <AccountViewLink address={tokenOwnership.ownerAddress} target={`/members/${tokenOwnership.ownerAddress}`} />
                                   </Stack.Item>
                                   <Text>{tokenOwnership.quantity.toString()}</Text>
                                 </Stack>

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { longFormatEther } from '@kibalabs/core';
 import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LayerContainer, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { useAccount } from '../../AccountContext';
@@ -14,6 +14,7 @@ import { TokenCard } from '../../components/TokenCard';
 import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
+import { useWindowScroll } from '../../reactUtil';
 import { getBackgroundMusic, getBannerImageUrl, getChain, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
 
 
@@ -37,6 +38,7 @@ export const HomePage = (): React.ReactElement => {
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
   const tokenLimitRef = React.useRef<number>(30);
+  const galleryTokenCountRef = React.useRef<number>(0);
   const previousQueryRef = React.useRef<string | null>(null);
   const [minPrice, setMinPrice] = React.useState<BigNumber | null>(null);
   const [maxPrice, setMaxPrice] = React.useState<BigNumber | null>(null);
@@ -46,6 +48,7 @@ export const HomePage = (): React.ReactElement => {
   }, [backgroundMusicSource]);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
+  galleryTokenCountRef.current = galleryTokens ? galleryTokens.length : 0;
 
   const host = getHost(projectId);
   let bannerImageUrl = getBannerImageUrl(projectId) || collection?.bannerImageUrl;
@@ -130,7 +133,7 @@ export const HomePage = (): React.ReactElement => {
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
       const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, 30, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens([...galleryTokens, ...retrievedGalleryTokens]);
       });
     } else {
@@ -168,9 +171,10 @@ export const HomePage = (): React.ReactElement => {
       filtersCopy[attributeName].push(attributeValue);
     }
     setFilters(filtersCopy);
-    if (scrollingRef) {
-      scrollingRef.scrollTop = 0;
-    }
+    // if (scrollingRef) {
+    //   window.scrollTop = 0;
+    // }
+    window.scrollTo(0, 0);
   };
 
   const updateTokenListings = React.useCallback(async (): Promise<void> => {
@@ -206,19 +210,32 @@ export const HomePage = (): React.ReactElement => {
     updateTokenListings();
   }, [updateTokenListings]);
 
-  const onScrolled = React.useCallback((event: Event): void => {
-    const eventTarget = event.target as HTMLDivElement;
-    if (galleryTokens && tokenLimitRef.current > galleryTokens.length) {
+  // NOTE(krishan711): this is the old code for when a specific element scrolled
+  // const onScrolled = React.useCallback((event: Event): void => {
+  //   // const eventTarget = event.target as Document;
+  //   if (galleryTokens && tokenLimitRef.current > galleryTokens.length) {
+  //     return;
+  //   }
+  //   const size = eventTarget.scrollHeight - eventTarget.clientHeight;
+  //   const position = eventTarget.scrollTop;
+  //   if (size - position < 750) {
+  //     tokenLimitRef.current += 30;
+  //     loadMoreCollectionTokens();
+  //   }
+  // }, [galleryTokens, tokenLimitRef, loadMoreCollectionTokens]);
+  // const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
+
+  const onWindowScrolled = React.useCallback((sizeScrolled: number, factorScrolled: number): void => {
+    if (galleryTokenCountRef.current > 0 && tokenLimitRef.current > galleryTokenCountRef.current) {
       return;
     }
-    const size = eventTarget.scrollHeight - eventTarget.clientHeight;
-    if (size - eventTarget.scrollTop < 750) {
+    if (((sizeScrolled / factorScrolled) - sizeScrolled) < 750) {
       tokenLimitRef.current += 30;
       loadMoreCollectionTokens();
     }
-  }, [galleryTokens, tokenLimitRef, loadMoreCollectionTokens]);
+  }, [galleryTokenCountRef, tokenLimitRef, loadMoreCollectionTokens]);
 
-  const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
+  useWindowScroll(onWindowScrolled);
 
   const onCloseSubpageClicked = (): void => {
     navigator.navigateTo('/');
@@ -251,137 +268,127 @@ export const HomePage = (): React.ReactElement => {
       ) : collection === null || collectionAttributes === null ? (
         <Text variant='error'>Failed to load</Text>
       ) : (
-        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-          { getTreasureHuntTokenId(projectId) && (
-            <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
-              <Box variant='notification'>
-                <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
-              </Box>
-            </Stack>
-          )}
-          <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-            <Stack direction={Direction.Horizontal} shouldAddGutters={false} isFullHeight={true} isFullWidth={true}>
-              <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                <React.Fragment>
-                  <Box width='300px' isFullHeight={true}>
-                    <Filter
-                      filters={filters}
-                      onAttributeValueClicked={onAttributeValueClicked}
-                      account={account}
-                      showOwnedTokensOnly={showOwnedTokensOnly}
-                      setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                      showListedTokensOnly={showListedTokensOnly}
-                      setShowListedTokensOnly={setShowListedTokensOnly}
-                      shouldShowMusicOption={backgroundMusic != null}
-                      shouldPlayMusic={shouldPlayMusic}
-                      setShouldPlayMusic={setShouldPlayMusic}
-                      collection={collection}
-                      collectionAttributes={collectionAttributes}
-                      shouldShowMarket={getChain(projectId) === 'ethereum'}
-                      minPrice={minPrice}
-                      setMinPrice={setMinPrice}
-                      maxPrice={maxPrice}
-                      setMaxPrice={setMaxPrice}
-                    />
+        <Stack direction={Direction.Horizontal} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={false} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
+          <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+            {/* NOTE(krishan711): 3.4em comes from navBar.height */}
+            <Box width='300px' maxHeight='calc(100vh - 3.4em)' variant='sideMenu-unrounded' isScrollableVertically={true}>
+              <Filter
+                filters={filters}
+                onAttributeValueClicked={onAttributeValueClicked}
+                account={account}
+                showOwnedTokensOnly={showOwnedTokensOnly}
+                setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                showListedTokensOnly={showListedTokensOnly}
+                setShowListedTokensOnly={setShowListedTokensOnly}
+                shouldShowMusicOption={backgroundMusic != null}
+                shouldPlayMusic={shouldPlayMusic}
+                setShouldPlayMusic={setShouldPlayMusic}
+                collection={collection}
+                collectionAttributes={collectionAttributes}
+                shouldShowMarket={getChain(projectId) === 'ethereum'}
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+              />
+            </Box>
+          </ResponsiveHidingView>
+          <Stack.Item growthFactor={1} shrinkFactor={1}>
+            <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
+              { getTreasureHuntTokenId(projectId) && (
+                <Stack paddingHorizontal={PaddingSize.Wide2} isFullWidth={true}>
+                  <Box variant='notification'>
+                    <MarkdownText textVariant='success' source={'🕵️‍♂️🕵️‍♀️ **The hunt is on, find the Sprite to win a prize!**\nHere&apos;s your clue: &quot;The tokenId is the beginner class in school&quot;'} />
                   </Box>
-                </React.Fragment>
-              </ResponsiveHidingView>
-              <Stack.Item growthFactor={1} shrinkFactor={1}>
-                <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
-                  <Stack.Item growthFactor={1} shrinkFactor={1}>
-                    <Box variant='unrounded' isFullHeight={true} isFullWidth={true}>
-                      <LayerContainer>
-                        <Stack direction={Direction.Vertical} isScrollableVertically={false} isFullHeight={true} contentAlignment={Alignment.Start}>
-                          {(showOwnedTokensOnly || showListedTokensOnly || minPrice || maxPrice || Object.keys(filters).length > 0) && (
-                            <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
-                              {showOwnedTokensOnly && (
-                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Owned'} onClicked={(): void => setShowOwnedTokensOnly(false)} />
-                              )}
-                              {showListedTokensOnly && (
-                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Listed'} onClicked={(): void => setShowListedTokensOnly(false)} />
-                              )}
-                              {minPrice && (
-                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Min price: ${longFormatEther(minPrice)}`} onClicked={(): void => setMinPrice(null)} />
-                              )}
-                              {maxPrice && (
-                                <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Max price: ${longFormatEther(maxPrice)}`} onClicked={(): void => setMaxPrice(null)} />
-                              )}
-                              {Object.keys(filters).map((filterKey: string): React.ReactElement => (
-                                <React.Fragment key={filterKey}>
-                                  {filters[filterKey].map((filterValue: string): React.ReactElement => (
-                                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={`${filterKey}: ${filterValue}`} text={`${filterKey}: ${filterValue}`} onClicked={(): void => onAttributeValueClicked(filterKey, filterValue)} />
-                                  ))}
-                                </React.Fragment>
-                              ))}
-                            </Stack>
-                          )}
-                          {galleryTokens === undefined ? (
-                            <Stack isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
-                              <LoadingSpinner />
-                            </Stack>
-                          ) : galleryTokens === null ? (
-                            <Text variant='error'>Failed to load</Text>
-                          ) : (
-                            <Stack.Item growthFactor={1} shrinkFactor={1}>
-                              <Box variant='unrounded' ref={setScrollingRef} isScrollableVertically={true} isFullHeight={true} isFullWidth={true}>
-                                {galleryTokens.length > 0 ? (
-                                  <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingHorizontal={PaddingSize.Wide1}>
-                                    {galleryTokens.map((galleryToken: GalleryToken): React.ReactElement => (
-                                      <TokenCard
-                                        key={galleryToken.collectionToken.tokenId}
-                                        token={galleryToken.collectionToken}
-                                        tokenCustomization={galleryToken.tokenCustomization}
-                                        tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
-                                        tokenQuantity={galleryToken.quantity}
-                                        target={`/tokens/${galleryToken.collectionToken.tokenId}`}
-                                      />
-                                    ))}
-                                  </EqualGrid>
-                                ) : (
-                                  <Text>No tokens match filter</Text>
-                                )}
-                              </Box>
-                            </Stack.Item>
-                          )}
-                        </Stack>
-                        {isResponsiveFilterShowing && (
-                          <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                            <FloatingView isFullHeight={true} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'0px'} zIndex={'100'}>
-                              <ColorSettingView variant='dialog'>
-                                <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
-                                  <Filter
-                                    filters={filters}
-                                    onAttributeValueClicked={onAttributeValueClicked}
-                                    account={account}
-                                    showOwnedTokensOnly={showOwnedTokensOnly}
-                                    setShowOwnedTokensOnly={setShowOwnedTokensOnly}
-                                    showListedTokensOnly={showListedTokensOnly}
-                                    setShowListedTokensOnly={setShowListedTokensOnly}
-                                    shouldShowMusicOption={backgroundMusicSource != null}
-                                    shouldPlayMusic={shouldPlayMusic}
-                                    setShouldPlayMusic={setShouldPlayMusic}
-                                    collection={collection}
-                                    collectionAttributes={collectionAttributes}
-                                    shouldShowMarket={getChain(projectId) === 'ethereum'}
-                                    minPrice={minPrice}
-                                    setMinPrice={setMinPrice}
-                                    maxPrice={maxPrice}
-                                    setMaxPrice={setMaxPrice}
-                                  />
-                                </Box>
-                              </ColorSettingView>
-                            </FloatingView>
-                          </ResponsiveHidingView>
-                        )}
-                      </LayerContainer>
-                    </Box>
-                  </Stack.Item>
-                  <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                    <Button variant='unrounded' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
-                  </ResponsiveHidingView>
                 </Stack>
-              </Stack.Item>
+              )}
+              {(showOwnedTokensOnly || showListedTokensOnly || minPrice || maxPrice || Object.keys(filters).length > 0) && (
+                <Stack direction={Direction.Horizontal} shouldAddGutters={true} shouldWrapItems={true} contentAlignment={Alignment.Start} paddingHorizontal={PaddingSize.Wide1} paddingBottom={PaddingSize.Default}>
+                  {showOwnedTokensOnly && (
+                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Owned'} onClicked={(): void => setShowOwnedTokensOnly(false)} />
+                  )}
+                  {showListedTokensOnly && (
+                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={'Listed'} onClicked={(): void => setShowListedTokensOnly(false)} />
+                  )}
+                  {minPrice && (
+                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Min price: ${longFormatEther(minPrice)}`} onClicked={(): void => setMinPrice(null)} />
+                  )}
+                  {maxPrice && (
+                    <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} text={`Max price: ${longFormatEther(maxPrice)}`} onClicked={(): void => setMaxPrice(null)} />
+                  )}
+                  {Object.keys(filters).map((filterKey: string): React.ReactElement => (
+                    <React.Fragment key={filterKey}>
+                      {filters[filterKey].map((filterValue: string): React.ReactElement => (
+                        <Button variant='small' iconRight={<KibaIcon variant='small' iconId='ion-close' />} key={`${filterKey}: ${filterValue}`} text={`${filterKey}: ${filterValue}`} onClicked={(): void => onAttributeValueClicked(filterKey, filterValue)} />
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </Stack>
+              )}
+              {galleryTokens === undefined ? (
+                <Stack isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
+                  <LoadingSpinner />
+                </Stack>
+              ) : galleryTokens === null ? (
+                <Text variant='error'>Failed to load</Text>
+              ) : (
+                <Stack.Item growthFactor={1} shrinkFactor={1}>
+                  {galleryTokens.length > 0 ? (
+                    <EqualGrid childSizeResponsive={{ base: 6, medium: 6, large: 4, extraLarge: 3 }} contentAlignment={Alignment.Start} shouldAddGutters={true} isFullHeight={false} paddingBottom={PaddingSize.Wide3}>
+                      {galleryTokens.map((galleryToken: GalleryToken): React.ReactElement => (
+                        <TokenCard
+                          key={galleryToken.collectionToken.tokenId}
+                          token={galleryToken.collectionToken}
+                          tokenCustomization={galleryToken.tokenCustomization}
+                          tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
+                          tokenQuantity={galleryToken.quantity}
+                          target={`/tokens/${galleryToken.collectionToken.tokenId}`}
+                        />
+                      ))}
+                    </EqualGrid>
+                  ) : (
+                    <Text>No tokens match filter</Text>
+                  )}
+                </Stack.Item>
+              )}
             </Stack>
+            {isResponsiveFilterShowing && (
+              <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                {/* NOTE(krishan711): 3.4em is from navBar.height */}
+                <FloatingView isFullHeight={false} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'3.4em'} zIndex={'100'}>
+                  <ColorSettingView variant='dialog'>
+                    <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
+                      <Filter
+                        filters={filters}
+                        onAttributeValueClicked={onAttributeValueClicked}
+                        account={account}
+                        showOwnedTokensOnly={showOwnedTokensOnly}
+                        setShowOwnedTokensOnly={setShowOwnedTokensOnly}
+                        showListedTokensOnly={showListedTokensOnly}
+                        setShowListedTokensOnly={setShowListedTokensOnly}
+                        shouldShowMusicOption={backgroundMusicSource != null}
+                        shouldPlayMusic={shouldPlayMusic}
+                        setShouldPlayMusic={setShouldPlayMusic}
+                        collection={collection}
+                        collectionAttributes={collectionAttributes}
+                        shouldShowMarket={getChain(projectId) === 'ethereum'}
+                        minPrice={minPrice}
+                        setMinPrice={setMinPrice}
+                        maxPrice={maxPrice}
+                        setMaxPrice={setMaxPrice}
+                        shouldShowDoneButton={true}
+                        onDoneClicked={onToggleResponsiveFilterClicked}
+                      />
+                    </Box>
+                  </ColorSettingView>
+                </FloatingView>
+              </ResponsiveHidingView>
+            )}
+            <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+              <FloatingView isFullWidth={true} positionBottom={'0'} positionLeft={'0'}>
+                <Button isFullWidth={true} variant='unrounded-overlay' text={isResponsiveFilterShowing ? 'DONE' : 'FILTERS'} onClicked={onToggleResponsiveFilterClicked} />
+              </FloatingView>
+            </ResponsiveHidingView>
           </Stack.Item>
         </Stack>
       )}
