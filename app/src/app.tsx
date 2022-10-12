@@ -144,11 +144,7 @@ export const App = (props: IAppProps): React.ReactElement => {
             <Router staticPath={props.staticPath}>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Start}>
                 <NavBar />
-                {/* <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                  <Box variant='unrounded' shouldClipContent={true} isFullHeight={false} isFullWidth={true}> */}
                 <SubRouter routes={routes} />
-                {/* </Box>
-                </Stack.Item> */}
               </Stack>
             </Router>
           </AccountControlProvider>
