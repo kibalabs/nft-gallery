@@ -131,7 +131,6 @@ export const App = (props: IAppProps): React.ReactElement => {
 
   return (
     <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={false}>
-      {/* background={getBackground(projectId)} extraCss={'background-'}> */}
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>
