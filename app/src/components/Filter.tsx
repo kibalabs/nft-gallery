@@ -76,7 +76,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
       {props.account && (
-        <Checkbox text='Your tokens only' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
+        <Checkbox text='Your tokens' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}
       <Spacing />
       {props.shouldShowMarket && (
