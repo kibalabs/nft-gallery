@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
+import { Collection, CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
@@ -442,6 +442,9 @@ export const MembersPageReal = (): React.ReactElement => {
                           <HeaderCell theme={tableHeaderCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
                           <HeaderCell theme={tableHeaderCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                           <HeaderCell theme={tableHeaderCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          {collection.doesSupportErc1155 && (
+                            <HeaderCell theme={tableHeaderCellTheme} headerId='UNIQUETOKENCOUNT' title='Unique' isOrderable={true} orderDirection={orderField === 'UNIQUETOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          )}
                           <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                         </StyledTableHeadRow>
                       </StyledTableHead>
@@ -464,6 +467,11 @@ export const MembersPageReal = (): React.ReactElement => {
                             <StyledTableBodyRowItem $theme={tableCellTheme}>
                               <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
                             </StyledTableBodyRowItem>
+                            {collection.doesSupportErc1155 && (
+                              <StyledTableBodyRowItem $theme={tableCellTheme}>
+                                <Text alignment={TextAlignment.Center}>{row.galleryUser.uniqueOwnedTokenCount}</Text>
+                              </StyledTableBodyRowItem>
+                            )}
                             <StyledTableBodyRowItem $theme={tableCellTheme}>
                               {row.galleryUser.twitterProfile != null ? (
                                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
