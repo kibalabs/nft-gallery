@@ -2,7 +2,7 @@ import React from 'react';
 
 import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, Head, HidingView, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, Head, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
@@ -374,122 +374,121 @@ export const MembersPageReal = (): React.ReactElement => {
       <Head>
         <title>{`Members | ${collection ? collection.name : 'Token'} Gallery`}</title>
       </Head>
-      <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
-        {collection === undefined || rows === undefined ? (
-          <LoadingSpinner />
-        ) : collection === null || rows === null ? (
-          <Text variant='error'>Failed to load</Text>
-        ) : (
-          null
-        )}
-        <HidingView isHidden={rows == null}>
-          <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
-            <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center}>
-              <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                <Box maxWidth='10em'>
-                  <OptionSelect
-                    selectedItemKey={order}
-                    onItemClicked={onOrderSelected}
-                    inputWrapperVariant='smallPadding'
-                    options={[
-                      { itemKey: 'TOKENCOUNT_DESC', text: '↓ Owned' },
-                      { itemKey: 'TOKENCOUNT_ASC', text: '↑ Owned' },
-                      { itemKey: 'JOINDATE_DESC', text: '↓ Joined' },
-                      { itemKey: 'JOINDATE_ASC', text: '↑ Joined' },
-                      { itemKey: 'FOLLOWERCOUNT_DESC', text: '↓ Followers' },
-                      { itemKey: 'FOLLOWERCOUNT_ASC', text: '↑ Followers' },
-                    ]}
-                  />
-                </Box>
-              </ResponsiveHidingView>
-              <Spacing />
-              <Stack.Item growthFactor={1} shrinkFactor={1}>
+      <ContainingView>
+        <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
+          {collection === undefined || rows === undefined ? (
+            <LoadingSpinner />
+          ) : collection === null || rows === null ? (
+            <Text variant='error'>Failed to load</Text>
+          ) : (
+            <React.Fragment>
+              <Stack direction={Direction.Horizontal} isFullWidth={true} childAlignment={Alignment.Center}>
                 <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-                  <Box>
+                  <Box maxWidth='50%'>
+                    <OptionSelect
+                      selectedItemKey={order}
+                      onItemClicked={onOrderSelected}
+                      inputWrapperVariant='smallPadding'
+                      options={[
+                        { itemKey: 'TOKENCOUNT_DESC', text: '↓ Owned' },
+                        { itemKey: 'TOKENCOUNT_ASC', text: '↑ Owned' },
+                        { itemKey: 'JOINDATE_DESC', text: '↓ Joined' },
+                        { itemKey: 'JOINDATE_ASC', text: '↑ Joined' },
+                        { itemKey: 'FOLLOWERCOUNT_DESC', text: '↓ Followers' },
+                        { itemKey: 'FOLLOWERCOUNT_ASC', text: '↑ Followers' },
+                      ]}
+                    />
+                  </Box>
+                </ResponsiveHidingView>
+                <Spacing />
+                <Stack.Item growthFactor={1} shrinkFactor={1}>
+                  <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+                    <Box>
+                      <NumberPager
+                        pageCount={pageCount}
+                        activePage={page}
+                        siblingPageCount={0}
+                        onPageClicked={onPageClicked}
+                      />
+                    </Box>
+                  </ResponsiveHidingView>
+                </Stack.Item>
+                <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                  <Box maxWidth='400px'>
                     <NumberPager
                       pageCount={pageCount}
                       activePage={page}
-                      siblingPageCount={0}
+                      siblingPageCount={1}
                       onPageClicked={onPageClicked}
                     />
                   </Box>
                 </ResponsiveHidingView>
-              </Stack.Item>
-              <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-                <Box maxWidth='400px'>
-                  <NumberPager
-                    pageCount={pageCount}
-                    activePage={page}
-                    siblingPageCount={1}
-                    onPageClicked={onPageClicked}
-                  />
-                </Box>
-              </ResponsiveHidingView>
-            </Stack>
-            <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
-                {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
-                  <List shouldShowDividers={true}>
-                    {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
-                      <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
-                        <MemberRowContent row={row} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
-                      </List.Item>
-                    ))}
-                  </List>
-                ) : (
-                  <StyledTable $theme={tableTheme}>
-                    <StyledTableHead>
-                      <StyledTableHeadRow>
-                        <HeaderCell theme={tableHeaderCellTheme} headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
-                        <HeaderCell theme={tableHeaderCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
-                        <HeaderCell theme={tableHeaderCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                        <HeaderCell theme={tableHeaderCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                        <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                      </StyledTableHeadRow>
-                    </StyledTableHead>
-                    <StyledTableBody>
+              </Stack>
+              <Stack.Item growthFactor={1} shrinkFactor={1} isHidden={rows == null}>
+                <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
+                  {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
+                    <List shouldShowDividers={true}>
                       {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
-                        <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`}>
-                          <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
-                          </StyledTableBodyRowItem>
-                          <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <UserCellContent row={row} />
-                          </StyledTableBodyRowItem>
-                          <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            {row.galleryUser.joinDate ? (
-                              <Text alignment={TextAlignment.Center}>{dateToRelativeString(row.galleryUser.joinDate)}</Text>
-                            ) : (
-                              <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
-                            )}
-                          </StyledTableBodyRowItem>
-                          <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
-                          </StyledTableBodyRowItem>
-                          <StyledTableBodyRowItem $theme={tableCellTheme}>
-                            {row.galleryUser.twitterProfile != null ? (
-                              <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
-                                <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
-                                {followedUsers.includes(row.galleryUser.address) ? (
-                                  <Text variant='note'>Following</Text>
-                                ) : (
-                                  <Button variant='small' text='Follow' onClicked={(): Promise<void> => onFollowClicked(row.galleryUser)} />
-                                )}
-                              </Stack>
-                            ) : (
-                              <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
-                            )}
-                          </StyledTableBodyRowItem>
-                        </StyledTableBodyRow>
+                        <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
+                          <MemberRowContent row={row} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
+                        </List.Item>
                       ))}
-                    </StyledTableBody>
-                  </StyledTable>
-                )}
-              </Box>
-            </Stack.Item>
-          </Stack>
-        </HidingView>
-      </Stack>
+                    </List>
+                  ) : (
+                    <StyledTable $theme={tableTheme}>
+                      <StyledTableHead>
+                        <StyledTableHeadRow>
+                          <HeaderCell theme={tableHeaderCellTheme} headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
+                          <HeaderCell theme={tableHeaderCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
+                          <HeaderCell theme={tableHeaderCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          <HeaderCell theme={tableHeaderCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                        </StyledTableHeadRow>
+                      </StyledTableHead>
+                      <StyledTableBody>
+                        {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
+                          <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`}>
+                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
+                            </StyledTableBodyRowItem>
+                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              <UserCellContent row={row} />
+                            </StyledTableBodyRowItem>
+                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              {row.galleryUser.joinDate ? (
+                                <Text alignment={TextAlignment.Center}>{dateToRelativeString(row.galleryUser.joinDate)}</Text>
+                              ) : (
+                                <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
+                              )}
+                            </StyledTableBodyRowItem>
+                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
+                            </StyledTableBodyRowItem>
+                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              {row.galleryUser.twitterProfile != null ? (
+                                <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
+                                  <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
+                                  {followedUsers.includes(row.galleryUser.address) ? (
+                                    <Text variant='note'>Following</Text>
+                                  ) : (
+                                    <Button variant='small' text='Follow' onClicked={(): Promise<void> => onFollowClicked(row.galleryUser)} />
+                                  )}
+                                </Stack>
+                              ) : (
+                                <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
+                              )}
+                            </StyledTableBodyRowItem>
+                          </StyledTableBodyRow>
+                        ))}
+                      </StyledTableBody>
+                    </StyledTable>
+                  )}
+                </Box>
+              </Stack.Item>
+            </React.Fragment>
+          )}
+        </Stack>
+      </ContainingView>
       <ColorSettingView variant='dialog'>
         <Dialog
           isOpen={isTokenSubpageShowing}

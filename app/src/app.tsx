@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester, RestMethod } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Box, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { ToastContainer } from 'react-toastify';
 
 import { AccountControlProvider } from './AccountContext';
@@ -130,21 +130,25 @@ export const App = (props: IAppProps): React.ReactElement => {
   }, [updateCollection]);
 
   return (
-    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={true} background={getBackground(projectId)}>
+    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={false}>
+      {/* background={getBackground(projectId)} extraCss={'background-'}> */}
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>
+      <BackgroundView {...(getBackground(projectId) || {})}>
+        <div style={{ position: 'fixed', height: '100vh', width: '100vw', zIndex: -1, top: 0, left: 0 }} />
+      </BackgroundView>
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={{ ...globals, collection, allTokens, collectionAttributes }}>
           <AccountControlProvider>
             <Router staticPath={props.staticPath}>
-              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true}>
+              <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Start}>
                 <NavBar />
-                <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-                  <Box variant='unrounded' shouldClipContent={true} isFullHeight={false} isFullWidth={true}>
-                    <SubRouter routes={routes} />
-                  </Box>
-                </Stack.Item>
+                {/* <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                  <Box variant='unrounded' shouldClipContent={true} isFullHeight={false} isFullWidth={true}> */}
+                <SubRouter routes={routes} />
+                {/* </Box>
+                </Stack.Item> */}
               </Stack>
             </Router>
           </AccountControlProvider>

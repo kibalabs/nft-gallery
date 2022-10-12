@@ -297,24 +297,26 @@ export const TokenPage = (): React.ReactElement => {
         <Text variant='error'>Failed to load</Text>
       ) : (
         <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
-          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={true} childAlignment={Alignment.Center}>
+          <Stack directionResponsive={{ base: Direction.Vertical, medium: Direction.Horizontal }} isFullWidth={true} isFullHeight={false} childAlignment={Alignment.Start}>
             <Stack.Item growthFactor={1} shrinkFactor={1}>
-              <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
-                <IpfsImage source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={true} alternativeText={collectionToken.name} isFullWidth={true} />
-                {getChain(projectId) === 'ethereum' && (
-                  <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
-                    <IconButton variant={'tertiary'} icon={<Box width='1em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
-                  </Stack>
-                )}
-              </Stack>
+              <Box variant='sticky'>
+                <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                  <IpfsImage source={imageUrl} maxHeight='30em' maxWidth='30em' isLazyLoadable={false} alternativeText={collectionToken.name} isFullWidth={true} />
+                  {getChain(projectId) === 'ethereum' && (
+                    <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
+                    </Stack>
+                  )}
+                </Stack>
+              </Box>
             </Stack.Item>
             <Spacing variant={PaddingSize.Wide2} />
             <Stack.Item growthFactor={1} shrinkFactor={1} shouldShrinkBelowContentSize={true}>
-              <Box maxWidth='400px' isFullWidth={true} isFullHeight={true}>
-                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true} isFullHeight={true} isScrollableVertically={true}>
+              <Box maxWidth='400px'>
+                <Stack direction={Direction.Vertical} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} childAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }} isFullWidth={true} isFullHeight={false} isScrollableVertically={false}>
                   {isUpdatingStory ? (
                     <Box maxWidth='350px'>
                       <Form onFormSubmitted={onUpdateStorySaveClicked} isLoading={isSavingStory}>

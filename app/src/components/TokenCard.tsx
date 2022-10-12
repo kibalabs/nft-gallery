@@ -20,7 +20,7 @@ export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
     <LinkBase target={props.target} isFullWidth={true}>
       <Box variant='tokenCard' shouldClipContent={true} isFullHeight={true}>
         <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Default} isFullHeight={true}>
-          <Box maxHeight={'20em'} minHeight={'10em'} shouldClipContent={true} variant='unrounded'>
+          <Box maxHeight={'20em'} minHeight={'7em'} shouldClipContent={true} variant='unrounded'>
             <IpfsImage source={props.token.resizableImageUrl ?? props.token.imageUrl ?? ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
             {props.tokenQuantity > 1 && (
               <div style={{ position: 'absolute', top: 0, right: 0 }}>
