@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
+import { Collection, CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
@@ -202,6 +202,7 @@ interface IMemberRowContentProps {
   index: number;
   row: GalleryUserRow;
   isFollowing: boolean;
+  collection: Collection;
   onFollowClicked: (galleryUser: GalleryUser) => void;
 }
 
@@ -227,6 +228,12 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
         <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
           <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
             <Text>{props.row.galleryUser.ownedTokenCount}</Text>
+            {props.collection.doesSupportErc1155 && (
+              <React.Fragment>
+                <Spacing variant={PaddingSize.Narrow} />
+                <Text>{`(${props.row.galleryUser.uniqueOwnedTokenCount})`}</Text>
+              </React.Fragment>
+            )}
             <Spacing variant={PaddingSize.Narrow} />
             {props.row.chosenOwnedTokens.length > 0 && (
               <LinkBase target={`/members/tokens/${props.row.chosenOwnedTokens[0].tokenId}`}>
@@ -268,7 +275,7 @@ export const MembersPage = (): React.ReactElement => {
 };
 
 const DUMMY_ROW = new GalleryUserRow(
-  new GalleryUser('0x0000000000000000000000000000000000000000', '', null, null, 0, new Date()),
+  new GalleryUser('0x0000000000000000000000000000000000000000', '', null, null, 0, 0, new Date()),
   [
     new CollectionToken('', '', '', '', null, null, null, []),
     new CollectionToken('', '', '', '', null, null, null, []),
@@ -430,7 +437,7 @@ export const MembersPageReal = (): React.ReactElement => {
                     <List shouldShowDividers={true}>
                       {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
                         <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
-                          <MemberRowContent row={row} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
+                          <MemberRowContent row={row} collection={collection} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                         </List.Item>
                       ))}
                     </List>

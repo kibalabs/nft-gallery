@@ -90,15 +90,17 @@ export const NavBar = (): React.ReactElement => {
             </TabBar>
           </ResponsiveHidingView>
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-            {selectedTabKey === TAB_KEY_GALLERY ? (
-              <Text variant='branded'>Gallery</Text>
-            ) : selectedTabKey === TAB_KEY_MEMBERS ? (
-              <Text variant='branded'>Members</Text>
-            ) : selectedTabKey === TAB_KEY_HOLDINGS ? (
-              <Text variant='branded'>Member Holdings</Text>
-            ) : (
-              <React.Fragment />
-            )}
+            <LinkBase onClicked={onMenuClicked}>
+              {selectedTabKey === TAB_KEY_GALLERY ? (
+                <Text variant='branded'>Gallery</Text>
+              ) : selectedTabKey === TAB_KEY_MEMBERS ? (
+                <Text variant='branded'>Members</Text>
+              ) : selectedTabKey === TAB_KEY_HOLDINGS ? (
+                <Text variant='branded'>Member Holdings</Text>
+              ) : (
+                <React.Fragment />
+              )}
+            </LinkBase>
           </ResponsiveHidingView>
           <Stack.Item shrinkFactor={1} growthFactor={1}>
             <Spacing />
@@ -122,7 +124,7 @@ export const NavBar = (): React.ReactElement => {
         </Stack>
         <HidingView isHidden={!isMenuOpen}>
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
-            <Box variant='unrounded-overlay'>
+            <Box variant='unrounded-navBar-navBarScrolled'>
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} shouldAddGutters={true} paddingStart={PaddingSize.Wide} paddingEnd={PaddingSize.Wide}>
                 <Button text='Gallery' variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
                 <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
