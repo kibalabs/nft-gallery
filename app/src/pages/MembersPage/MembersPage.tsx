@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { Collection, CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
+import { CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';

@@ -50,23 +50,14 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           },
         },
       },
-      // inputWrappers: {
-      //   default: {
-      //     normal: {
-      //       default: {
-      //         background: {
-      //           'background-color': 'rgba(255, 255, 255, 0.3)',
-      //           'border-color': 'rgba(255, 255, 255, 0.4)',
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
       boxes: {
         tokenCard: {
           'border-width': '2px',
           'border-color': 'rgba(255, 255, 255, 0.2)',
           'background-color': 'rgba(255, 255, 255, 0.1)',
+        },
+        navBarScrolled: {
+          'background-color': '$colors.spriteGreenClear20',
         },
       },
     }));
