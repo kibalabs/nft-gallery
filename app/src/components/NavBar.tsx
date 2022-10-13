@@ -126,7 +126,7 @@ export const NavBar = (): React.ReactElement => {
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
             <Box variant='unrounded-navBar-navBarScrolled'>
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} shouldAddGutters={true} paddingStart={PaddingSize.Wide} paddingEnd={PaddingSize.Wide}>
-                <Button text='Gallery' variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
+                <Button text='Market' variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
                 <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
                 { chain === 'ethereum' && (
                   <React.Fragment>

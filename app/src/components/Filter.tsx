@@ -71,7 +71,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
   };
 
   return (
-    <Stack direction={Direction.Vertical} isFullHeight={true} isScrollableVertically={true} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
+    <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
       {props.shouldShowMusicOption && (
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
