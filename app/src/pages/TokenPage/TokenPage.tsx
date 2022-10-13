@@ -535,7 +535,7 @@ export const TokenPage = (): React.ReactElement => {
                           ) : (
                             <List isFullWidth={true}>
                               {tokenListings.map((tokenListing: TokenListing): React.ReactElement => (
-                                <List.Item variant='slim' key={tokenListing.tokenListingId} itemKey={tokenListing.tokenListingId}>
+                                <List.Item variant='slim' key={tokenListing.tokenListingId} itemKey={String(tokenListing.tokenListingId)}>
                                   <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true} childAlignment={Alignment.Center}>
                                     {tokenListing.source.startsWith('opensea') ? (
                                       <Box width='1.3em'><Image source={'/assets/icon-opensea-color.svg'} alternativeText={'opensea'} /></Box>
