@@ -182,6 +182,25 @@ export class ListCollectionTokenAirdropsResponse extends ResponseData {
 }
 
 
+export class ListCollectionTokenListingsRequest extends RequestData {
+}
+
+export class ListCollectionTokenListingsResponse extends ResponseData {
+  readonly tokenListings: Resources.TokenListing[];
+
+  public constructor(tokenListings: Resources.TokenListing[]) {
+    super();
+    this.tokenListings = tokenListings;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListCollectionTokenListingsResponse => {
+    return new ListCollectionTokenListingsResponse(
+      (obj.tokenListings as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.TokenListing.fromObject(innerObj)),
+    );
+  };
+}
+
+
 export class InQueryParam extends RequestData {
   readonly fieldName: string;
   readonly values: string[];

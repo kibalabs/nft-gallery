@@ -19,7 +19,8 @@ import { getChain, getTreasureHuntTokenId, isCustomizationEnabled } from '../../
 
 const TAB_KEY_ATTRIBUTES = 'TAB_KEY_ATTRIBUTES';
 const TAB_KEY_OWNERSHIPS = 'TAB_KEY_OWNERSHIPS';
-const TAB_KEY_ACTIVITY = 'TAB_KEY_ACITIVTY';
+const TAB_KEY_ACTIVITY = 'TAB_KEY_ACTIVITY';
+const TAB_KEY_LISTINGS = 'TAB_KEY_LISTINGS';
 
 export const TokenPage = (): React.ReactElement => {
   const account = useAccount();
@@ -37,6 +38,7 @@ export const TokenPage = (): React.ReactElement => {
   const [treasureHuntSubmittingError, setTreasureHuntSubmittingError] = React.useState<Error | null>(null);
   const [airdrop, setAirdrop] = React.useState<Airdrop | null | undefined>(undefined);
   const [liveListing, setLiveListing] = React.useState<TokenListing | null | undefined>(undefined);
+  const [tokenListings, setTokenListings] = React.useState<TokenListing[] | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_ATTRIBUTES);
 
   const listing = liveListing ?? galleryToken?.tokenListing;
@@ -85,7 +87,7 @@ export const TokenPage = (): React.ReactElement => {
     updateCollectionToken();
   }, [updateCollectionToken]);
 
-  const updateListings = React.useCallback(async (): Promise<void> => {
+  const updateLiveListing = React.useCallback(async (): Promise<void> => {
     if (!collection?.address || !collectionToken?.tokenId) {
       setLiveListing(null);
       return;
@@ -116,6 +118,24 @@ export const TokenPage = (): React.ReactElement => {
       setLiveListing(liveListings.sort((liveListing1: TokenListing, liveListing2: TokenListing): number => (liveListing1.value.gte(liveListing2.value) ? 1 : -1))[0]);
     }
   }, [projectId, collection?.address, collectionToken?.tokenId]);
+
+  React.useEffect((): void => {
+    updateLiveListing();
+  }, [updateLiveListing]);
+
+  const updateListings = React.useCallback(async (): Promise<void> => {
+    if (!collection?.address || !collectionToken?.tokenId) {
+      setTokenListings(null);
+      return;
+    }
+    setTokenListings(undefined);
+    await notdClient.listCollectionTokenListings(collection.address, collectionToken?.tokenId).then((retrievedTokenListings: TokenListing[]): void => {
+      setTokenListings(retrievedTokenListings);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setTokenListings(null);
+    });
+  }, [notdClient, collection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateListings();
@@ -455,11 +475,14 @@ export const TokenPage = (): React.ReactElement => {
                       )}
                       <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
                         <TabBar.Item variant='lined' tabKey={TAB_KEY_ATTRIBUTES} text='Traits' />
-                        {collection.doesSupportErc1155 && tokenOwnerships && (
+                        {getChain(projectId) === 'ethereum' && collection.doesSupportErc1155 && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
                         )}
                         {getChain(projectId) === 'ethereum' && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_ACTIVITY} text='Activity' />
+                        )}
+                        {getChain(projectId) === 'ethereum' && (
+                          <TabBar.Item variant='lined' tabKey={TAB_KEY_LISTINGS} text='Listings' />
                         )}
                       </TabBar>
                       <Spacing />
@@ -502,6 +525,35 @@ export const TokenPage = (): React.ReactElement => {
                                 ))}
                               </List>
                             </React.Fragment>
+                          )}
+                        </HidingView>
+                        <HidingView isHidden={selectedTabKey !== TAB_KEY_LISTINGS}>
+                          {tokenListings === undefined ? (
+                            <LoadingSpinner />
+                          ) : tokenListings === null ? (
+                            <Text variant='error'>Failed to load listings</Text>
+                          ) : (
+                            <List isFullWidth={true}>
+                              {tokenListings.map((tokenListing: TokenListing): React.ReactElement => (
+                                <List.Item variant='slim' key={tokenListing.tokenListingId} itemKey={String(tokenListing.tokenListingId)}>
+                                  <Stack direction={Direction.Horizontal} shouldAddGutters={true} isFullWidth={true} childAlignment={Alignment.Center}>
+                                    {tokenListing.source.startsWith('opensea') ? (
+                                      <Box width='1.3em'><Image source={'/assets/icon-opensea-color.svg'} alternativeText={'opensea'} /></Box>
+                                    ) : tokenListing.source.startsWith('looksrare') ? (
+                                      <Box width='1.3em'><Image source={'/assets/icon-looksrare-color.svg'} alternativeText={'looksrare'} /></Box>
+                                    ) : (
+                                      null
+                                    )}
+                                    <Stack.Item shrinkFactor={1} shouldShrinkBelowContentSize={true}>
+                                      <AccountViewLink address={tokenListing.offererAddress} target={`/members/${tokenListing.offererAddress}`} />
+                                    </Stack.Item>
+                                    <Stack.Item growthFactor={1} shrinkFactor={1} />
+                                    <EtherValue value={longFormatNumber(etherToNumber(tokenListing.value))} />
+                                    <IconButton target={getListingUrl(tokenListing)} icon={<KibaIcon variant='small' iconId='ion-open-outline' />} />
+                                  </Stack>
+                                </List.Item>
+                              ))}
+                            </List>
                           )}
                         </HidingView>
                       </Stack.Item>
