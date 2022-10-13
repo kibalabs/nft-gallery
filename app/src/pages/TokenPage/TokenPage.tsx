@@ -129,13 +129,13 @@ export const TokenPage = (): React.ReactElement => {
       return;
     }
     setTokenListings(undefined);
-    await notdClient.listCollectionTokenListings(collection.address, tokenId).then((retrievedTokenListings: TokenListing[]): void => {
+    await notdClient.listCollectionTokenListings(collection.address, collectionToken?.tokenId).then((retrievedTokenListings: TokenListing[]): void => {
       setTokenListings(retrievedTokenListings);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenListings(null);
     });
-  }, [projectId, collection?.address, collectionToken?.tokenId]);
+  }, [notdClient, collection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateListings();
