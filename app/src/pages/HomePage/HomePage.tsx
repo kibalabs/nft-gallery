@@ -357,7 +357,7 @@ export const HomePage = (): React.ReactElement => {
                 {/* NOTE(krishan711): 3.4em is from navBar.height */}
                 <FloatingView isFullHeight={false} positionBottom={'0px'} isFullWidth={true} positionLeft={'0px'} positionTop={'3.4em'} zIndex={'100'}>
                   <ColorSettingView variant='dialog'>
-                    <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true}>
+                    <Box variant='filterOverlay' isFullHeight={true} shouldClipContent={true} isScrollableVertically={true}>
                       <Filter
                         filters={filters}
                         onAttributeValueClicked={onAttributeValueClicked}
