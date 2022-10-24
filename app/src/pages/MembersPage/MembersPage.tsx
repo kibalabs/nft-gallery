@@ -1,18 +1,19 @@
 import React from 'react';
 
-import { dateToRelativeString, getClassName, RecursivePartial } from '@kibalabs/core';
+import { dateToRelativeString, dateToString, getClassName, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, Head, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, Head, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useColors, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import ReactTooltip from 'react-tooltip';
 import styled from 'styled-components';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { Collection, CollectionToken, GalleryUser, GalleryUserRow, ListResponse } from '../../client';
+import { Collection, CollectionToken, GalleryUser, GalleryUserBadge, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
-import { getChain } from '../../util';
+import { getBadges, getChain, IBadge, isBadgesEnabled } from '../../util';
 
 
 interface ITableTheme extends ThemeType {
@@ -133,6 +134,37 @@ const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
   );
 };
 
+interface IJoinedCellContentProps {
+  row: GalleryUserRow;
+}
+
+const JoinedCellContent = (props: IJoinedCellContentProps): React.ReactElement => {
+  const colors = useColors();
+
+  return (
+    <React.Fragment>
+      <div data-tip data-for={`joinedcell-${props.row.galleryUser.address}`}>
+        {props.row.galleryUser.joinDate ? (
+          <Text alignment={TextAlignment.Center}>{dateToRelativeString(props.row.galleryUser.joinDate)}</Text>
+        ) : (
+          <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
+        )}
+      </div>
+      <ReactTooltip id={`joinedcell-${props.row.galleryUser.address}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
+        <Box maxWidth='300px'>
+          <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+            {props.row.galleryUser.joinDate ? (
+              <Text>{`Joined on ${dateToString(props.row.galleryUser.joinDate, 'yyyy-MM-dd HH:mm')}`}</Text>
+            ) : (
+              <Text>Never joined</Text>
+            )}
+          </Stack>
+        </Box>
+      </ReactTooltip>
+    </React.Fragment>
+  );
+};
+
 interface IOwnedTokensCellContentProps {
   row: GalleryUserRow;
   shouldHideTokens?: boolean;
@@ -158,6 +190,49 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
           ))}
         </React.Fragment>
       )}
+    </Stack>
+  );
+};
+
+interface IBadgesCellContentProps {
+  row: GalleryUserRow;
+  projectId: string;
+  maxBadgeCount?: number;
+}
+
+const BadgesCellContent = (props: IBadgesCellContentProps): React.ReactElement => {
+  const colors = useColors();
+  const maxBadgeCount = props.maxBadgeCount ?? 5;
+  const badges = React.useMemo((): IBadge[] => {
+    const userBadgeKeys = props.row.galleryUserBadges.map((badge: GalleryUserBadge): string => badge.badgeKey);
+    return getBadges(props.projectId).filter((badge: IBadge): boolean => userBadgeKeys.includes(badge.key));
+  }, [props.projectId, props.row.galleryUserBadges]);
+
+  return (
+    <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+      <Text alignment={TextAlignment.Center}>{badges.length}</Text>
+      <Spacing variant={PaddingSize.Default} />
+      <React.Fragment>
+        {badges.slice(0, maxBadgeCount).map((badge: IBadge): React.ReactElement => (
+          <React.Fragment key={badge.key}>
+            <div data-tip data-for={`${props.row.galleryUser.address}-${badge.key}`}>
+              <MarginView marginLeft='inverseWide'>
+                <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
+                  <IpfsImage variant='unrounded' isLazyLoadable={true} source={badge.imageUrl} alternativeText={badge.name} width='1.4em' height='1.4em' />
+                </Box>
+              </MarginView>
+            </div>
+            <ReactTooltip id={`${props.row.galleryUser.address}-${badge.key}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
+              <Box maxWidth='300px'>
+                <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+                  <Text variant='bold'>{badge.name}</Text>
+                  <Text>{badge.description}</Text>
+                </Stack>
+              </Box>
+            </ReactTooltip>
+          </React.Fragment>
+        ))}
+      </React.Fragment>
     </Stack>
   );
 };
@@ -201,63 +276,78 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
 interface IMemberRowContentProps {
   index: number;
   row: GalleryUserRow;
+  projectId: string;
   isFollowing: boolean;
   collection: Collection;
   onFollowClicked: (galleryUser: GalleryUser) => void;
 }
 
 const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => {
+  const badges = React.useMemo((): IBadge[] => {
+    const userBadgeKeys = props.row.galleryUserBadges.map((badge: GalleryUserBadge): string => badge.badgeKey);
+    return getBadges(props.projectId).filter((badge: IBadge): boolean => userBadgeKeys.includes(badge.key));
+  }, [props.projectId, props.row.galleryUserBadges]);
+
   const onFollowClicked = (): void => {
     props.onFollowClicked(props.row.galleryUser);
   };
 
   return (
-    <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-      <Text>{`#${props.index}`}</Text>
-      <Stack.Item growthFactor={1} shrinkFactor={1}>
-        <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start}>
-          <AccountViewLink address={props.row.galleryUser.address} target={`/members/${props.row.galleryUser.address}`} />
-          {props.row.galleryUser.joinDate ? (
-            <Text variant='small'>{`joined ${dateToRelativeString(props.row.galleryUser.joinDate)}`}</Text>
-          ) : (
-            <Text variant='note'>{'-'}</Text>
-          )}
-        </Stack>
-      </Stack.Item>
-      <Box width='3em'>
-        <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
-          <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
-            <Text>{props.row.galleryUser.ownedTokenCount}</Text>
-            {props.collection.doesSupportErc1155 && (
-              <React.Fragment>
-                <Spacing variant={PaddingSize.Narrow} />
-                <Text>{`(${props.row.galleryUser.uniqueOwnedTokenCount})`}</Text>
-              </React.Fragment>
-            )}
-            <Spacing variant={PaddingSize.Narrow} />
-            {props.row.chosenOwnedTokens.length > 0 && (
-              <LinkBase target={`/members/tokens/${props.row.chosenOwnedTokens[0].tokenId}`}>
-                <Box variant='memberToken-unbordered' isFullWidth={false} shouldClipContent={true}>
-                  <IpfsImage variant='unrounded' isLazyLoadable={true} source={props.row.chosenOwnedTokens[0].resizableImageUrl ?? props.row.chosenOwnedTokens[0].imageUrl ?? ''} alternativeText={props.row.chosenOwnedTokens[0].name} width='1.4em' height='1.4em' />
-                </Box>
-              </LinkBase>
+    <Stack direction={Direction.Vertical} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+      <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
+        <Text>{`#${props.index}`}</Text>
+        <Stack.Item growthFactor={1} shrinkFactor={1}>
+          <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start}>
+            <AccountViewLink address={props.row.galleryUser.address} target={`/members/${props.row.galleryUser.address}`} />
+            {props.row.galleryUser.joinDate ? (
+              <Text variant='small'>{`joined ${dateToRelativeString(props.row.galleryUser.joinDate)}`}</Text>
+            ) : (
+              <Text variant='note'>{'-'}</Text>
             )}
           </Stack>
-          {props.row.galleryUser.twitterProfile && (
-            <React.Fragment>
-              <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
-                <Text>{props.row.galleryUser.twitterProfile.followerCount}</Text>
-                <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
-              </Stack>
-              {props.isFollowing ? (
-                <Text variant='note' shouldBreakAnywhere={false} shouldBreakOnWords={false}>Following</Text>
-              ) : (
-                <Button variant='small' text='Follow' onClicked={onFollowClicked} />
+        </Stack.Item>
+        <Box width='3em'>
+          <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
+            <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
+              <Text>{props.row.galleryUser.ownedTokenCount}</Text>
+              {props.collection.doesSupportErc1155 && (
+                <React.Fragment>
+                  <Spacing variant={PaddingSize.Narrow} />
+                  <Text>{`(${props.row.galleryUser.uniqueOwnedTokenCount})`}</Text>
+                </React.Fragment>
               )}
-            </React.Fragment>
-          )}
-        </Stack>
-      </Box>
+              <Spacing variant={PaddingSize.Narrow} />
+              {props.row.chosenOwnedTokens.length > 0 && (
+                <LinkBase target={`/members/tokens/${props.row.chosenOwnedTokens[0].tokenId}`}>
+                  <Box variant='memberToken-unbordered' isFullWidth={false} shouldClipContent={true}>
+                    <IpfsImage variant='unrounded' isLazyLoadable={true} source={props.row.chosenOwnedTokens[0].resizableImageUrl ?? props.row.chosenOwnedTokens[0].imageUrl ?? ''} alternativeText={props.row.chosenOwnedTokens[0].name} width='1.4em' height='1.4em' />
+                  </Box>
+                </LinkBase>
+              )}
+            </Stack>
+            {props.row.galleryUser.twitterProfile && (
+              <React.Fragment>
+                <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End} childAlignment={Alignment.Center}>
+                  <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
+                  <Text>{props.row.galleryUser.twitterProfile.followerCount}</Text>
+                  {props.isFollowing ? (
+                    <Text variant='note' shouldBreakAnywhere={false} shouldBreakOnWords={false}>Following</Text>
+                  ) : (
+                    <Button variant='small' text='Follow' onClicked={onFollowClicked} />
+                  )}
+                </Stack>
+              </React.Fragment>
+            )}
+          </Stack>
+        </Box>
+      </Stack>
+      <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true} shouldWrapItems={true}>
+        {badges.slice(0, 100).map((badge: IBadge): React.ReactElement => (
+          <Box key={badge.key} isFullWidth={false} variant='memberToken' shouldClipContent={true}>
+            <IpfsImage variant='unrounded' isLazyLoadable={true} source={badge.imageUrl} alternativeText={badge.name} width='1.4em' height='1.4em' />
+          </Box>
+        ))}
+      </Stack>
     </Stack>
   );
 };
@@ -283,6 +373,7 @@ const DUMMY_ROW = new GalleryUserRow(
     new CollectionToken('', '', '', '', null, null, null, []),
     new CollectionToken('', '', '', '', null, null, null, []),
   ],
+  [],
 );
 
 export const DEFAULT_SORT = 'FOLLOWERCOUNT_DESC';
@@ -437,7 +528,7 @@ export const MembersPageReal = (): React.ReactElement => {
                     <List shouldShowDividers={true}>
                       {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
                         <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
-                          <MemberRowContent row={row} collection={collection} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
+                          <MemberRowContent projectId={projectId} row={row} collection={collection} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                         </List.Item>
                       ))}
                     </List>
@@ -452,6 +543,9 @@ export const MembersPageReal = (): React.ReactElement => {
                           {collection.doesSupportErc1155 && (
                             <HeaderCell theme={tableHeaderCellTheme} headerId='UNIQUETOKENCOUNT' title='Unique' isOrderable={true} orderDirection={orderField === 'UNIQUETOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                           )}
+                          {isBadgesEnabled(projectId) && (
+                            <HeaderCell theme={tableHeaderCellTheme} headerId='BADGES' title='Badges' isOrderable={false} orderDirection={null} />
+                          )}
                           <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                         </StyledTableHeadRow>
                       </StyledTableHead>
@@ -465,11 +559,7 @@ export const MembersPageReal = (): React.ReactElement => {
                               <UserCellContent row={row} />
                             </StyledTableBodyRowItem>
                             <StyledTableBodyRowItem $theme={tableCellTheme}>
-                              {row.galleryUser.joinDate ? (
-                                <Text alignment={TextAlignment.Center}>{dateToRelativeString(row.galleryUser.joinDate)}</Text>
-                              ) : (
-                                <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
-                              )}
+                              <JoinedCellContent row={row} />
                             </StyledTableBodyRowItem>
                             <StyledTableBodyRowItem $theme={tableCellTheme}>
                               <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
@@ -477,6 +567,11 @@ export const MembersPageReal = (): React.ReactElement => {
                             {collection.doesSupportErc1155 && (
                               <StyledTableBodyRowItem $theme={tableCellTheme}>
                                 <Text alignment={TextAlignment.Center}>{row.galleryUser.uniqueOwnedTokenCount}</Text>
+                              </StyledTableBodyRowItem>
+                            )}
+                            {isBadgesEnabled(projectId) && (
+                              <StyledTableBodyRowItem $theme={tableCellTheme}>
+                                <BadgesCellContent projectId={projectId} row={row} />
                               </StyledTableBodyRowItem>
                             )}
                             <StyledTableBodyRowItem $theme={tableCellTheme}>

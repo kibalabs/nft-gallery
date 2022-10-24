@@ -263,6 +263,14 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         'border-width': baseTheme.dimensions.borderWidth,
         'border-color': '$colors.background',
       },
+      badge: {
+        'background-color': 'rgba(0, 0, 0, 0)',
+        'border-width': baseTheme.dimensions.borderWidth,
+        'border-color': '$colors.background',
+      },
+      badgeUnobtained: {
+        opacity: '0.3',
+      },
       unbordered: {
         'border-width': '0',
       },

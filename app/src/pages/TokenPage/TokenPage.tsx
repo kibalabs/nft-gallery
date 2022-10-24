@@ -488,11 +488,15 @@ export const TokenPage = (): React.ReactElement => {
                       <Spacing />
                       <Stack.Item growthFactor={1} shrinkFactor={1}>
                         <HidingView isHidden={selectedTabKey !== TAB_KEY_ATTRIBUTES}>
-                          <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
-                            {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
-                              <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
-                            ))}
-                          </EqualGrid>
+                          {collectionToken.attributes.length === 0 ? (
+                            <Text variant='note'>This token has no traits 😢</Text>
+                          ) : (
+                            <EqualGrid childSize={6} contentAlignment={Alignment.Start} shouldAddGutters={true} defaultGutter={PaddingSize.Narrow}>
+                              {collectionToken.attributes.map((attribute: TokenAttribute): React.ReactElement => (
+                                <KeyValue key={attribute.traitType} name={attribute.traitType} nameTextVariant='note' value={attribute.value} valueTextVariant='default' />
+                              ))}
+                            </EqualGrid>
+                          )}
                         </HidingView>
                         <HidingView isHidden={selectedTabKey !== TAB_KEY_OWNERSHIPS}>
                           <List isFullWidth={true}>
@@ -532,6 +536,8 @@ export const TokenPage = (): React.ReactElement => {
                             <LoadingSpinner />
                           ) : tokenListings === null ? (
                             <Text variant='error'>Failed to load listings</Text>
+                          ) : tokenListings.length === 0 ? (
+                            <Text variant='note'>This token has no listings 😭</Text>
                           ) : (
                             <List isFullWidth={true}>
                               {tokenListings.map((tokenListing: TokenListing): React.ReactElement => (

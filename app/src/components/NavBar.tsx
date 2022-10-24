@@ -71,20 +71,20 @@ export const NavBar = (): React.ReactElement => {
           <Stack.Item shrinkFactor={1} shouldShrinkBelowContentSize={true}>
             <LinkBase target='/' isFullHeight={true}>
               {logoImageUrl ? (
-                <IpfsImage source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} Gallery`} isFullHeight={true} maxHeight='2em' />
+                <IpfsImage source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} logo`} isFullHeight={true} maxHeight='2em' />
               ) : (
-                <Text variant='header1'>{`${collection ? collection.name : ''} Gallery`}</Text>
+                <Text variant='header1'>{`${collection ? collection.name : ''} Hub`}</Text>
               )}
             </LinkBase>
           </Stack.Item>
           <Spacing />
           <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
             <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-              <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text='Gallery' />
-              {getChain(projectId) === 'ethereum' && (
+              <TabBar.Item variant='narrow' tabKey={TAB_KEY_GALLERY} text={chain === 'ethereum' ? 'Market' : 'Gallery'} />
+              {chain === 'ethereum' && (
                 <TabBar.Item variant='narrow' tabKey={TAB_KEY_MEMBERS} text='Members' />
               )}
-              {getChain(projectId) === 'ethereum' && (
+              {chain === 'ethereum' && (
                 <TabBar.Item variant='narrow' tabKey={TAB_KEY_HOLDINGS} text='Member Holdings' />
               )}
             </TabBar>
@@ -92,7 +92,7 @@ export const NavBar = (): React.ReactElement => {
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
             <LinkBase onClicked={onMenuClicked}>
               {selectedTabKey === TAB_KEY_GALLERY ? (
-                <Text variant='branded'>Gallery</Text>
+                <Text variant='branded'>{chain === 'ethereum' ? 'Market' : 'Gallery'}</Text>
               ) : selectedTabKey === TAB_KEY_MEMBERS ? (
                 <Text variant='branded'>Members</Text>
               ) : selectedTabKey === TAB_KEY_HOLDINGS ? (
@@ -126,10 +126,11 @@ export const NavBar = (): React.ReactElement => {
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
             <Box variant='unrounded-navBar-navBarScrolled'>
               <Stack direction={Direction.Vertical} isFullWidth={true} childAlignment={Alignment.Center} shouldAddGutters={true} paddingStart={PaddingSize.Wide} paddingEnd={PaddingSize.Wide}>
-                <Button text='Market' variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
-                <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
+                <Button text={chain === 'ethereum' ? 'Market' : 'Gallery'} variant={getVariant(selectedTabKey === TAB_KEY_GALLERY ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_GALLERY)} />
                 { chain === 'ethereum' && (
                   <React.Fragment>
+                    <Button text='Members' variant={getVariant(selectedTabKey === TAB_KEY_MEMBERS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_MEMBERS)} />
+                    <Button text='Member Holdings' variant={getVariant(selectedTabKey === TAB_KEY_HOLDINGS ? 'navBarSelected' : null)} onClicked={(): void => onTabKeySelected(TAB_KEY_HOLDINGS)} />
                     { account ? (
                       <AccountViewLink address={account.address} target={`/members/${account.address}`} />
                     ) : (

@@ -340,13 +340,14 @@ export class GalleryUserRow extends ResponseData {
   public constructor(
     readonly galleryUser: GalleryUser,
     readonly chosenOwnedTokens: CollectionToken[],
-
+    readonly galleryUserBadges: GalleryUserBadge[],
   ) { super(); }
 
   public static fromObject = (obj: Record<string, unknown>): GalleryUserRow => {
     return new GalleryUserRow(
       GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
       (obj.chosenOwnedTokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
+      (obj.galleryUserBadges as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): GalleryUserBadge => GalleryUserBadge.fromObject(innerObj)),
     );
   };
 }
@@ -422,6 +423,24 @@ export class CollectionOverlapSummary extends ResponseData {
       Number(obj.ownerCount),
       Number(obj.registryTokenCount),
       Number(obj.otherRegistryTokenCount),
+    );
+  };
+}
+
+export class GalleryUserBadge extends ResponseData {
+  public constructor(
+    readonly registryAddress: string,
+    readonly ownerAddress: string,
+    readonly badgeKey: string,
+    readonly achievedDate: Date,
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): GalleryUserBadge => {
+    return new GalleryUserBadge(
+      String(obj.registryAddress),
+      String(obj.ownerAddress),
+      String(obj.badgeKey),
+      dateFromString(obj.achievedDate as string),
     );
   };
 }
