@@ -13,7 +13,7 @@ import { IpfsImage } from '../../components/IpfsImage';
 import { TokenCard } from '../../components/TokenCard';
 import { UserTokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
-import { getBadges, IBadge } from '../../util';
+import { getBadges, IBadge, isBadgesEnabled } from '../../util';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
@@ -236,21 +236,6 @@ export const AccountPage = (): React.ReactElement => {
             ) : galleryUser && !galleryUser.joinDate && (
               <Text variant='note'>{'Never joined'}</Text>
             )}
-            <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
-              <React.Fragment>
-                <Spacing />
-                {badges === undefined ? (
-                  <LoadingSpinner />
-                ) : badges === null ? (
-                  null
-                ) : (
-                  <Box width='500px' maxWidth='90%'>
-                    <BadgesView userBadges={badges} badges={getBadges(projectId)} />
-                  </Box>
-                )}
-                <Spacing />
-              </React.Fragment>
-            </ResponsiveHidingView>
           </React.Fragment>
           <React.Fragment>
             { galleryUser === undefined || galleryTokens?.length === 0 ? (
@@ -269,6 +254,25 @@ export const AccountPage = (): React.ReactElement => {
               null
             )}
           </React.Fragment>
+          <React.Fragment>
+            {isBadgesEnabled(projectId) && (
+              <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+                <React.Fragment>
+                  <Spacing />
+                  {badges === undefined ? (
+                    <LoadingSpinner />
+                  ) : badges === null ? (
+                    null
+                  ) : (
+                    <Box width='500px' maxWidth='90%'>
+                      <BadgesView userBadges={badges} badges={getBadges(projectId)} />
+                    </Box>
+                  )}
+                  <Spacing />
+                </React.Fragment>
+              </ResponsiveHidingView>
+            )}
+          </React.Fragment>
           <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
             <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
               <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
@@ -279,7 +283,9 @@ export const AccountPage = (): React.ReactElement => {
           <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
             <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
               <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
-              <TabBar.Item variant='lined' tabKey={TAB_KEY_BADGES} text='Badges' />
+              {isBadgesEnabled(projectId) && (
+                <TabBar.Item variant='lined' tabKey={TAB_KEY_BADGES} text='Badges' />
+              )}
               <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
               <TabBar.Item variant='lined' tabKey={TAB_KEY_OTHER} text='Other Projects' />
             </TabBar>
