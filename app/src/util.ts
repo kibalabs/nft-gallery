@@ -1,8 +1,27 @@
 import { IBackgroundConfig } from '@kibalabs/ui-react';
 
+
+export interface IBadge {
+  key: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
 export interface IProjectConfig {
   projectId: string;
   name: string;
+  hots: string;
+  chain: string;
+  isCustomizationEnabled: boolean;
+  backgroundConfig: IBackgroundConfig | null;
+  logoImageUrl: string;
+  getBannerImageUrl: string;
+  getIconImageUrl: string;
+  getEveryviewCode: string;
+  getCollectionAddress: string;
+  isBadgesEnabled: boolean;
+  badges: IBadge[];
 }
 
 
@@ -110,7 +129,7 @@ export const getBannerImageUrl = (projectId: string): string | null => {
 };
 
 
-export const getIcon = (projectId: string): string | null => {
+export const getIconImageUrl = (projectId: string): string | null => {
   if (projectId === 'sprites') {
     return '/assets/sprites/icon.png';
   }
@@ -155,4 +174,39 @@ export const getCollectionAddress = (projectId: string): string | null => {
     return '0x5351105753Bdbc3Baa908A0c04F1468535749c3D';
   }
   return null;
+};
+
+
+export const isBadgesEnabled = (projectId: string): boolean => {
+  if (projectId === 'rudeboys') {
+    return true;
+  }
+  return false;
+};
+
+export const getBadges = (projectId: string): IBadge[] => {
+  if (projectId === 'rudeboys') {
+    return [{
+      key: 'NEVER_SOLD',
+      name: 'Never Sold',
+      description: 'I\'ve never sold a RudeBoy',
+      imageUrl: '/assets/rudeboys/badge-sold.svg',
+    }, {
+      key: 'DIAMOND_HANDS',
+      name: 'Diamonds Hands',
+      description: 'I\'ve held at least one RudeBoy ever since mint',
+      imageUrl: '/assets/rudeboys/badge-diamond.svg',
+    }, {
+      key: 'MINTER',
+      name: 'Minter',
+      description: 'I\'ve minted a RudeBoy directly from source',
+      imageUrl: '/assets/rudeboys/badge-pick.svg',
+    }, {
+      key: 'ONE_OF_ONE',
+      name: 'One of One Holder',
+      description: 'I\'ve held a 1/1 at some point in time',
+      imageUrl: '/assets/rudeboys/badge-one.svg',
+    }];
+  }
+  return [];
 };

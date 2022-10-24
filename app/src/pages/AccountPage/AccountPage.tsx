@@ -2,23 +2,69 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, getVariant, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import ReactTooltip from 'react-tooltip';
 
 import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
-import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, TokenTransfer } from '../../client/resources';
+import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, GalleryUserBadge, TokenTransfer } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { IpfsImage } from '../../components/IpfsImage';
 import { TokenCard } from '../../components/TokenCard';
 import { UserTokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
+import { getBadges, IBadge } from '../../util';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
 const TAB_KEY_OTHER = 'TAB_KEY_OTHER';
+const TAB_KEY_BADGES = 'TAB_KEY_BADGES';
+
+export interface IBadgesViewProps {
+  badges: IBadge[];
+  userBadges: GalleryUserBadge[];
+}
+
+export const BadgesView = (props: IBadgesViewProps): React.ReactElement => {
+  const colors = useColors();
+
+  const ownedBadgeAchievedDateMap = React.useMemo((): Record<string, Date> => {
+    return props.userBadges.reduce((accumulator: Record<string, Date>, current: GalleryUserBadge): Record<string, Date> => {
+      accumulator[current.badgeKey] = current.achievedDate;
+      return accumulator;
+    }, {});
+  }, [props.userBadges]);
+
+  return (
+    <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} defaultGutter={PaddingSize.Wide}>
+      {props.badges.map((badge: IBadge): React.ReactElement => (
+        <React.Fragment key={badge.key}>
+          <div data-tip data-for={`BadgesView-${badge.key}`}>
+            <Box variant={getVariant('badge', ownedBadgeAchievedDateMap[badge.key] ? '' : 'badgeUnobtained')} isFullWidth={false} shouldClipContent={true}>
+              <IpfsImage variant='unrounded' isLazyLoadable={false} source={badge.imageUrl} alternativeText={badge.name} width='3em' height='3em' />
+            </Box>
+          </div>
+          <ReactTooltip id={`BadgesView-${badge.key}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
+            <Box maxWidth='300px'>
+              <Stack direction={Direction.Vertical} shouldAddGutters={true}>
+                <Text variant='bold'>{badge.name}</Text>
+                <Text>{badge.description}</Text>
+                {ownedBadgeAchievedDateMap[badge.key] ? (
+                  <Text>{`Achieved on: ${dateToString(ownedBadgeAchievedDateMap[badge.key], 'yyyy-MM-dd HH:mm')}`}</Text>
+                ) : (
+                  <Text variant='note'>Not held</Text>
+                )}
+              </Stack>
+            </Box>
+          </ReactTooltip>
+        </React.Fragment>
+      ))}
+    </Stack>
+  );
+};
 
 export const AccountPage = (): React.ReactElement => {
-  const { notdClient, collection } = useGlobals();
+  const { notdClient, collection, projectId } = useGlobals();
   const location = useLocation();
   const navigator = useNavigator();
   const account = useAccount();
@@ -30,8 +76,16 @@ export const AccountPage = (): React.ReactElement => {
   const [galleryUser, setGalleryUser] = React.useState<GalleryUser | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OWNED);
   const [recentTransfers, setRecentTransfers] = React.useState<TokenTransfer[] | null | undefined>(undefined);
+  const [badges, setBadges] = React.useState<GalleryUserBadge[] | null | undefined>(undefined);
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
+
+  const ownedBadgeAchievedDateMap = React.useMemo((): Record<string, Date> | undefined | null => {
+    return badges?.reduce((accumulator: Record<string, Date>, current: GalleryUserBadge): Record<string, Date> => {
+      accumulator[current.badgeKey] = current.achievedDate;
+      return accumulator;
+    }, {});
+  }, [badges]);
 
   const updateTokens = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
@@ -53,6 +107,26 @@ export const AccountPage = (): React.ReactElement => {
     updateTokens();
   }, [updateTokens]);
 
+  const updateBadges = React.useCallback(async (shouldClear = false): Promise<void> => {
+    if (shouldClear) {
+      setBadges(undefined);
+    }
+    if (!accountAddress || !collection?.address) {
+      setBadges(undefined);
+      return;
+    }
+    notdClient.listUserBadges(collection.address, accountAddress).then((retrievedGalleryUserBadges: GalleryUserBadge[]): void => {
+      setBadges(retrievedGalleryUserBadges);
+    }).catch((error: unknown): void => {
+      console.error(error);
+      setBadges(null);
+    });
+  }, [notdClient, collection?.address, accountAddress]);
+
+  React.useEffect((): void => {
+    updateBadges();
+  }, [updateBadges]);
+
   const updateOwnedCollections = React.useCallback(async (shouldClear = false): Promise<void> => {
     if (shouldClear) {
       setOwnedCollections(undefined);
@@ -61,7 +135,7 @@ export const AccountPage = (): React.ReactElement => {
       setOwnedCollections(undefined);
       return;
     }
-    notdClient.getOwnedCollections(collection.address, accountAddress).then((retrievedOwnedCollections: GalleryOwnedCollection[]): void => {
+    notdClient.listUserOwnedCollections(collection.address, accountAddress).then((retrievedOwnedCollections: GalleryOwnedCollection[]): void => {
       setOwnedCollections(retrievedOwnedCollections);
     }).catch((error: unknown): void => {
       console.error(error);
@@ -162,6 +236,21 @@ export const AccountPage = (): React.ReactElement => {
             ) : galleryUser && !galleryUser.joinDate && (
               <Text variant='note'>{'Never joined'}</Text>
             )}
+            <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+              <React.Fragment>
+                <Spacing />
+                {badges === undefined ? (
+                  <LoadingSpinner />
+                ) : badges === null ? (
+                  null
+                ) : (
+                  <Box width='500px' maxWidth='90%'>
+                    <BadgesView userBadges={badges} badges={getBadges(projectId)} />
+                  </Box>
+                )}
+                <Spacing />
+              </React.Fragment>
+            </ResponsiveHidingView>
           </React.Fragment>
           <React.Fragment>
             { galleryUser === undefined || galleryTokens?.length === 0 ? (
@@ -180,11 +269,21 @@ export const AccountPage = (): React.ReactElement => {
               null
             )}
           </React.Fragment>
-          <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
-            <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
-            <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
-            <TabBar.Item variant='lined' tabKey={TAB_KEY_OTHER} text='Other Projects' />
-          </TabBar>
+          <ResponsiveHidingView hiddenBelow={ScreenSize.Medium}>
+            <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OTHER} text='Other Projects' />
+            </TabBar>
+          </ResponsiveHidingView>
+          <ResponsiveHidingView hiddenAbove={ScreenSize.Medium}>
+            <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNED} text='Owned Tokens' />
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_BADGES} text='Badges' />
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_TRANSACTIONS} text='Activity' />
+              <TabBar.Item variant='lined' tabKey={TAB_KEY_OTHER} text='Other Projects' />
+            </TabBar>
+          </ResponsiveHidingView>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             {selectedTabKey === TAB_KEY_OWNED ? (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true}>
@@ -204,6 +303,30 @@ export const AccountPage = (): React.ReactElement => {
                         tokenQuantity={galleryToken.quantity}
                         target={`/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
                       />
+                    ))}
+                  </EqualGrid>
+                )}
+              </Stack>
+            ) : selectedTabKey === TAB_KEY_BADGES ? (
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true}>
+                { badges === undefined ? (
+                  <LoadingSpinner />
+                ) : badges === null ? (
+                  <Text variant='error' alignment={TextAlignment.Center}>Failed to load account tokens</Text>
+                ) : badges.length === 0 ? (
+                  <Text alignment={TextAlignment.Center}>No tokens owned</Text>
+                ) : (
+                  <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                    {getBadges(projectId).map((badge: IBadge): React.ReactElement => (
+                      <Box key={badge.key} variant={getVariant(ownedBadgeAchievedDateMap && ownedBadgeAchievedDateMap[badge.key] ? '' : 'badgeUnobtained')} isFullWidth={true}>
+                        <Stack direction={Direction.Vertical} shouldAddGutters={true} childAlignment={Alignment.Center}>
+                          <Box variant={getVariant('badge', ownedBadgeAchievedDateMap && ownedBadgeAchievedDateMap[badge.key] ? '' : 'badgeUnobtained')} isFullWidth={true} shouldClipContent={true}>
+                            <IpfsImage variant='unrounded' isLazyLoadable={false} source={badge.imageUrl} alternativeText={badge.name} isFullHeight={true} isFullWidth={true} />
+                          </Box>
+                          <Text alignment={TextAlignment.Center} variant='bold'>{badge.name}</Text>
+                          <Text alignment={TextAlignment.Center}>{badge.description}</Text>
+                        </Stack>
+                      </Box>
                     ))}
                   </EqualGrid>
                 )}
@@ -256,7 +379,7 @@ export const AccountPage = (): React.ReactElement => {
                               key={`${token.registryAddress}-${token.tokenId}`}
                               token={token}
                               tokenQuantity={1}
-                              target=''
+                              target={`https://tokenhunt.io/collections/${token.registryAddress}/tokens/${token.tokenId}`}
                             />
                           ))}
                         </EqualGrid>

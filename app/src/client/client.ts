@@ -135,12 +135,20 @@ export class NotdClient extends ServiceClient {
     return response.tokenTransfers;
   };
 
-  public getOwnedCollections = async (address: string, userAddress: string): Promise<Resources.GalleryOwnedCollection[]> => {
+  public listUserOwnedCollections = async (address: string, userAddress: string): Promise<Resources.GalleryOwnedCollection[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${address}/users/${userAddress}/owned-collections`;
-    const request = new Endpoints.GetGalleryUserOwnedCollectionsRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.GetGalleryUserOwnedCollectionsResponse);
+    const request = new Endpoints.ListGalleryUserOwnedCollectionsRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryUserOwnedCollectionsResponse);
     return response.ownedCollections;
+  };
+
+  public listUserBadges = async (address: string, userAddress: string): Promise<Resources.GalleryUserBadge[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/collections/${address}/users/${userAddress}/badges`;
+    const request = new Endpoints.ListGalleryUserBadgesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryUserBadgesResponse);
+    return response.galleryUserBadges;
   };
 
   public getCollectionOverlaps = async (address: string, otherRegistryAddress?: string): Promise<Resources.CollectionOverlap[]> => {

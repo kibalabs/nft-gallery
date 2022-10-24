@@ -428,10 +428,10 @@ export class GetCollectionRecentTransfersResponse extends ResponseData {
 }
 
 
-export class GetGalleryUserOwnedCollectionsRequest extends RequestData {
+export class ListGalleryUserOwnedCollectionsRequest extends RequestData {
 }
 
-export class GetGalleryUserOwnedCollectionsResponse extends ResponseData {
+export class ListGalleryUserOwnedCollectionsResponse extends ResponseData {
   readonly ownedCollections: Resources.GalleryOwnedCollection[];
 
   public constructor(ownedCollections: Resources.GalleryOwnedCollection[]) {
@@ -439,9 +439,27 @@ export class GetGalleryUserOwnedCollectionsResponse extends ResponseData {
     this.ownedCollections = ownedCollections;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): GetGalleryUserOwnedCollectionsResponse => {
-    return new GetGalleryUserOwnedCollectionsResponse(
+  public static fromObject = (obj: Record<string, unknown>): ListGalleryUserOwnedCollectionsResponse => {
+    return new ListGalleryUserOwnedCollectionsResponse(
       (obj.ownedCollections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.GalleryOwnedCollection.fromObject(innerObj)),
+    );
+  };
+}
+
+export class ListGalleryUserBadgesRequest extends RequestData {
+}
+
+export class ListGalleryUserBadgesResponse extends ResponseData {
+  readonly galleryUserBadges: Resources.GalleryUserBadge[];
+
+  public constructor(galleryUserBadges: Resources.GalleryUserBadge[]) {
+    super();
+    this.galleryUserBadges = galleryUserBadges;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListGalleryUserBadgesResponse => {
+    return new ListGalleryUserBadgesResponse(
+      (obj.galleryUserBadges as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.GalleryUserBadge.fromObject(innerObj)),
     );
   };
 }

@@ -21,7 +21,7 @@ import { MemberHoldingsPage } from './pages/MemberHoldingsPage';
 import { MembersPage } from './pages/MembersPage/MembersPage';
 import { TokenPage } from './pages/TokenPage';
 import { buildProjectTheme } from './theme';
-import { getBackground, getCollectionAddress, getEveryviewCode, getIcon } from './util';
+import { getBackground, getCollectionAddress, getEveryviewCode, getIconImageUrl } from './util';
 
 import './fonts.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -90,7 +90,7 @@ export interface IAppProps extends IHeadRootProviderProps {
 }
 
 export const App = (props: IAppProps): React.ReactElement => {
-  useFavicon(getIcon(projectId) || '/assets/icon.png');
+  useFavicon(getIconImageUrl(projectId) || '/assets/icon.png');
   const [collection, setCollection] = React.useState<Collection | null | undefined>(props.pageData?.collection || undefined);
   const [allTokens, setAllTokens] = React.useState<CollectionToken[] | null | undefined>(props.pageData?.allTokens || undefined);
   const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
