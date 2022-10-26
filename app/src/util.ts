@@ -1,5 +1,11 @@
 import { IBackgroundConfig } from '@kibalabs/ui-react';
 
+import GoblintownConfigJson from './projects/goblintown.json';
+import MdtpConfigJson from './projects/mdtp.json';
+import PepesConfigJson from './projects/pepes.json';
+import RudeboysConfigJson from './projects/rudeboys.json';
+import SpritesConfigJson from './projects/sprites.json';
+
 
 export interface IBadge {
   key: string;
@@ -11,19 +17,33 @@ export interface IBadge {
 export interface IProjectConfig {
   projectId: string;
   name: string;
-  hots: string;
+  host: string;
   chain: string;
   isCustomizationEnabled: boolean;
   backgroundConfig: IBackgroundConfig | null;
+  backgroundMusingFileUrl: string | null,
   logoImageUrl: string;
-  getBannerImageUrl: string;
-  getIconImageUrl: string;
-  getEveryviewCode: string;
-  getCollectionAddress: string;
+  bannerImageUrl: string | null;
+  iconImageUrl: string | null;
+  everyviewCode: string | null;
+  collectionAddress: string | null;
   isBadgesEnabled: boolean;
   badges: IBadge[];
 }
 
+const RUDEBOYS_CONFIG = RudeboysConfigJson as IProjectConfig;
+const SPRITES_CONFIG = SpritesConfigJson as IProjectConfig;
+const MDTP_CONFIG = MdtpConfigJson as IProjectConfig;
+const GOBLINTOWN_CONFIG = GoblintownConfigJson as IProjectConfig;
+const PEPES_CONFIG = PepesConfigJson as IProjectConfig;
+
+const PROJECT_CONFIGS = {
+  [RUDEBOYS_CONFIG.projectId]: RUDEBOYS_CONFIG,
+  [SPRITES_CONFIG.projectId]: SPRITES_CONFIG,
+  [MDTP_CONFIG.projectId]: MDTP_CONFIG,
+  [GOBLINTOWN_CONFIG.projectId]: GOBLINTOWN_CONFIG,
+  [PEPES_CONFIG.projectId]: PEPES_CONFIG,
+};
 
 // eslint-disable-next-line unused-imports/no-unused-vars
 export const getTreasureHuntTokenId = (projectId: string): string | null => {
@@ -32,181 +52,59 @@ export const getTreasureHuntTokenId = (projectId: string): string | null => {
 
 
 export const getHost = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return 'https://gallery.spriteclubnft.com';
-  }
-  if (projectId === 'goblintown') {
-    return 'https://goblintown-gallery.tokenpage.xyz';
-  }
-  if (projectId === 'mdtp') {
-    return 'https://gallery.milliondollartokenpage.com';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].host;
 };
 
 
 export const getChain = (projectId: string): string => {
-  if (projectId === 'pepes') {
-    return 'avalanche';
-  }
-  return 'ethereum';
+  return PROJECT_CONFIGS[projectId].chain;
 };
 
 
 export const isCustomizationEnabled = (projectId: string): boolean => {
-  if (projectId === 'sprites') {
-    return true;
-  }
-  return false;
+  return PROJECT_CONFIGS[projectId].isCustomizationEnabled;
 };
 
 
 export const getBackground = (projectId: string): IBackgroundConfig | null => {
-  if (projectId === 'sprites') {
-    return {
-      linearGradient: '180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%',
-    };
-  }
-  if (projectId === 'pepes') {
-    return {
-      layers: [
-        { imageUrl: '/assets/pepes/background.png' },
-        { color: 'RGBA(96, 100, 85, 0.75)' },
-      ],
-    };
-  }
-  if (projectId === 'goblintown') {
-    return {
-      layers: [
-        { imageUrl: '/assets/goblintown/background.png' },
-        { color: 'rgba(0, 0, 0, 0.75)' },
-      ],
-    };
-  }
-  return null;
-};
-
-
-export const getLogoImageUrl = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return '/assets/sprites/logo.png';
-  }
-  if (projectId === 'pepes') {
-    return '/assets/pepes/logo.png';
-  }
-  if (projectId === 'goblintown') {
-    return '/assets/goblintown/logo-animated-inverse.gif';
-  }
-  if (projectId === 'mdtp') {
-    return '/assets/mdtp/logo.png';
-  }
-  if (projectId === 'rudeboys') {
-    return '/assets/rudeboys/logo.svg';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].backgroundConfig;
 };
 
 
 export const getBackgroundMusic = (projectId: string): string | null => {
-  if (projectId === 'goblintown') {
-    return '/assets/goblintown/music.mp3';
-  }
-  if (projectId === 'sprites') {
-    return '/assets/sprites/music.mp3';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].backgroundMusingFileUrl;
+};
+
+
+export const getLogoImageUrl = (projectId: string): string | null => {
+  return PROJECT_CONFIGS[projectId].logoImageUrl;
 };
 
 
 export const getBannerImageUrl = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return '/assets/sprites/banner.png';
-  }
-  if (projectId === 'pepes') {
-    return '/assets/pepes/banner.png';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].bannerImageUrl;
 };
 
 
 export const getIconImageUrl = (projectId: string): string | null => {
-  if (projectId === 'sprites') {
-    return '/assets/sprites/icon.png';
-  }
-  if (projectId === 'goblintown') {
-    return '/assets/goblintown/icon.png';
-  }
-  if (projectId === 'pepes') {
-    return '/assets/pepes/icon.png';
-  }
-  if (projectId === 'mdtp') {
-    return '/assets/mdtp/icon.png';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].iconImageUrl;
 };
 
 
 export const getEveryviewCode = (projectId: string): string | null => {
-  if (projectId === 'mdtp') {
-    return '54fa4b47b0b3431884b64a549d46ffd7';
-  }
-  if (projectId === 'goblintown') {
-    return 'eb42bb3312374c8982d92c3eb38f84e7';
-  }
-  if (projectId === 'sprites') {
-    return '23fecbad77194ba4aa49b4abb88c6131';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].everyviewCode;
 };
 
 
 export const getCollectionAddress = (projectId: string): string | null => {
-  if (projectId === 'mdtp') {
-    return '0x8e720F90014fA4De02627f4A4e217B7e3942d5e8';
-  }
-  if (projectId === 'goblintown') {
-    return '0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e';
-  }
-  if (projectId === 'sprites') {
-    return '0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3';
-  }
-  if (projectId === 'rudeboys') {
-    return '0x5351105753Bdbc3Baa908A0c04F1468535749c3D';
-  }
-  return null;
+  return PROJECT_CONFIGS[projectId].collectionAddress;
 };
 
 
 export const isBadgesEnabled = (projectId: string): boolean => {
-  if (projectId === 'rudeboys') {
-    return true;
-  }
-  return false;
+  return PROJECT_CONFIGS[projectId].isBadgesEnabled;
 };
 
 export const getBadges = (projectId: string): IBadge[] => {
-  if (projectId === 'rudeboys') {
-    return [{
-      key: 'NEVER_SOLD',
-      name: 'Never Sold',
-      description: 'I\'ve never sold a RudeBoy',
-      imageUrl: '/assets/rudeboys/badge-sold.svg',
-    }, {
-      key: 'DIAMOND_HANDS',
-      name: 'Diamonds Hands',
-      description: 'I\'ve held at least one RudeBoy ever since mint',
-      imageUrl: '/assets/rudeboys/badge-diamond.svg',
-    }, {
-      key: 'MINTER',
-      name: 'Minter',
-      description: 'I\'ve minted a RudeBoy directly from source',
-      imageUrl: '/assets/rudeboys/badge-pick.svg',
-    }, {
-      key: 'ONE_OF_ONE',
-      name: 'One of One Holder',
-      description: 'I\'ve held a 1/1 at some point in time',
-      imageUrl: '/assets/rudeboys/badge-one.svg',
-    }];
-  }
-  return [];
+  return PROJECT_CONFIGS[projectId].badges;
 };

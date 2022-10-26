@@ -1,0 +1,21 @@
+{
+  "projectId": "pepes",
+  "name": "Pepe e Cacio",
+  "host": "https://gallery.pepepasta.xyz",
+  "chain": "avalanche",
+  "isCustomizationEnabled": false,
+  "backgroundConfig": {
+    "layers": [
+      { "imageUrl": "/assets/pepes/background.png" },
+      { "color": "rgba(96, 100, 85, 0.75)" }
+    ]
+  },
+  "backgroundMusingFileUrl": null,
+  "logoImageUrl": "/assets/pepes/logo.png",
+  "bannerImageUrl": "assets/pepes/banner.png",
+  "iconImageUrl": "/assets/pepes/icon.png",
+  "everyviewCode": null,
+  "collectionAddress": null,
+  "isBadgesEnabled": false,
+  "badges": []
+}

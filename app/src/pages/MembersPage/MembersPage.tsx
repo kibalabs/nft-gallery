@@ -100,11 +100,12 @@ const StyledTableBody = styled.tbody<IStyledTableBodyProps>`
 `;
 
 interface IStyledTableBodyRowProps {
-
+  backgroundColor?: string;
 }
 
 const StyledTableBodyRow = styled.tr<IStyledTableBodyRowProps>`
   overflow: hidden;
+  ${(props: IStyledTableBodyRowProps): string => (props.backgroundColor ? `background-color: ${props.backgroundColor}` : '')};
 `;
 
 interface IStyledTableBodyRowItemProps {
@@ -247,6 +248,7 @@ interface IHeaderCellProps {
 }
 
 const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
+  const colors = useColors();
   if (props.isOrderable && !props.onClicked) {
     throw Error('onClicked must be provided if isOrderable=true');
   }
@@ -265,8 +267,10 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
     >
       <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
         <Text variant='bold' tag='span' alignment={TextAlignment.Left}>{props.title}</Text>
-        {props.orderDirection && (
-          <KibaIcon variant='small' iconId={props.orderDirection === -1 ? 'ion-caret-down-outline' : 'ion-caret-up-outline'} />
+        {props.orderDirection ? (
+          <KibaIcon variant='small' iconId={props.orderDirection === -1 ? 'ion-caret-down' : 'ion-caret-up'} />
+        ) : props.isOrderable && (
+          <KibaIcon variant='small' iconId={'ion-caret-forward'} _color={colors.textClear75} />
         )}
       </Stack>
     </StyledTableHeadRowItem>
@@ -551,7 +555,7 @@ export const MembersPageReal = (): React.ReactElement => {
                       </StyledTableHead>
                       <StyledTableBody>
                         {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
-                          <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`}>
+                          <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`} backgroundColor={(pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined}>
                             <StyledTableBodyRowItem $theme={tableCellTheme}>
                               <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
                             </StyledTableBodyRowItem>
