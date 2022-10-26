@@ -1,0 +1,38 @@
+{
+  "projectId": "sprites",
+  "name": "Sprite Club",
+  "host": "https://gallery.spriteclubnft.com",
+  "chain": "ethereum",
+  "isCustomizationEnabled": true,
+  "backgroundConfig": {
+    "linearGradient": "180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%"
+  },
+  "backgroundMusingFileUrl": "/assets/sprites/music.mp3",
+  "logoImageUrl": "/assets/sprites/logo.png",
+  "bannerImageUrl": "/assets/sprites/banner.png",
+  "iconImageUrl": "/assets/sprites/icon.png",
+  "everyviewCode": "23fecbad77194ba4aa49b4abb88c6131",
+  "collectionAddress": "0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3",
+  "isBadgesEnabled": false,
+  "badges": [{
+    "key": "NEVER_SOLD",
+    "name": "Never Sold",
+    "description": "I've never sold a RudeBoy",
+    "imageUrl": "/assets/rudeboys/badge-sold.svg"
+  }, {
+    "key": "DIAMOND_HANDS",
+    "name": "Diamonds Hands",
+    "description": "I've held at least one RudeBoy ever since mint",
+    "imageUrl": "/assets/rudeboys/badge-diamond.svg"
+  }, {
+    "key": "MINTER",
+    "name": "Minter",
+    "description": "I've minted a RudeBoy directly from source",
+    "imageUrl": "/assets/rudeboys/badge-pick.svg"
+  }, {
+    "key": "ONE_OF_ONE",
+    "name": "One of One Holder",
+    "description": "I've held a 1/1 at some point in time",
+    "imageUrl": "/assets/rudeboys/badge-one.svg"
+  }]
+}
