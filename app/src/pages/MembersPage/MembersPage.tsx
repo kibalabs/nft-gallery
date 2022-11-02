@@ -13,7 +13,7 @@ import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
 import { useGlobals } from '../../globalsContext';
-import { getBadges, getChain, IBadge, isBadgesEnabled } from '../../util';
+import { getBadges, getChain, getDefaultMembersSort, IBadge, isBadgesEnabled } from '../../util';
 
 
 interface ITableTheme extends ThemeType {
@@ -388,13 +388,14 @@ export const MembersPageReal = (): React.ReactElement => {
   const tableHeaderCellTheme = useBuiltTheme<ITableCellTheme>('tableCells', 'header');
   const tableCellTheme = useBuiltTheme<ITableCellTheme>('tableCells');
   const { collection, notdClient, projectId } = useGlobals();
+  const defaultMembersSort = getDefaultMembersSort(projectId) || DEFAULT_SORT;
   const navigator = useNavigator();
   const location = useLocation();
   const account = useAccount();
   const loginSignature = useLoginSignature();
   const onLoginClicked = useOnLoginClicked();
   const [followedUsers, setFollowedUsers] = React.useState<string[]>([]);
-  const [queryOrder, setOrder] = useUrlQueryState('order', undefined, DEFAULT_SORT);
+  const [queryOrder, setOrder] = useUrlQueryState('order', undefined, defaultMembersSort);
   const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);
   const [pageCount, setPageCount] = React.useState<number>(0);
   const [rows, setRows] = React.useState<GalleryUserRow[] | undefined | null>(undefined);
@@ -494,6 +495,8 @@ export const MembersPageReal = (): React.ReactElement => {
                       options={[
                         { itemKey: 'TOKENCOUNT_DESC', text: '↓ Owned' },
                         { itemKey: 'TOKENCOUNT_ASC', text: '↑ Owned' },
+                        { itemKey: 'UNIQUETOKENCOUNT_DESC', text: '↓ Unique' },
+                        { itemKey: 'UNIQUETOKENCOUNT_ASC', text: '↑ Unique' },
                         { itemKey: 'JOINDATE_DESC', text: '↓ Joined' },
                         { itemKey: 'JOINDATE_ASC', text: '↑ Joined' },
                         { itemKey: 'FOLLOWERCOUNT_DESC', text: '↓ Followers' },

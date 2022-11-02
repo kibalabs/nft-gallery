@@ -34,5 +34,6 @@
     "name": "One of One Holder",
     "description": "I've held a 1/1 at some point in time",
     "imageUrl": "/assets/rudeboys/badge-one.svg"
-  }]
+  }],
+  "defaultMembersSort": null
 }
