@@ -17,5 +17,6 @@
   "everyviewCode": null,
   "collectionAddress": null,
   "isBadgesEnabled": false,
-  "badges": []
+  "badges": [],
+  "defaultMembersSort": null
 }

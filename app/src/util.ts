@@ -27,6 +27,7 @@ export interface IProjectConfig {
   iconImageUrl: string | null;
   everyviewCode: string | null;
   collectionAddress: string | null;
+  defaultMembersSort: string | null;
   isBadgesEnabled: boolean;
   badges: IBadge[];
 }
@@ -107,4 +108,8 @@ export const isBadgesEnabled = (projectId: string): boolean => {
 
 export const getBadges = (projectId: string): IBadge[] => {
   return PROJECT_CONFIGS[projectId].badges;
+};
+
+export const getDefaultMembersSort = (projectId: string): string | null => {
+  return PROJECT_CONFIGS[projectId].defaultMembersSort;
 };

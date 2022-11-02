@@ -245,6 +245,9 @@ export const TokenPage = (): React.ReactElement => {
     if (tokenListing.source === 'looksrare') {
       return `https://looksrare.org/collections/${tokenListing.registryAddress}/${tokenListing.tokenId}`;
     }
+    if (tokenListing.source === 'rarible') {
+      return `https://rarible.com/token/${tokenListing.registryAddress}:${tokenListing.tokenId}`;
+    }
     return '';
   };
 
@@ -325,9 +328,10 @@ export const TokenPage = (): React.ReactElement => {
                   {getChain(projectId) === 'ethereum' && (
                     <Stack direction={Direction.Horizontal} contentAlignmentResponsive={{ base: Alignment.Center, medium: Alignment.Start }}>
                       <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-info.svg'} alternativeText={'info'} /></Box>} target={`https://tokenhunt.io/collections/${collectionToken.registryAddress}/tokens/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
                       <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-looksrare.svg'} alternativeText={'looksrare'} /></Box>} target={`https://looksrare.org/collections/${collectionToken.registryAddress}/${tokenId}`} />
                       <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-opensea.svg'} alternativeText={'opensea'} /></Box>} target={`https://opensea.io/assets/${collectionToken.registryAddress}/${tokenId}`} />
-                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-etherscan.svg'} alternativeText={'etherscan'} /></Box>} target={`https://etherscan.io/nft/${collectionToken.registryAddress}/${tokenId}`} />
+                      <IconButton variant={'tertiary'} icon={<Box width='1.3em'><Image source={'/assets/icon-rarible.svg'} alternativeText={'rarible'} /></Box>} target={`https://rarible.com/token/${collectionToken.registryAddress}:${tokenId}`} />
                     </Stack>
                   )}
                 </Stack>
@@ -547,6 +551,8 @@ export const TokenPage = (): React.ReactElement => {
                                       <Box width='1.3em'><Image source={'/assets/icon-opensea-color.svg'} alternativeText={'opensea'} /></Box>
                                     ) : tokenListing.source.startsWith('looksrare') ? (
                                       <Box width='1.3em'><Image source={'/assets/icon-looksrare-color.svg'} alternativeText={'looksrare'} /></Box>
+                                    ) : tokenListing.source.startsWith('rarible') ? (
+                                      <Box width='1.3em'><Image source={'/assets/icon-rarible-color.svg'} alternativeText={'rarible'} /></Box>
                                     ) : (
                                       null
                                     )}
