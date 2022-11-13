@@ -12,6 +12,7 @@ export interface IBadge {
   name: string;
   description: string;
   imageUrl: string;
+  isTransient: boolean;
 }
 
 export interface IProjectConfig {
