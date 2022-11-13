@@ -228,8 +228,9 @@ export class QueryCollectionTokensRequest extends RequestData {
   readonly isListed?: boolean;
   readonly tokenIdIn?: string[];
   readonly attributeFilters?: InQueryParam[];
+  readonly order?: string;
 
-  public constructor(limit?: number, offset?: number, ownerAddress?: string, minPrice?: BigNumber, maxPrice?: BigNumber, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[]) {
+  public constructor(limit?: number, offset?: number, ownerAddress?: string, minPrice?: BigNumber, maxPrice?: BigNumber, isListed?: boolean, tokenIdIn?: string[], attributeFilters?: InQueryParam[], order?: string) {
     super();
     this.limit = limit;
     this.offset = offset;
@@ -239,6 +240,7 @@ export class QueryCollectionTokensRequest extends RequestData {
     this.isListed = isListed;
     this.tokenIdIn = tokenIdIn;
     this.attributeFilters = attributeFilters;
+    this.order = order;
   }
 
   public toObject = (): Record<string, unknown> => {
@@ -251,6 +253,7 @@ export class QueryCollectionTokensRequest extends RequestData {
       isListed: this.isListed,
       tokenIdIn: this.tokenIdIn,
       attributeFilters: this.attributeFilters?.map((param: InQueryParam): Record<string, unknown> => param.toObject()),
+      order: this.order,
     };
   };
 }

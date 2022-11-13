@@ -483,6 +483,15 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
           },
         },
       },
+      unbordered: {
+        normal: {
+          default: {
+            background: {
+              'border-color': 'transparent',
+            },
+          },
+        },
+      },
     },
     titledCollapsibleBoxes: {
       default: {

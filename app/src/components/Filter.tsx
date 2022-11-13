@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ETHER } from '@kibalabs/core';
-import { Alignment, Button, Checkbox, Direction, PaddingSize, SingleLineInput, Spacing, Stack, StatefulTitledCollapsibleBox, Text } from '@kibalabs/ui-react';
+import { Alignment, Button, Checkbox, Direction, IOption, OptionSelect, PaddingSize, SingleLineInput, Spacing, Stack, StatefulTitledCollapsibleBox, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
 import { Account } from '../AccountContext';
@@ -22,6 +22,9 @@ export interface IFilterProps {
   shouldPlayMusic: boolean;
   setShouldPlayMusic: (newShouldPlayMusic: boolean) => void;
   shouldShowMarket: boolean;
+  order: string;
+  setOrder: (newOrder: string) => void;
+  shouldShowOrder: boolean;
   minPrice: BigNumber | null;
   setMinPrice: (value: BigNumber | null) => void;
   maxPrice: BigNumber | null;
@@ -29,6 +32,7 @@ export interface IFilterProps {
   shouldShowDoneButton?: boolean;
   onDoneClicked?: () => void;
 }
+
 
 export const Filter = (props: IFilterProps): React.ReactElement => {
   const [minPriceString, setMinPriceString] = React.useState<string | null>(null);
@@ -70,6 +74,26 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
     }
   };
 
+  const onOrderSelected = (newOrder: string): void => {
+    props.setOrder(newOrder);
+  };
+
+  const sortOptions = React.useMemo((): IOption[] => {
+    const options: IOption[] = [
+      { itemKey: 'TOKENID_ASC', text: '↑ ID' },
+      { itemKey: 'TOKENID_DESC', text: '↓ ID' },
+      { itemKey: 'PRICE_ASC', text: '↑ Price' },
+      { itemKey: 'PRICE_DESC', text: '↓ Price' },
+    ];
+    if (props.collection && props.collection.doesSupportErc1155) {
+      options.push(...[
+        { itemKey: 'QUANTITY_DESC', text: '↓ Quantity' },
+        { itemKey: 'QUANTITY_ASC', text: '↑ Quantity' },
+      ]);
+    }
+    return options;
+  }, [props.collection]);
+
   return (
     <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
       {props.shouldShowMusicOption && (
@@ -78,9 +102,17 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       {props.account && (
         <Checkbox text='Your tokens' isChecked={props.showOwnedTokensOnly} onToggled={onShowOwnedTokensOnlyToggled} />
       )}
+      {props.shouldShowOrder && (
+        <OptionSelect
+          selectedItemKey={props.order}
+          onItemClicked={onOrderSelected}
+          placeholderText={'Sort by'}
+          options={sortOptions}
+        />
+      )}
       <Spacing />
       {props.shouldShowMarket && (
-        <StatefulTitledCollapsibleBox title='Market' isCollapsedInitially={true}>
+        <StatefulTitledCollapsibleBox title='Listings' isCollapsedInitially={true}>
           <Stack direction={Direction.Vertical} shouldAddGutters={true}>
             <Checkbox text='Listed' isChecked={props.showListedTokensOnly} onToggled={onShowListedTokensOnlyToggled} />
             {/* <Stack.Item gutterBefore={PaddingSize.Default} gutterAfter={PaddingSize.Narrow2}>
