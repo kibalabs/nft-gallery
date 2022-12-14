@@ -1,11 +1,11 @@
 import { IBackgroundConfig } from '@kibalabs/ui-react';
 
+import CreepzConfigJson from './projects/creepz.json';
 import GoblintownConfigJson from './projects/goblintown.json';
 import MdtpConfigJson from './projects/mdtp.json';
 import PepesConfigJson from './projects/pepes.json';
 import RudeboysConfigJson from './projects/rudeboys.json';
 import SpritesConfigJson from './projects/sprites.json';
-import CreepzConfigJson from './projects/creepz.json';
 
 
 export interface IBadge {
@@ -32,20 +32,20 @@ export interface IProjectConfig {
   badges: IBadge[];
 }
 
+const CREEPZ_CONFIG = CreepzConfigJson as IProjectConfig;
 const RUDEBOYS_CONFIG = RudeboysConfigJson as IProjectConfig;
 const SPRITES_CONFIG = SpritesConfigJson as IProjectConfig;
 const MDTP_CONFIG = MdtpConfigJson as IProjectConfig;
 const GOBLINTOWN_CONFIG = GoblintownConfigJson as IProjectConfig;
 const PEPES_CONFIG = PepesConfigJson as IProjectConfig;
-const CREEPZ_CONFIG = CreepzConfigJson as IProjectConfig;
 
 const PROJECT_CONFIGS = {
+  [CREEPZ_CONFIG.projectId]: CREEPZ_CONFIG,
   [RUDEBOYS_CONFIG.projectId]: RUDEBOYS_CONFIG,
   [SPRITES_CONFIG.projectId]: SPRITES_CONFIG,
   [MDTP_CONFIG.projectId]: MDTP_CONFIG,
   [GOBLINTOWN_CONFIG.projectId]: GOBLINTOWN_CONFIG,
   [PEPES_CONFIG.projectId]: PEPES_CONFIG,
-  [CREEPZ_CONFIG.projectId]: CREEPZ_CONFIG,
 };
 
 // eslint-disable-next-line unused-imports/no-unused-vars
