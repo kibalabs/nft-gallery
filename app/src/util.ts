@@ -1,5 +1,6 @@
 import { IBackgroundConfig } from '@kibalabs/ui-react';
 
+import CreepzConfigJson from './projects/creepz.json';
 import GoblintownConfigJson from './projects/goblintown.json';
 import MdtpConfigJson from './projects/mdtp.json';
 import PepesConfigJson from './projects/pepes.json';
@@ -33,6 +34,7 @@ export interface IProjectConfig {
   badges: IBadge[];
 }
 
+const CREEPZ_CONFIG = CreepzConfigJson as IProjectConfig;
 const RUDEBOYS_CONFIG = RudeboysConfigJson as IProjectConfig;
 const SPRITES_CONFIG = SpritesConfigJson as IProjectConfig;
 const MDTP_CONFIG = MdtpConfigJson as IProjectConfig;
@@ -40,6 +42,7 @@ const GOBLINTOWN_CONFIG = GoblintownConfigJson as IProjectConfig;
 const PEPES_CONFIG = PepesConfigJson as IProjectConfig;
 
 const PROJECT_CONFIGS = {
+  [CREEPZ_CONFIG.projectId]: CREEPZ_CONFIG,
   [RUDEBOYS_CONFIG.projectId]: RUDEBOYS_CONFIG,
   [SPRITES_CONFIG.projectId]: SPRITES_CONFIG,
   [MDTP_CONFIG.projectId]: MDTP_CONFIG,
