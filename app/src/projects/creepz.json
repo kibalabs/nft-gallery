@@ -1,0 +1,17 @@
+{
+    "projectId": "creepz",
+    "name": "CREEPZ",
+    "host": "https://gallery.creepz.com",
+    "chain": "ethereum",
+    "isCustomizationEnabled": false,
+    "backgroundConfig": null,
+    "backgroundMusingFileUrl": null,
+    "logoImageUrl": "/assets/creepz/icon.png",
+    "bannerImageUrl": null,
+    "iconImageUrl": "/assets/creepz/logo.png",
+    "everyviewCode": null,
+    "collectionAddress": "0xfE8C6d19365453D26af321D0e8c910428c23873F",
+    "isBadgesEnabled": false,
+    "badges": []
+  }
+  
