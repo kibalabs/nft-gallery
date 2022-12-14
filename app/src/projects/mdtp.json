@@ -12,5 +12,6 @@
   "everyviewCode": "54fa4b47b0b3431884b64a549d46ffd7",
   "collectionAddress": "0x8e720F90014fA4De02627f4A4e217B7e3942d5e8",
   "isBadgesEnabled": false,
-  "badges": []
+  "badges": [],
+  "defaultMembersSort": null
 }

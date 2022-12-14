@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { longFormatEther } from '@kibalabs/core';
-import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator } from '@kibalabs/core-react';
+import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
@@ -24,6 +24,7 @@ export const useScrollListenerElement = <T extends HTMLElement>(handler: (event:
   return [element, setElement];
 };
 
+export const DEFAULT_SORT = 'TOKENID_ASC';
 
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
@@ -37,6 +38,7 @@ export const HomePage = (): React.ReactElement => {
   const [tokenListingMap, setTokenListMap] = React.useState<Record<string, TokenListing | null>>({});
   const [isResponsiveFilterShowing, setIsResponsiveFilterShowing] = React.useState<boolean>(false);
   const [shouldPlayMusic, setShouldPlayMusic] = React.useState<boolean>(false);
+  const [_order, setOrder] = useUrlQueryState('order', undefined, DEFAULT_SORT);
   const tokenLimitRef = React.useRef<number>(30);
   const galleryTokenCountRef = React.useRef<number>(0);
   const previousQueryRef = React.useRef<string | null>(null);
@@ -46,6 +48,8 @@ export const HomePage = (): React.ReactElement => {
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
+
+  const order = _order ?? DEFAULT_SORT;
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
   galleryTokenCountRef.current = galleryTokens ? galleryTokens.length : 0;
@@ -85,6 +89,7 @@ export const HomePage = (): React.ReactElement => {
         isListed: showListedTokensOnly,
         tokenIdIn: undefined,
         attributeFilters,
+        order,
       };
       if (JSON.stringify(newQuery) === previousQueryRef.current) {
         return;
@@ -92,7 +97,7 @@ export const HomePage = (): React.ReactElement => {
       // NOTE(krishan711): this is to prevent duplicate querying (e.g. when account is loaded but not used)
       previousQueryRef.current = JSON.stringify(newQuery);
       setGalleryTokens(undefined);
-      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, tokenLimitRef.current, 0, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters, order).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens(retrievedGalleryTokens);
       }).catch((error: unknown): void => {
         console.error(error);
@@ -120,7 +125,7 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, previousQueryRef, account, allTokens]);
+  }, [projectId, notdClient, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, previousQueryRef, account, allTokens]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -133,7 +138,7 @@ export const HomePage = (): React.ReactElement => {
     const collectionAddress = getCollectionAddress(projectId);
     if (collectionAddress) {
       const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
-      notdClient.queryCollectionTokens(collectionAddress, 30, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters).then((retrievedGalleryTokens: GalleryToken[]): void => {
+      notdClient.queryCollectionTokens(collectionAddress, 30, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters, order).then((retrievedGalleryTokens: GalleryToken[]): void => {
         setGalleryTokens([...galleryTokens, ...retrievedGalleryTokens]);
       });
     } else {
@@ -158,7 +163,7 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, galleryTokens, account, allTokens]);
+  }, [notdClient, projectId, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, galleryTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -286,6 +291,9 @@ export const HomePage = (): React.ReactElement => {
                 collection={collection}
                 collectionAttributes={collectionAttributes}
                 shouldShowMarket={getChain(projectId) === 'ethereum'}
+                order={order}
+                setOrder={setOrder}
+                shouldShowOrder={getChain(projectId) === 'ethereum'}
                 minPrice={minPrice}
                 setMinPrice={setMinPrice}
                 maxPrice={maxPrice}
@@ -372,6 +380,9 @@ export const HomePage = (): React.ReactElement => {
                         collection={collection}
                         collectionAttributes={collectionAttributes}
                         shouldShowMarket={getChain(projectId) === 'ethereum'}
+                        order={order}
+                        setOrder={setOrder}
+                        shouldShowOrder={getChain(projectId) === 'ethereum'}
                         minPrice={minPrice}
                         setMinPrice={setMinPrice}
                         maxPrice={maxPrice}

@@ -16,21 +16,26 @@
     "key": "NEVER_SOLD",
     "name": "Never Sold",
     "description": "I've never sold a RudeBoy",
-    "imageUrl": "/assets/rudeboys/badge-sold.svg"
+    "imageUrl": "/assets/rudeboys/badge-sold.svg",
+    "isTransient": true
   }, {
     "key": "DIAMOND_HANDS",
     "name": "Diamonds Hands",
     "description": "I've held at least one RudeBoy ever since mint",
-    "imageUrl": "/assets/rudeboys/badge-diamond.svg"
+    "imageUrl": "/assets/rudeboys/badge-diamond.svg",
+    "isTransient": true
   }, {
     "key": "MINTER",
     "name": "Minter",
     "description": "I've minted a RudeBoy directly from source",
-    "imageUrl": "/assets/rudeboys/badge-pick.svg"
+    "imageUrl": "/assets/rudeboys/badge-pick.svg",
+    "isTransient": false
   }, {
     "key": "ONE_OF_ONE",
     "name": "One of One Holder",
     "description": "I've held a 1/1 at some point in time",
-    "imageUrl": "/assets/rudeboys/badge-one.svg"
-  }]
+    "imageUrl": "/assets/rudeboys/badge-one.svg",
+    "isTransient": false
+  }],
+  "defaultMembersSort": "UNIQUETOKENCOUNT_DESC"
 }
