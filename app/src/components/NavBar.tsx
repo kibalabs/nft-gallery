@@ -54,6 +54,10 @@ export const NavBar = (): React.ReactElement => {
     setIsMenuOpen(false);
   };
 
+  React.useEffect((): void => {
+    setSelectedTabKey(getTabKey(location.pathname));
+  }, [location.pathname]);
+
   const onMenuClicked = (): void => {
     setIsMenuOpen(!isMenuOpen);
   };
