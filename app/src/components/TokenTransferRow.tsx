@@ -4,9 +4,9 @@ import { dateToRelativeString, shortFormatEther } from '@kibalabs/core';
 import { Alignment, Direction, IconButton, KibaIcon, PaddingSize, Spacing, Stack, Text } from '@kibalabs/ui-react';
 import { BigNumber } from 'ethers';
 
-import { TokenTransfer } from '../client/resources';
 import { AccountViewLink } from './AccountView';
 import { IpfsImage } from './IpfsImage';
+import { TokenTransfer } from '../client/resources';
 
 interface IUserTokenTransferRowProps {
   userAddress: string;

@@ -2,14 +2,14 @@ import React from 'react';
 
 import { ETHER } from '@kibalabs/core';
 import { Alignment, Button, Checkbox, Direction, IOption, OptionSelect, PaddingSize, SingleLineInput, Spacing, Stack, StatefulTitledCollapsibleBox, Text } from '@kibalabs/ui-react';
+import { Web3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
-import { Account } from '../AccountContext';
 import { Collection, CollectionAttribute } from '../client';
 
 
 export interface IFilterProps {
-  account: Account | null | undefined;
+  account: Web3Account | null | undefined;
   collection: Collection;
   collectionAttributes: CollectionAttribute[];
   filters: Record<string, string[]>;

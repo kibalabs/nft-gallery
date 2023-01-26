@@ -2,13 +2,13 @@ import React from 'react';
 
 import { useLocation, useNavigator } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, getVariant, HidingView, IconButton, KibaIcon, LinkBase, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text } from '@kibalabs/ui-react';
+import { useOnLinkWeb3AccountsClicked, useWeb3Account } from '@kibalabs/web3-react';
 
-import { useAccount, useOnLinkAccountsClicked } from '../AccountContext';
+import { AccountViewLink } from './AccountView';
+import { IpfsImage } from './IpfsImage';
 import { useGlobals } from '../globalsContext';
 import { useWindowScroll } from '../reactUtil';
 import { getChain, getLogoImageUrl } from '../util';
-import { AccountViewLink } from './AccountView';
-import { IpfsImage } from './IpfsImage';
 
 const TAB_KEY_GALLERY = 'TAB_KEY_GALLERY';
 const TAB_KEY_MEMBERS = 'TAB_KEY_MEMBERS';
@@ -28,9 +28,9 @@ const getTabKey = (locationPath): string => {
 };
 
 export const NavBar = (): React.ReactElement => {
-  const account = useAccount();
+  const account = useWeb3Account();
   const { projectId, collection } = useGlobals();
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+  const onLinkAccountsClicked = useOnLinkWeb3AccountsClicked();
   const logoImageUrl = getLogoImageUrl(projectId);
   const chain = getChain(projectId);
   const navigator = useNavigator();
@@ -75,7 +75,7 @@ export const NavBar = (): React.ReactElement => {
           <Stack.Item shrinkFactor={1} shouldShrinkBelowContentSize={true}>
             <LinkBase target='/' isFullHeight={true}>
               {logoImageUrl ? (
-                <IpfsImage source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} logo`} isFullHeight={true} maxHeight='2em' />
+                <IpfsImage variant='unrounded' source={logoImageUrl} alternativeText={`${collection ? collection.name : ''} logo`} isFullHeight={true} maxHeight='2em' />
               ) : (
                 <Text variant='header1'>{`${collection ? collection.name : ''} Hub`}</Text>
               )}

@@ -4,9 +4,9 @@ import { LocalStorageClient, Requester, RestMethod } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
+import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
-import { AccountControlProvider } from './AccountContext';
 import { Collection, CollectionAttribute, CollectionToken } from './client';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
@@ -135,6 +135,10 @@ export const App = (props: IAppProps): React.ReactElement => {
     updateCollection();
   }, [updateCollection]);
 
+  const onWeb3AccountError = (error: Error): void => {
+    console.error(error);
+  };
+
   return (
     <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={false}>
       <Head headId='app'>
@@ -145,14 +149,14 @@ export const App = (props: IAppProps): React.ReactElement => {
       </BackgroundView>
       <PageDataProvider initialData={props.pageData}>
         <GlobalsProvider globals={{ ...globals, collection, allTokens, collectionAttributes }}>
-          <AccountControlProvider>
+          <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
             <Router staticPath={props.staticPath}>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Start}>
                 <NavBar />
                 <SubRouter routes={routes} />
               </Stack>
             </Router>
-          </AccountControlProvider>
+          </Web3AccountControlProvider>
         </GlobalsProvider>
       </PageDataProvider>
       <ToastContainer />

@@ -13,6 +13,7 @@
   "iconImageUrl": "/assets/sprites/icon.png",
   "everyviewCode": "23fecbad77194ba4aa49b4abb88c6131",
   "collectionAddress": "0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3",
+  "shouldUsePreviewImages": false,
   "isBadgesEnabled": false,
   "badges": [{
     "key": "NEVER_SOLD",

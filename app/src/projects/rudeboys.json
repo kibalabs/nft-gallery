@@ -11,6 +11,7 @@
   "iconImageUrl": "/assets/rudeboys/icon.png",
   "everyviewCode": null,
   "collectionAddress": "0x5351105753Bdbc3Baa908A0c04F1468535749c3D",
+  "shouldUsePreviewImages": true,
   "isBadgesEnabled": true,
   "badges": [{
     "key": "NEVER_SOLD",

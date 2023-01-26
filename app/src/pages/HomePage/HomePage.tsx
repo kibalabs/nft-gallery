@@ -3,9 +3,9 @@ import React from 'react';
 import { longFormatEther } from '@kibalabs/core';
 import { getIsRunningOnBrowser, SubRouterOutlet, useEventListener, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
 import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid, Head, KibaIcon, LoadingSpinner, MarkdownText, PaddingSize, ResponsiveHidingView, ScreenSize, Stack, Text } from '@kibalabs/ui-react';
+import { useWeb3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
-import { useAccount } from '../../AccountContext';
 import { CollectionToken, GalleryToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
@@ -15,7 +15,7 @@ import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
 import { useWindowScroll } from '../../reactUtil';
-import { getBackgroundMusic, getBannerImageUrl, getChain, getCollectionAddress, getHost, getTreasureHuntTokenId } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getChain, getCollectionAddress, getHost, getShouldUsePreviewImages, getTreasureHuntTokenId } from '../../util';
 
 
 export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
@@ -29,7 +29,7 @@ export const DEFAULT_SORT = 'TOKENID_ASC';
 export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
-  const account = useAccount();
+  const account = useWeb3Account();
   const { notdClient, projectId, collection, collectionAttributes, allTokens } = useGlobals();
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
@@ -45,6 +45,7 @@ export const HomePage = (): React.ReactElement => {
   const [minPrice, setMinPrice] = React.useState<BigNumber | null>(null);
   const [maxPrice, setMaxPrice] = React.useState<BigNumber | null>(null);
   const backgroundMusicSource = getBackgroundMusic(projectId);
+  const shouldUsePreviewImages = getShouldUsePreviewImages(projectId);
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
@@ -351,6 +352,7 @@ export const HomePage = (): React.ReactElement => {
                           tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
                           tokenQuantity={galleryToken.quantity}
                           target={`/tokens/${galleryToken.collectionToken.tokenId}`}
+                          shouldUsePreviewImages={shouldUsePreviewImages}
                         />
                       ))}
                     </EqualGrid>
