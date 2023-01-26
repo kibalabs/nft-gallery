@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { etherToNumber, longFormatNumber } from '@kibalabs/core';
+import { etherToNumber, longFormatNumber, updateQueryString } from '@kibalabs/core';
 import { Alignment, Box, Direction, HidingView, LinkBase, PaddingSize, PaddingView, Spacing, Stack, Text } from '@kibalabs/ui-react';
 
-import { CollectionToken, TokenCustomization, TokenListing } from '../client';
 import { EtherValue } from './EtherValue';
 import { IpfsImage } from './IpfsImage';
+import { CollectionToken, TokenCustomization, TokenListing } from '../client';
 
 interface ITokenCardProps {
   target: string;
@@ -13,15 +13,22 @@ interface ITokenCardProps {
   tokenCustomization?: TokenCustomization | null;
   tokenListing?: TokenListing | null;
   tokenQuantity: number;
+  shouldUsePreviewImages?: boolean;
 }
 
 export const TokenCard = (props: ITokenCardProps): React.ReactElement => {
+  let imageUrl = props.token.resizableImageUrl ?? props.token.imageUrl ?? '';
+  const isImageResponsive = imageUrl.includes('d35ci2i0uce4j6.cloudfront.net') || imageUrl.includes('pablo-images.kibalabs.com');
+  if (isImageResponsive && props.shouldUsePreviewImages) {
+    imageUrl = updateQueryString(imageUrl, { p: true });
+  }
+
   return (
     <LinkBase target={props.target} isFullWidth={true}>
       <Box variant='tokenCard' shouldClipContent={true} isFullHeight={true}>
         <Stack direction={Direction.Vertical} shouldAddGutters={true} contentAlignment={Alignment.Start} paddingBottom={PaddingSize.Default} isFullHeight={true}>
           <Box maxHeight={'20em'} minHeight={'7em'} shouldClipContent={true} variant='unrounded'>
-            <IpfsImage source={props.token.resizableImageUrl ?? props.token.imageUrl ?? ''} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
+            <IpfsImage source={imageUrl} variant='unrounded' fitType='contain' isLazyLoadable={true} isCenteredHorizontally={true} isFullHeight={true} isFullWidth={true} alternativeText={props.token.name} />
             {props.tokenQuantity > 1 && (
               <div style={{ position: 'absolute', top: 0, right: 0 }}>
                 <Box variant='tokenCardQuantity' shouldClipContent={true}>

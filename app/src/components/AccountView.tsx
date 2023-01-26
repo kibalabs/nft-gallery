@@ -2,9 +2,8 @@ import React from 'react';
 
 import { getClassName, truncateMiddle } from '@kibalabs/core';
 import { Alignment, Box, Direction, Image, LinkBase, Stack, Text } from '@kibalabs/ui-react';
+import { useWeb3, useWeb3Account } from '@kibalabs/web3-react';
 import { ethers } from 'ethers';
-
-import { useAccount, useWeb3 } from '../AccountContext';
 
 
 const nameCache: Map<string, string | null> = new Map();
@@ -78,7 +77,7 @@ export interface AccountViewProps {
 }
 
 export const AccountView = (props: AccountViewProps): React.ReactElement => {
-  const account = useAccount();
+  const account = useWeb3Account();
   const name = useEnsName(props.address);
 
   const defaultText = truncateMiddle(props.address, 10);

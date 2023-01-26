@@ -5,7 +5,7 @@ import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from 
 import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, getVariant, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import ReactTooltip from 'react-tooltip';
 
-import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
+import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, GalleryUserBadge, TokenTransfer } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
@@ -67,9 +67,9 @@ export const AccountPage = (): React.ReactElement => {
   const { notdClient, collection, projectId } = useGlobals();
   const location = useLocation();
   const navigator = useNavigator();
-  const account = useAccount();
-  const loginSignature = useLoginSignature();
-  const onLoginClicked = useOnLoginClicked();
+  const account = useWeb3Account();
+  const loginSignature = useWeb3LoginSignature();
+  const onLoginClicked = useWeb3OnLoginClicked();
   const accountAddress = useStringRouteParam('accountAddress');
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [ownedCollections, setOwnedCollections] = React.useState<GalleryOwnedCollection[] | null | undefined>(undefined);

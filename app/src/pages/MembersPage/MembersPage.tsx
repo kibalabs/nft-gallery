@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import ReactTooltip from 'react-tooltip';
 import styled from 'styled-components';
 
-import { useAccount, useLoginSignature, useOnLoginClicked } from '../../AccountContext';
+import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import { Collection, CollectionToken, GalleryUser, GalleryUserBadge, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
@@ -391,9 +391,9 @@ export const MembersPageReal = (): React.ReactElement => {
   const defaultMembersSort = getDefaultMembersSort(projectId) || DEFAULT_SORT;
   const navigator = useNavigator();
   const location = useLocation();
-  const account = useAccount();
-  const loginSignature = useLoginSignature();
-  const onLoginClicked = useOnLoginClicked();
+  const account = useWeb3Account();
+  const loginSignature = useWeb3LoginSignature();
+  const onLoginClicked = useWeb3OnLoginClicked();
   const [followedUsers, setFollowedUsers] = React.useState<string[]>([]);
   const [queryOrder, setOrder] = useUrlQueryState('order', undefined, defaultMembersSort);
   const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);

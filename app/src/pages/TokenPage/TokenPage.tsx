@@ -3,9 +3,9 @@ import React from 'react';
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
 import { useStringRouteParam } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, HidingView, IconButton, Image, KibaIcon, Link, LinkBase, List, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
+import { useOnLinkWeb3AccountsClicked, useWeb3, useWeb3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
-import { useAccount, useOnLinkAccountsClicked, useWeb3 } from '../../AccountContext';
 import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { EtherValue } from '../../components/EtherValue';
@@ -23,14 +23,14 @@ const TAB_KEY_ACTIVITY = 'TAB_KEY_ACTIVITY';
 const TAB_KEY_LISTINGS = 'TAB_KEY_LISTINGS';
 
 export const TokenPage = (): React.ReactElement => {
-  const account = useAccount();
+  const account = useWeb3Account();
   const web3 = useWeb3();
   const tokenId = useStringRouteParam('tokenId');
   const { notdClient, projectId, collection, allTokens } = useGlobals();
   const [galleryToken, setGalleryToken] = React.useState<GalleryToken | null | undefined>(undefined);
   const collectionToken = galleryToken?.collectionToken;
   const tokenCustomization = galleryToken?.tokenCustomization;
-  const onLinkAccountsClicked = useOnLinkAccountsClicked();
+  const onLinkAccountsClicked = useOnLinkWeb3AccountsClicked();
   const [tokenTransfers, setTokenTransfers] = React.useState<TokenTransfer[] | undefined | null>(undefined);
   const [tokenOwnerships, setTokenOwnerships] = React.useState<TokenOwnership[] | null | undefined>(undefined);
   const [isTreasureHuntSubmitting, setIsTreasureHuntSubmitting] = React.useState<boolean>(false);

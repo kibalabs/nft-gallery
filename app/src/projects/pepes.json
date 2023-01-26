@@ -16,6 +16,7 @@
   "iconImageUrl": "/assets/pepes/icon.png",
   "everyviewCode": null,
   "collectionAddress": null,
+  "shouldUsePreviewImages": false,
   "isBadgesEnabled": false,
   "badges": [],
   "defaultMembersSort": null
