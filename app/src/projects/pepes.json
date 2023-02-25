@@ -10,14 +10,15 @@
       { "color": "rgba(96, 100, 85, 0.75)" }
     ]
   },
-  "backgroundMusingFileUrl": null,
+  "backgroundMusicUrl": null,
   "logoImageUrl": "/assets/pepes/logo.png",
   "bannerImageUrl": "assets/pepes/banner.png",
   "iconImageUrl": "/assets/pepes/icon.png",
   "everyviewCode": null,
   "collectionAddress": null,
   "shouldUsePreviewImages": false,
+  "defaultMembersSort": null,
   "isBadgesEnabled": false,
   "badges": [],
-  "defaultMembersSort": null
+  "isSuperCollection": false
 }

@@ -133,6 +133,14 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
     }));
   }
+  if (projectId === 'creepz') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      colors: {
+        brandPrimary: '#ffffff',
+        brandSecondary: 'rgb(89,190,144)',
+      },
+    }));
+  }
   return buildTheme(overrideTheme);
 };
 

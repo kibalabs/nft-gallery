@@ -514,3 +514,22 @@ export class ListGalleryCollectionOverlapSummariesResponse extends ResponseData 
     );
   };
 }
+
+
+export class ListGalleryCollectionsInSuperCollectionRequest extends RequestData {
+}
+
+export class ListGalleryCollectionsInSuperCollectionResponse extends ResponseData {
+  readonly collections: Resources.Collection[];
+
+  public constructor(collections: Resources.Collection[]) {
+    super();
+    this.collections = collections;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListGalleryCollectionsInSuperCollectionResponse => {
+    return new ListGalleryCollectionsInSuperCollectionResponse(
+      (obj.collections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.Collection.fromObject(innerObj)),
+    );
+  };
+}

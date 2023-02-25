@@ -13,6 +13,8 @@ export interface IGlobals {
   localStorageClient: LocalStorageClient;
   collection: Collection | null | undefined;
   collectionAttributes: CollectionAttribute[] | null | undefined;
+  otherCollections: Collection[] | null | undefined;
+  otherCollectionAttributes: Record<string, CollectionAttribute[]> | null | undefined;
   allTokens: CollectionToken[] | null | undefined;
 }
 

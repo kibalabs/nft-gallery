@@ -1,12 +1,12 @@
 import React from 'react';
 
 import { etherToNumber, longFormatNumber, resolveUrl, truncateEnd, truncateMiddle } from '@kibalabs/core';
-import { useStringRouteParam } from '@kibalabs/core-react';
+import { useStringRouteParam, useUrlQueryState } from '@kibalabs/core-react';
 import { Alignment, Box, Button, Direction, EqualGrid, Form, Head, HidingView, IconButton, Image, KibaIcon, Link, LinkBase, List, LoadingSpinner, MultiLineInput, PaddingSize, ResponsiveTextAlignmentView, SingleLineInput, Spacing, Stack, TabBar, Text, TextAlignment } from '@kibalabs/ui-react';
 import { useOnLinkWeb3AccountsClicked, useWeb3, useWeb3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
-import { Airdrop, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
+import { Airdrop, Collection, CollectionToken, GalleryToken, TokenAttribute, TokenListing, TokenOwnership, TokenTransfer } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { EtherValue } from '../../components/EtherValue';
 import { IpfsImage } from '../../components/IpfsImage';
@@ -26,8 +26,9 @@ export const TokenPage = (): React.ReactElement => {
   const account = useWeb3Account();
   const web3 = useWeb3();
   const tokenId = useStringRouteParam('tokenId');
-  const { notdClient, projectId, collection, allTokens } = useGlobals();
+  const { notdClient, projectId, collection, otherCollections, allTokens } = useGlobals();
   const [galleryToken, setGalleryToken] = React.useState<GalleryToken | null | undefined>(undefined);
+  const [selectedCollectionAddress, _] = useUrlQueryState('collection');
   const collectionToken = galleryToken?.collectionToken;
   const tokenCustomization = galleryToken?.tokenCustomization;
   const onLinkAccountsClicked = useOnLinkWeb3AccountsClicked();
@@ -40,6 +41,7 @@ export const TokenPage = (): React.ReactElement => {
   const [liveListing, setLiveListing] = React.useState<TokenListing | null | undefined>(undefined);
   const [tokenListings, setTokenListings] = React.useState<TokenListing[] | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_ATTRIBUTES);
+  const selectedCollection = !selectedCollectionAddress ? collection : (!otherCollections ? otherCollections : otherCollections.find((innerCollection: Collection): boolean => innerCollection.address === selectedCollectionAddress));
 
   const listing = liveListing ?? galleryToken?.tokenListing;
   const imageUrl = collectionToken?.resizableImageUrl ?? (collectionToken?.imageUrl ? resolveUrl(collectionToken.imageUrl) : '');
@@ -61,11 +63,11 @@ export const TokenPage = (): React.ReactElement => {
   };
 
   const updateCollectionToken = React.useCallback(async (): Promise<void> => {
-    if (collection?.address === undefined) {
+    if (selectedCollection?.address === undefined) {
       setGalleryToken(undefined);
       return;
     }
-    if (collection?.address === null) {
+    if (selectedCollection?.address === null) {
       setGalleryToken(null);
       return;
     }
@@ -77,18 +79,18 @@ export const TokenPage = (): React.ReactElement => {
         setGalleryToken(new GalleryToken(chosenCollectionToken, null, null, 1));
       }
     } else {
-      await notdClient.getGalleryToken(collection?.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
+      await notdClient.getGalleryToken(selectedCollection?.address, tokenId).then((retrievedGalleryToken: GalleryToken): void => {
         setGalleryToken(retrievedGalleryToken);
       });
     }
-  }, [notdClient, collection?.address, allTokens, tokenId]);
+  }, [notdClient, selectedCollection?.address, allTokens, tokenId]);
 
   React.useEffect((): void => {
     updateCollectionToken();
   }, [updateCollectionToken]);
 
   const updateLiveListing = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !collectionToken?.tokenId) {
+    if (!selectedCollection?.address || !collectionToken?.tokenId) {
       setLiveListing(null);
       return;
     }
@@ -96,7 +98,7 @@ export const TokenPage = (): React.ReactElement => {
     const liveListings: TokenListing[] = [];
     if (getChain(projectId) === 'ethereum') {
       try {
-        const openseaListing = await (new OpenseaClient().getTokenListing(collection.address, collectionToken.tokenId));
+        const openseaListing = await (new OpenseaClient().getTokenListing(selectedCollection.address, collectionToken.tokenId));
         if (openseaListing) {
           liveListings.push(openseaListing);
         }
@@ -104,7 +106,7 @@ export const TokenPage = (): React.ReactElement => {
         console.error(error);
       }
       try {
-        const looksrareListing = await (new LooksrareClient().getTokenListing(collection.address, collectionToken.tokenId));
+        const looksrareListing = await (new LooksrareClient().getTokenListing(selectedCollection.address, collectionToken.tokenId));
         if (looksrareListing) {
           liveListings.push(looksrareListing);
         }
@@ -117,37 +119,37 @@ export const TokenPage = (): React.ReactElement => {
     } else {
       setLiveListing(liveListings.sort((liveListing1: TokenListing, liveListing2: TokenListing): number => (liveListing1.value.gte(liveListing2.value) ? 1 : -1))[0]);
     }
-  }, [projectId, collection?.address, collectionToken?.tokenId]);
+  }, [projectId, selectedCollection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateLiveListing();
   }, [updateLiveListing]);
 
   const updateListings = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !collectionToken?.tokenId) {
+    if (!selectedCollection?.address || !collectionToken?.tokenId) {
       setTokenListings(null);
       return;
     }
     setTokenListings(undefined);
-    await notdClient.listCollectionTokenListings(collection.address, collectionToken?.tokenId).then((retrievedTokenListings: TokenListing[]): void => {
+    await notdClient.listCollectionTokenListings(selectedCollection.address, collectionToken?.tokenId).then((retrievedTokenListings: TokenListing[]): void => {
       setTokenListings(retrievedTokenListings);
     }).catch((error: unknown): void => {
       console.error(error);
       setTokenListings(null);
     });
-  }, [notdClient, collection?.address, collectionToken?.tokenId]);
+  }, [notdClient, selectedCollection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateListings();
   }, [updateListings]);
 
   const updateAirdropStatus = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !collectionToken?.tokenId) {
+    if (!selectedCollection?.address || !collectionToken?.tokenId) {
       setAirdrop(null);
       return;
     }
     setAirdrop(undefined);
-    notdClient.listCollectionTokenAirdrops(collection.address, collectionToken.tokenId).then((airdrops: Airdrop[]): void => {
+    notdClient.listCollectionTokenAirdrops(selectedCollection.address, collectionToken.tokenId).then((airdrops: Airdrop[]): void => {
       if (airdrops.length > 0) {
         setAirdrop(airdrops[0]);
       } else {
@@ -157,14 +159,14 @@ export const TokenPage = (): React.ReactElement => {
       console.error(error);
       setAirdrop(null);
     });
-  }, [notdClient, collection?.address, collectionToken?.tokenId]);
+  }, [notdClient, selectedCollection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateAirdropStatus();
   }, [updateAirdropStatus]);
 
   const updateTokenSales = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !collectionToken?.tokenId) {
+    if (!selectedCollection?.address || !collectionToken?.tokenId) {
       setTokenTransfers(null);
       return;
     }
@@ -172,21 +174,21 @@ export const TokenPage = (): React.ReactElement => {
     if (getChain(projectId) !== 'ethereum') {
       setTokenTransfers([]);
     } else {
-      notdClient.listCollectionTokenRecentTransfers(collection.address, collectionToken.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
+      notdClient.listCollectionTokenRecentTransfers(selectedCollection.address, collectionToken.tokenId).then((retrievedTokenTransfers: TokenTransfer[]): void => {
         setTokenTransfers(retrievedTokenTransfers);
       }).catch((error: unknown): void => {
         console.error(error);
         setTokenTransfers(null);
       });
     }
-  }, [notdClient, projectId, collection?.address, collectionToken?.tokenId]);
+  }, [notdClient, projectId, selectedCollection?.address, collectionToken?.tokenId]);
 
   React.useEffect((): void => {
     updateTokenSales();
   }, [updateTokenSales]);
 
   const updateTokenOwnerships = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !collectionToken?.tokenId || !collection?.doesSupportErc1155) {
+    if (!selectedCollection?.address || !collectionToken?.tokenId || !selectedCollection?.doesSupportErc1155) {
       setTokenOwnerships(null);
       return;
     }
@@ -194,21 +196,21 @@ export const TokenPage = (): React.ReactElement => {
     if (getChain(projectId) !== 'ethereum') {
       setTokenOwnerships([]);
     } else {
-      notdClient.listCollectionTokenOwnerships(collection.address, collectionToken.tokenId).then((retrievedTokenOwnerships: TokenOwnership[]): void => {
+      notdClient.listCollectionTokenOwnerships(selectedCollection.address, collectionToken.tokenId).then((retrievedTokenOwnerships: TokenOwnership[]): void => {
         setTokenOwnerships(retrievedTokenOwnerships);
       }).catch((error: unknown): void => {
         console.error(error);
         setTokenOwnerships(null);
       });
     }
-  }, [notdClient, projectId, collection?.address, collectionToken?.tokenId, collection?.doesSupportErc1155]);
+  }, [notdClient, projectId, selectedCollection?.address, collectionToken?.tokenId, selectedCollection?.doesSupportErc1155]);
 
   React.useEffect((): void => {
     updateTokenOwnerships();
   }, [updateTokenOwnerships]);
 
   const onTreasureHuntSubmitClicked = async (): Promise<void> => {
-    if (!collection || !collectionToken) {
+    if (!selectedCollection || !collectionToken) {
       return;
     }
     setTreasureHuntSubmittingError(null);
@@ -221,14 +223,14 @@ export const TokenPage = (): React.ReactElement => {
     const message = JSON.stringify({
       command: 'COMPLETE_TREASURE_HUNT',
       message: {
-        registryAddress: collection.address,
+        registryAddress: selectedCollection.address,
         tokenId: collectionToken.tokenId,
       },
     });
     let signature;
     try {
       signature = await account.signer.signMessage(message);
-      await notdClient.submitTreasureHuntForCollectionToken(collection.address, collectionToken.tokenId, account.address, signature);
+      await notdClient.submitTreasureHuntForCollectionToken(selectedCollection.address, collectionToken.tokenId, account.address, signature);
     } catch (error: unknown) {
       setIsTreasureHuntSubmitting(false);
       setTreasureHuntSubmittingError(error as Error);
@@ -268,7 +270,7 @@ export const TokenPage = (): React.ReactElement => {
   };
 
   const onUpdateStorySaveClicked = async (): Promise<void> => {
-    if (!web3 || !account || !collection) {
+    if (!web3 || !account || !selectedCollection) {
       setUpdatingStoryErrorMessaging('Your wallet is not connected');
       return;
     }
@@ -277,7 +279,7 @@ export const TokenPage = (): React.ReactElement => {
     const blockNumber = await web3.getBlockNumber();
     const command = 'CREATE_CUSTOMIZATION';
     const message = {
-      registryAddress: collection.address,
+      registryAddress: selectedCollection.address,
       tokenId,
       creatorAddress: account.address,
       blockNumber,
@@ -288,7 +290,7 @@ export const TokenPage = (): React.ReactElement => {
     let signature;
     try {
       signature = await account.signer.signMessage(dataString);
-      await notdClient.createCustomizationForCollectionToken(collection.address, tokenId, account.address, signature, blockNumber, customName, customDescription);
+      await notdClient.createCustomizationForCollectionToken(selectedCollection.address, tokenId, account.address, signature, blockNumber, customName, customDescription);
       updateCollectionToken();
       setIsSavingStory(false);
       setIsUpdatingStory(false);
@@ -314,9 +316,9 @@ export const TokenPage = (): React.ReactElement => {
           <meta name='twitter:card' content='summary' />
         )} */}
       </Head>
-      {collection === undefined || collectionToken === undefined ? (
+      {selectedCollection === undefined || collectionToken === undefined ? (
         <LoadingSpinner />
-      ) : collection === null || collectionToken === null ? (
+      ) : selectedCollection === null || collectionToken === null ? (
         <Text variant='error'>Failed to load</Text>
       ) : (
         <ResponsiveTextAlignmentView alignmentResponsive={{ base: TextAlignment.Center, medium: TextAlignment.Left }}>
@@ -382,7 +384,7 @@ export const TokenPage = (): React.ReactElement => {
                       )}
                       <Text variant='header2'>{tokenCustomization?.name || collectionToken.name}</Text>
                       <Spacing variant={PaddingSize.Narrow2} />
-                      { collection.doesSupportErc721 && latestTransfer && (
+                      { selectedCollection.doesSupportErc721 && latestTransfer && (
                         <LinkBase target={`/members/${latestTransfer.toAddress}`}>
                           <Stack direction={Direction.Horizontal} childAlignment={Alignment.Center} contentAlignment={Alignment.Center} shouldAddGutters={true}>
                             <Text variant='small'>Owned by</Text>
@@ -393,7 +395,7 @@ export const TokenPage = (): React.ReactElement => {
                           </Stack>
                         </LinkBase>
                       )}
-                      { collection.doesSupportErc1155 && tokenOwnerships && (
+                      { selectedCollection.doesSupportErc1155 && tokenOwnerships && (
                         <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
                           <KibaIcon variant='small' iconId='ion-person' />
                           <Text>{`${tokenOwnerships.length} owners`}</Text>
@@ -479,7 +481,7 @@ export const TokenPage = (): React.ReactElement => {
                       )}
                       <TabBar contentAlignment={Alignment.Start} isFullWidth={false} onTabKeySelected={onTabKeySelected} selectedTabKey={selectedTabKey}>
                         <TabBar.Item variant='lined' tabKey={TAB_KEY_ATTRIBUTES} text='Traits' />
-                        {getChain(projectId) === 'ethereum' && collection.doesSupportErc1155 && (
+                        {getChain(projectId) === 'ethereum' && selectedCollection.doesSupportErc1155 && (
                           <TabBar.Item variant='lined' tabKey={TAB_KEY_OWNERSHIPS} text='Owners' />
                         )}
                         {getChain(projectId) === 'ethereum' && (

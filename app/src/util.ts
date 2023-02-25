@@ -23,7 +23,7 @@ export interface IProjectConfig {
   chain: string;
   isCustomizationEnabled: boolean;
   backgroundConfig: IBackgroundConfig | null;
-  backgroundMusingFileUrl: string | null,
+  backgroundMusicUrl: string | null,
   logoImageUrl: string;
   bannerImageUrl: string | null;
   iconImageUrl: string | null;
@@ -33,6 +33,7 @@ export interface IProjectConfig {
   defaultMembersSort: string | null;
   isBadgesEnabled: boolean;
   badges: IBadge[];
+  isSuperCollection: boolean;
 }
 
 const CREEPZ_CONFIG = CreepzConfigJson as IProjectConfig;
@@ -78,7 +79,7 @@ export const getBackground = (projectId: string): IBackgroundConfig | null => {
 
 
 export const getBackgroundMusic = (projectId: string): string | null => {
-  return PROJECT_CONFIGS[projectId].backgroundMusingFileUrl;
+  return PROJECT_CONFIGS[projectId].backgroundMusicUrl;
 };
 
 
@@ -104,6 +105,11 @@ export const getEveryviewCode = (projectId: string): string | null => {
 
 export const getCollectionAddress = (projectId: string): string | null => {
   return PROJECT_CONFIGS[projectId].collectionAddress;
+};
+
+
+export const isSuperCollection = (projectId: string): boolean => {
+  return PROJECT_CONFIGS[projectId].isSuperCollection;
 };
 
 
