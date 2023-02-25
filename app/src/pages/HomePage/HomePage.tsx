@@ -52,7 +52,6 @@ export const HomePage = (): React.ReactElement => {
   }, [backgroundMusicSource]);
   const selectedCollection = !selectedCollectionAddress ? collection : (!otherCollections ? otherCollections : otherCollections.find((innerCollection: Collection): boolean => innerCollection.address === selectedCollectionAddress));
   const selectedCollectionAttributes = (selectedCollection === undefined || otherCollectionAttributes === undefined) ? undefined : (selectedCollection === null || otherCollectionAttributes === null) ? null : otherCollectionAttributes[selectedCollection.address];
-
   const order = _order ?? DEFAULT_SORT;
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
@@ -244,15 +243,15 @@ export const HomePage = (): React.ReactElement => {
   };
 
   const getTokenTarget = (galleryToken: GalleryToken): string => {
-    if (selectedCollection) {
-      return `/tokens/${galleryToken.collectionToken.tokenId}?collection=${selectedCollection.address}`;
+    if (selectedCollectionAddress) {
+      return `/tokens/${galleryToken.collectionToken.tokenId}?collection=${selectedCollectionAddress}`;
     }
     return `/tokens/${galleryToken.collectionToken.tokenId}`;
   };
 
   const onCloseSubpageClicked = (): void => {
-    if (selectedCollection) {
-      navigator.navigateTo(`/?collection=${selectedCollection.address}`);
+    if (selectedCollectionAddress) {
+      navigator.navigateTo(`/?collection=${selectedCollectionAddress}`);
       return;
     }
     navigator.navigateTo('/');
