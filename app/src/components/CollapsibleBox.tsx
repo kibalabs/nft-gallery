@@ -52,9 +52,11 @@ const StyledHeader = styled.div<IStyledCollapsibleBoxProps>`
 
 const StyledContent = styled.div<IStyledCollapsibleBoxProps>`
   width: 100%;
+  transition: height 0.3s;
   ${(props: IStyledCollapsibleBoxProps): string => themeToCss(props.$theme.normal.default.contentBackground)};
 
   &.collapsed {
+    height: 0;
     ${(props: IStyledCollapsibleBoxProps): string => themeToCss(props.$theme.collapsed?.default?.contentBackground)};
   }
 `;
@@ -63,6 +65,7 @@ interface ICollapsibleBoxProps extends IComponentProps<ITitledCollapsibleBoxThem
   headerView: React.ReactNode;
   isCollapsed: boolean;
   onCollapseToggled(): void;
+  shouldSkipRenderingWhenCollapsed?: boolean;
 }
 
 export const CollapsibleBox = (props: ICollapsibleBoxProps): React.ReactElement => {
@@ -85,11 +88,13 @@ export const CollapsibleBox = (props: ICollapsibleBoxProps): React.ReactElement 
         {props.headerView}
         <KibaIcon iconId={props.isCollapsed ? 'ion-chevron-down' : 'ion-chevron-up'} />
       </StyledHeader>
-      <HidingView isHidden={props.isCollapsed}>
-        <StyledContent $theme={theme} className={getClassName(props.isCollapsed && 'collapsed')}>
-          {props.children}
-        </StyledContent>
-      </HidingView>
+      {(!props.isCollapsed || !props.shouldSkipRenderingWhenCollapsed) && (
+        <HidingView isHidden={props.isCollapsed}>
+          <StyledContent $theme={theme} className={getClassName(props.isCollapsed && 'collapsed')}>
+            {props.children}
+          </StyledContent>
+        </HidingView>
+      )}
     </StyledCollapsibleBox>
   );
 };
@@ -103,6 +108,7 @@ CollapsibleBox.defaultProps = {
 interface IStatefulCollapsibleBoxProps extends IComponentProps<ITitledCollapsibleBoxTheme>, ISingleAnyChildProps {
   headerView: React.ReactNode;
   isCollapsedInitially?: boolean;
+  shouldSkipRenderingWhenCollapsed?: boolean;
 }
 
 export const StatefulCollapsibleBox = (props: IStatefulCollapsibleBoxProps): React.ReactElement => {
@@ -120,6 +126,7 @@ export const StatefulCollapsibleBox = (props: IStatefulCollapsibleBoxProps): Rea
       headerView={props.headerView}
       isCollapsed={isCollapsed}
       onCollapseToggled={onCollapseToggled}
+      shouldSkipRenderingWhenCollapsed={props.shouldSkipRenderingWhenCollapsed}
     >
       {props.children}
     </CollapsibleBox>

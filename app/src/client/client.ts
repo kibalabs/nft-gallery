@@ -151,15 +151,7 @@ export class NotdClient extends ServiceClient {
     return response.galleryUserBadges;
   };
 
-  public getCollectionOverlaps = async (address: string, otherRegistryAddress?: string): Promise<Resources.CollectionOverlap[]> => {
-    const method = RestMethod.GET;
-    const path = `gallery/v1/collections/${address}/overlaps`;
-    const request = new Endpoints.ListGalleryCollectionOverlapsRequest(otherRegistryAddress);
-    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryCollectionOverlapsResponse);
-    return response.collectionOverlaps;
-  };
-
-  public getCollectionOverlapSummaries = async (address: string): Promise<Resources.CollectionOverlapSummary[]> => {
+  public listCollectionOverlapSummaries = async (address: string): Promise<Resources.CollectionOverlapSummary[]> => {
     const method = RestMethod.GET;
     const path = `gallery/v1/collections/${address}/overlap-summaries`;
     const request = new Endpoints.ListGalleryCollectionOverlapSummariesRequest();
@@ -167,11 +159,35 @@ export class NotdClient extends ServiceClient {
     return response.collectionOverlapSummaries;
   };
 
-  public listGalleryCollectionsInSuperCollection = async (superCollectionName: string): Promise<Resources.Collection[]> => {
+  public listCollectionOverlaps = async (address: string, otherRegistryAddress?: string): Promise<Resources.CollectionOverlap[]> => {
     const method = RestMethod.GET;
-    const path = `gallery/v1/super-collections/${superCollectionName}/collections`;
-    const request = new Endpoints.ListGalleryCollectionsInSuperCollectionRequest();
-    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryCollectionsInSuperCollectionResponse);
-    return response.collections;
+    const path = `gallery/v1/collections/${address}/overlaps`;
+    const request = new Endpoints.ListGalleryCollectionOverlapsRequest(otherRegistryAddress);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGalleryCollectionOverlapsResponse);
+    return response.collectionOverlaps;
+  };
+
+  public listEntriesInSuperCollection = async (superCollectionName: string): Promise<Resources.SuperCollectionEntry[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/super-collections/${superCollectionName}/entries`;
+    const request = new Endpoints.ListEntriesInSuperCollectionRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListEntriesInSuperCollectionResponse);
+    return response.superCollectionEntries;
+  };
+
+  public listSuperCollectionOverlapSummaries = async (superCollectionName: string): Promise<Resources.CollectionOverlapSummary[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/super-collections/${superCollectionName}/overlap-summaries`;
+    const request = new Endpoints.ListGallerySuperCollectionOverlapSummariesRequest();
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGallerySuperCollectionOverlapSummariesResponse);
+    return response.collectionOverlapSummaries;
+  };
+
+  public listSuperCollectionOverlaps = async (superCollectionName: string, otherRegistryAddress?: string): Promise<Resources.SuperCollectionOverlap[]> => {
+    const method = RestMethod.GET;
+    const path = `gallery/v1/super-collections/${superCollectionName}/overlaps`;
+    const request = new Endpoints.ListGallerySuperCollectionOverlapsRequest(otherRegistryAddress);
+    const response = await this.makeRequest(method, path, request, Endpoints.ListGallerySuperCollectionOverlapsResponse);
+    return response.superCollectionOverlaps;
   };
 }

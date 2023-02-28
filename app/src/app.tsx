@@ -7,7 +7,7 @@ import { Alignment, BackgroundView, Direction, Head, IHeadRootProviderProps, Kib
 import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
-import { Collection, CollectionAttribute, CollectionToken } from './client';
+import { Collection, CollectionAttribute, CollectionToken, SuperCollectionEntry } from './client';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
 import { Footer } from './components/Footer';
@@ -47,7 +47,8 @@ export const globals: IGlobals = {
   notdClient,
   localStorageClient,
   collection: undefined,
-  collectionAttributes: undefined,
+  otherCollections: undefined,
+  otherCollectionAttributes: undefined,
   allTokens: undefined,
 };
 
@@ -117,18 +118,12 @@ export const App = (props: IAppProps): React.ReactElement => {
         setCollection(null);
       });
       if (isSuperCollection(projectId)) {
-        notdClient.listGalleryCollectionsInSuperCollection(projectId).then((retrievedCollections: Collection[]): void => {
-          setOtherCollections(retrievedCollections);
-          // TODO(krishan711): use the single api once available
-          Promise.all(retrievedCollections.map((retrievedCollection: Collection): Promise<CollectionAttribute[]> => {
-            return notdClient.listCollectionAttributes(retrievedCollection.address);
-          })).then((retrievedCollectionAttributes: CollectionAttribute[][]): void => {
-            const newOtherCollectionAttributes: Record<string, CollectionAttribute[]> = {};
-            for (let i = 0; i < retrievedCollections.length; i += 1) {
-              newOtherCollectionAttributes[retrievedCollections[i].address] = retrievedCollectionAttributes[i];
-            }
-            setOtherCollectionAttributes(newOtherCollectionAttributes);
-          });
+        notdClient.listEntriesInSuperCollection(projectId).then((retrievedSuperCollectionEntries: SuperCollectionEntry[]): void => {
+          setOtherCollections(retrievedSuperCollectionEntries.map((superCollectionEntry: SuperCollectionEntry): Collection => superCollectionEntry.collection));
+          setOtherCollectionAttributes(retrievedSuperCollectionEntries.reduce((accumulator: Record<string, CollectionAttribute[]>, current: SuperCollectionEntry): Record<string, CollectionAttribute[]> => {
+            accumulator[current.collection.address] = current.collectionAttributes;
+            return accumulator;
+          }, {}));
         }).catch((error: unknown): void => {
           console.error(error);
           setOtherCollections(null);

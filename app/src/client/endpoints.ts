@@ -516,20 +516,69 @@ export class ListGalleryCollectionOverlapSummariesResponse extends ResponseData 
 }
 
 
-export class ListGalleryCollectionsInSuperCollectionRequest extends RequestData {
+export class ListGallerySuperCollectionOverlapSummariesRequest extends RequestData {
 }
 
-export class ListGalleryCollectionsInSuperCollectionResponse extends ResponseData {
-  readonly collections: Resources.Collection[];
+export class ListGallerySuperCollectionOverlapSummariesResponse extends ResponseData {
+  readonly collectionOverlapSummaries: Resources.CollectionOverlapSummary[];
 
-  public constructor(collections: Resources.Collection[]) {
+  public constructor(collectionOverlapSummaries: Resources.CollectionOverlapSummary[]) {
     super();
-    this.collections = collections;
+    this.collectionOverlapSummaries = collectionOverlapSummaries;
   }
 
-  public static fromObject = (obj: Record<string, unknown>): ListGalleryCollectionsInSuperCollectionResponse => {
-    return new ListGalleryCollectionsInSuperCollectionResponse(
-      (obj.collections as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.Collection.fromObject(innerObj)),
+  public static fromObject = (obj: Record<string, unknown>): ListGalleryCollectionOverlapSummariesResponse => {
+    return new ListGalleryCollectionOverlapSummariesResponse(
+      (obj.collectionOverlapSummaries as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.CollectionOverlapSummary.fromObject(innerObj)),
+    );
+  };
+}
+
+
+export class ListEntriesInSuperCollectionRequest extends RequestData {
+}
+
+export class ListEntriesInSuperCollectionResponse extends ResponseData {
+  readonly superCollectionEntries: Resources.SuperCollectionEntry[];
+
+  public constructor(superCollectionEntries: Resources.SuperCollectionEntry[]) {
+    super();
+    this.superCollectionEntries = superCollectionEntries;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListEntriesInSuperCollectionResponse => {
+    return new ListEntriesInSuperCollectionResponse(
+      (obj.superCollectionEntries as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.SuperCollectionEntry.fromObject(innerObj)),
+    );
+  };
+}
+
+export class ListGallerySuperCollectionOverlapsRequest extends RequestData {
+  readonly otherRegistryAddress?: string;
+
+  public constructor(otherRegistryAddress?: string) {
+    super();
+    this.otherRegistryAddress = otherRegistryAddress;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      otherRegistryAddress: this.otherRegistryAddress,
+    };
+  };
+}
+
+export class ListGallerySuperCollectionOverlapsResponse extends ResponseData {
+  readonly superCollectionOverlaps: Resources.SuperCollectionOverlap[];
+
+  public constructor(superCollectionOverlaps: Resources.SuperCollectionOverlap[]) {
+    super();
+    this.superCollectionOverlaps = superCollectionOverlaps;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): ListGallerySuperCollectionOverlapsResponse => {
+    return new ListGallerySuperCollectionOverlapsResponse(
+      (obj.superCollectionOverlaps as Record<string, unknown>[]).map((innerObj: Record<string, unknown>) => Resources.SuperCollectionOverlap.fromObject(innerObj)),
     );
   };
 }
