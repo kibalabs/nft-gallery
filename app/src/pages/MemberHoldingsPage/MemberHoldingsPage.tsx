@@ -127,6 +127,9 @@ export const MemberHoldingsPage = (): React.ReactElement => {
                         <Stack key={collectionOverlap.ownerAddress} direction={Direction.Horizontal} childAlignment={Alignment.Center} shouldAddGutters={true}>
                           <AccountViewLink address={collectionOverlap.ownerAddress} target={`/members/${collectionOverlap.ownerAddress}`} />
                           <Spacing />
+                          <IpfsImage source={collectionOverlapSummary.otherCollection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
+                          <Text>{collectionOverlap.otherRegistryTokenCount}</Text>
+                          <Spacing variant={PaddingSize.Narrow} />
                           {isSuperCollection(projectId) ? (
                             <React.Fragment>
                               {otherCollections?.map((otherCollection: Collection): React.ReactElement => (
@@ -150,9 +153,6 @@ export const MemberHoldingsPage = (): React.ReactElement => {
                               <Spacing variant={PaddingSize.Narrow} />
                             </React.Fragment>
                           )}
-                          <Spacing variant={PaddingSize.Narrow} />
-                          <IpfsImage source={collectionOverlapSummary.otherCollection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
-                          <Text>{collectionOverlap.otherRegistryTokenCount}</Text>
                         </Stack>
                       ))}
                     </Stack>
