@@ -10,14 +10,15 @@
       { "color": "rgba(0, 0, 0, 0.75)" }
     ]
   },
-  "backgroundMusingFileUrl": "assets/goblintown/music.mp3",
+  "backgroundMusicUrl": "assets/goblintown/music.mp3",
   "logoImageUrl": "/assets/goblintown/logo-animated-inverse.gif",
   "bannerImageUrl": null,
   "iconImageUrl": "/assets/goblintown/icon.png",
   "everyviewCode": "eb42bb3312374c8982d92c3eb38f84e7",
   "collectionAddress": "0xbCe3781ae7Ca1a5e050Bd9C4c77369867eBc307e",
   "shouldUsePreviewImages": false,
+  "defaultMembersSort": null,
   "isBadgesEnabled": false,
   "badges": [],
-  "defaultMembersSort": null
+  "isSuperCollection": false
 }

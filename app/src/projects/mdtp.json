@@ -5,14 +5,15 @@
   "chain": "ethereum",
   "isCustomizationEnabled": false,
   "backgroundConfig": null,
-  "backgroundMusingFileUrl": null,
+  "backgroundMusicUrl": null,
   "logoImageUrl": "/assets/mdtp/logo.png",
   "bannerImageUrl": null,
   "iconImageUrl": "/assets/mdtp/icon.png",
   "everyviewCode": "54fa4b47b0b3431884b64a549d46ffd7",
   "collectionAddress": "0x8e720F90014fA4De02627f4A4e217B7e3942d5e8",
   "shouldUsePreviewImages": false,
+  "defaultMembersSort": null,
   "isBadgesEnabled": false,
   "badges": [],
-  "defaultMembersSort": null
+  "isSuperCollection": false
 }

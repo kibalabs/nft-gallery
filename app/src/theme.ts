@@ -1,6 +1,7 @@
 import { RecursivePartial } from '@kibalabs/core';
 import { buildTheme, IBoxTheme, ITextTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
 
+
 // NOTE(krishan711): the ordering here is wrong cos buildOverrideTheme uses baseTheme many times
 // but that doesn't take into account anything changed in this function.
 export const buildProjectTheme = (projectId: string): ITheme => {
@@ -133,12 +134,20 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
     }));
   }
+  if (projectId === 'creepz') {
+    return buildTheme(mergeThemePartial(overrideTheme, {
+      colors: {
+        brandPrimary: '#ffffff',
+        brandSecondary: 'rgb(89,190,144)',
+      },
+    }));
+  }
   return buildTheme(overrideTheme);
 };
 
 export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
   const baseTheme = buildTheme();
-  return {
+  const theme: RecursivePartial<ITheme> = {
     colors: {
       brandPrimary: '#B3C7F8',
       brandSecondary: '#2D86A3',
@@ -294,75 +303,6 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
       sticky: {
         position: 'sticky',
         top: '0',
-      },
-    },
-    tables: {
-      default: {
-        background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
-          'border-width': '0',
-        }),
-      },
-    },
-    tableCells: {
-      default: {
-        normal: {
-          default: {
-            background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
-              'border-radius': '0',
-              'border-width': '1px 0px',
-              'border-style': 'solid',
-              'border-color': 'rgba(255, 255, 255, 0.2)',
-              'background-color': 'rgba(255, 255, 255, 0)',
-              padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
-            }),
-            text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
-            }),
-          },
-          hover: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.2)',
-            },
-          },
-          press: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.3)',
-            },
-          },
-          focus: {
-            background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
-            }),
-          },
-        },
-      },
-      header: {
-        normal: {
-          default: {
-            background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
-              'border-radius': '0',
-              'border-width': '1px 0px',
-              'border-style': 'solid',
-              'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.2)',
-              'background-color': 'rgba(255, 255, 255, 0.1)',
-              padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
-            }),
-            text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
-            }),
-          },
-          hover: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.2)',
-            },
-          },
-          press: {
-            background: {
-              'background-color': 'rgba(255, 255, 255, 0.3)',
-            },
-          },
-          focus: {
-            background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
-            }),
-          },
-        },
       },
     },
     tabBarItems: {
@@ -584,63 +524,133 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
-    numberPagerItems: {
-      default: {
-        normal: {
-          default: {
-            background: mergeTheme(baseTheme.boxes.default, baseTheme.boxes.focusable, {
-              padding: `${baseTheme.dimensions.paddingNarrow} ${baseTheme.dimensions.paddingNarrow}`,
-              'background-color': 'transparent',
-            }),
-            text: mergeTheme(baseTheme.texts.default, {
-            }),
-          },
-          hover: {
-            background: {
-              'background-color': '$colors.brandPrimaryClear90',
-            },
-          },
-          press: {
-            background: {
-              'background-color': '$colors.brandPrimaryClear80',
-            },
-          },
-          focus: {
-            background: baseTheme.boxes.focussed,
+  };
+  theme.tables = {
+    default: {
+      background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+        'border-width': '0',
+      }),
+    },
+  };
+  theme.tableCells = {
+    default: {
+      normal: {
+        default: {
+          background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+            'border-radius': '0',
+            'border-width': '1px 0px',
+            'border-style': 'solid',
+            'border-color': 'rgba(255, 255, 255, 0.2)',
+            'background-color': 'rgba(255, 255, 255, 0)',
+            padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+          }),
+          text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+          }),
+        },
+        hover: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.2)',
           },
         },
-        active: {
-          default: {
-            background: {
-              'background-color': '$colors.tabSelectedBackground',
-            },
+        press: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.3)',
           },
         },
-        disabled: {
-          default: {
-            background: {
-              // color: '$colors.disabledText',
-              opacity: '0.2',
-            },
+        focus: {
+          background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+          }),
+        },
+      },
+    },
+    header: {
+      normal: {
+        default: {
+          background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+            'border-radius': '0',
+            'border-width': '1px 0px',
+            'border-style': 'solid',
+            'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.2)',
+            'background-color': 'rgba(255, 255, 255, 0.1)',
+            padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+          }),
+          text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+          }),
+        },
+        hover: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.2)',
           },
-          hover: {
-            background: {
-              'background-color': 'transparent',
-            },
+        },
+        press: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.3)',
           },
-          press: {
-            background: {
-              'background-color': 'transparent',
-            },
+        },
+        focus: {
+          background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+          }),
+        },
+      },
+    },
+  };
+  theme.numberPagerItems = {
+    default: {
+      normal: {
+        default: {
+          background: mergeTheme(baseTheme.boxes.default, baseTheme.boxes.focusable, {
+            padding: `${baseTheme.dimensions.paddingNarrow} ${baseTheme.dimensions.paddingNarrow}`,
+            'background-color': 'transparent',
+          }),
+          text: mergeTheme(baseTheme.texts.default, {
+          }),
+        },
+        hover: {
+          background: {
+            'background-color': '$colors.brandPrimaryClear90',
           },
-          focus: {
-            background: {
-              'background-color': 'transparent',
-              border: 'none',
-            },
+        },
+        press: {
+          background: {
+            'background-color': '$colors.brandPrimaryClear80',
+          },
+        },
+        focus: {
+          background: baseTheme.boxes.focussed,
+        },
+      },
+      active: {
+        default: {
+          background: {
+            'background-color': '$colors.tabSelectedBackground',
+          },
+        },
+      },
+      disabled: {
+        default: {
+          background: {
+            // color: '$colors.disabledText',
+            opacity: '0.2',
+          },
+        },
+        hover: {
+          background: {
+            'background-color': 'transparent',
+          },
+        },
+        press: {
+          background: {
+            'background-color': 'transparent',
+          },
+        },
+        focus: {
+          background: {
+            'background-color': 'transparent',
+            border: 'none',
           },
         },
       },
     },
   };
+  return theme;
 };

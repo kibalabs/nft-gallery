@@ -5,12 +5,15 @@ import { Alignment, Button, Checkbox, Direction, IOption, OptionSelect, PaddingS
 import { Web3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
+import { CollectionSelect } from './CollectionSelect';
 import { Collection, CollectionAttribute } from '../client';
 
 
 export interface IFilterProps {
   account: Web3Account | null | undefined;
   collection: Collection;
+  otherCollections: Collection[] | null | undefined;
+  onCollectionSelected: (collection: Collection) => void;
   collectionAttributes: CollectionAttribute[];
   filters: Record<string, string[]>;
   onAttributeValueClicked: (attributeName: string, attributeValue: string | null | undefined) => void;
@@ -96,6 +99,9 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
 
   return (
     <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} shouldAddGutters={true} padding={PaddingSize.Wide} paddingRight={PaddingSize.Default}>
+      {props.otherCollections && props.otherCollections?.length > 0 && (
+        <CollectionSelect onCollectionSelected={props.onCollectionSelected} collections={props.otherCollections} selectedCollectionAddress={props.collection.address} />
+      )}
       {props.shouldShowMusicOption && (
         <Checkbox text='Play music' isChecked={props.shouldPlayMusic} onToggled={onShouldPlayMusicToggled} />
       )}
@@ -112,7 +118,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       )}
       <Spacing />
       {props.shouldShowMarket && (
-        <StatefulTitledCollapsibleBox title='Listings' isCollapsedInitially={true}>
+        <StatefulTitledCollapsibleBox title='Listings' isCollapsedInitially={true} shouldSkipRenderingWhenCollapsed={true}>
           <Stack direction={Direction.Vertical} shouldAddGutters={true}>
             <Checkbox text='Listed' isChecked={props.showListedTokensOnly} onToggled={onShowListedTokensOnlyToggled} />
             {/* <Stack.Item gutterBefore={PaddingSize.Default} gutterAfter={PaddingSize.Narrow2}>
@@ -142,7 +148,7 @@ export const Filter = (props: IFilterProps): React.ReactElement => {
       )}
       <Spacing />
       {props.collectionAttributes && props.collectionAttributes.map((collectionAttribute: CollectionAttribute): React.ReactElement => (
-        <StatefulTitledCollapsibleBox key={collectionAttribute.name} title={collectionAttribute.name} isCollapsedInitially={true}>
+        <StatefulTitledCollapsibleBox key={collectionAttribute.name} title={collectionAttribute.name} isCollapsedInitially={true} shouldSkipRenderingWhenCollapsed={true}>
           <Stack direction={Direction.Vertical}>
             {collectionAttribute.values.map((value: string): React.ReactElement => (
               <Checkbox

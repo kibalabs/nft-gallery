@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { LocalStorageClient, Requester, RestMethod } from '@kibalabs/core';
+import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
 import { Alignment, BackgroundView, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
-import { Collection, CollectionAttribute, CollectionToken } from './client';
+import { Collection, CollectionAttribute, CollectionToken, SuperCollectionEntry } from './client';
 import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
 import { Footer } from './components/Footer';
@@ -21,7 +21,7 @@ import { MemberHoldingsPage } from './pages/MemberHoldingsPage';
 import { MembersPage } from './pages/MembersPage/MembersPage';
 import { TokenPage } from './pages/TokenPage';
 import { buildProjectTheme } from './theme';
-import { getBackground, getCollectionAddress, getEveryviewCode, getIconImageUrl } from './util';
+import { getBackground, getCollectionAddress, getEveryviewCode, getIconImageUrl, isSuperCollection } from './util';
 
 import './fonts.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -47,7 +47,8 @@ export const globals: IGlobals = {
   notdClient,
   localStorageClient,
   collection: undefined,
-  collectionAttributes: undefined,
+  otherCollections: undefined,
+  otherCollectionAttributes: undefined,
   allTokens: undefined,
 };
 
@@ -92,8 +93,11 @@ export interface IAppProps extends IHeadRootProviderProps {
 export const App = (props: IAppProps): React.ReactElement => {
   useFavicon(getIconImageUrl(projectId) || '/assets/icon.png');
   const [collection, setCollection] = React.useState<Collection | null | undefined>(props.pageData?.collection || undefined);
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const [allTokens, setAllTokens] = React.useState<CollectionToken[] | null | undefined>(props.pageData?.allTokens || undefined);
-  const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
+  const [otherCollections, setOtherCollections] = React.useState<Collection[] | undefined | null>(undefined);
+  // const [collectionAttributes, setCollectionAttributes] = React.useState<CollectionAttribute[] | null | undefined>(undefined);
+  const [otherCollectionAttributes, setOtherCollectionAttributes] = React.useState<Record<string, CollectionAttribute[]> | undefined | null>(undefined);
 
   useInitialization((): void => {
     const everyviewCode = getEveryviewCode(projectId);
@@ -113,21 +117,35 @@ export const App = (props: IAppProps): React.ReactElement => {
         console.error(error);
         setCollection(null);
       });
-      notdClient.listCollectionAttributes(collectionAddress).then((retrievedCollectionAttributes: CollectionAttribute[]): void => {
-        setCollectionAttributes(retrievedCollectionAttributes);
-      }).catch((error: unknown): void => {
-        console.error(error);
-        setCollectionAttributes(null);
-      });
-    } else {
-      const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
-      const collectionData = JSON.parse(collectionDataResponse.content);
-      const newCollection = Collection.fromObject(collectionData.collection);
-      const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
-      const newAllTokens = collectionData.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
-      setCollection(newCollection);
-      setCollectionAttributes(newCollectionAttributes);
-      setAllTokens(newAllTokens);
+      if (isSuperCollection(projectId)) {
+        notdClient.listEntriesInSuperCollection(projectId).then((retrievedSuperCollectionEntries: SuperCollectionEntry[]): void => {
+          setOtherCollections(retrievedSuperCollectionEntries.map((superCollectionEntry: SuperCollectionEntry): Collection => superCollectionEntry.collection));
+          setOtherCollectionAttributes(retrievedSuperCollectionEntries.reduce((accumulator: Record<string, CollectionAttribute[]>, current: SuperCollectionEntry): Record<string, CollectionAttribute[]> => {
+            accumulator[current.collection.address] = current.collectionAttributes;
+            return accumulator;
+          }, {}));
+        }).catch((error: unknown): void => {
+          console.error(error);
+          setOtherCollections(null);
+        });
+      } else {
+        setOtherCollections([]);
+        notdClient.listCollectionAttributes(collectionAddress).then((retrievedCollectionAttributes: CollectionAttribute[]): void => {
+          setOtherCollectionAttributes({ [collectionAddress]: retrievedCollectionAttributes });
+        }).catch((error: unknown): void => {
+          console.error(error);
+          setOtherCollectionAttributes(null);
+        });
+      }
+    // } else {
+    //   const collectionDataResponse = await requester.makeRequest(RestMethod.GET, `${window.location.origin}/assets/${projectId}/data.json`);
+    //   const collectionData = JSON.parse(collectionDataResponse.content);
+    //   const newCollection = Collection.fromObject(collectionData.collection);
+    //   const newCollectionAttributes = collectionData.collectionAttributes.map((record: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(record));
+    //   const newAllTokens = collectionData.collectionTokens.map((record: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(record));
+    //   setCollection(newCollection);
+    //   setOtherCollectionAttributes(newCollectionAttributes);
+    //   setAllTokens(newAllTokens);
     }
   }, []);
 
@@ -148,7 +166,7 @@ export const App = (props: IAppProps): React.ReactElement => {
         <div style={{ position: 'fixed', height: '100vh', width: '100vw', zIndex: -1, top: 0, left: 0 }} />
       </BackgroundView>
       <PageDataProvider initialData={props.pageData}>
-        <GlobalsProvider globals={{ ...globals, collection, allTokens, collectionAttributes }}>
+        <GlobalsProvider globals={{ ...globals, collection, otherCollections, allTokens, otherCollectionAttributes }}>
           <Web3AccountControlProvider localStorageClient={localStorageClient} onError={onWeb3AccountError}>
             <Router staticPath={props.staticPath}>
               <Stack direction={Direction.Vertical} isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Start}>

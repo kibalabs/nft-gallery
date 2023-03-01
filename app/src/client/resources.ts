@@ -100,6 +100,22 @@ export class CollectionAttribute extends ResponseData {
   };
 }
 
+
+export class SuperCollectionEntry extends ResponseData {
+  public constructor(
+    readonly collection: Collection,
+    readonly collectionAttributes: CollectionAttribute[],
+
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): SuperCollectionEntry => {
+    return new SuperCollectionEntry(
+      Collection.fromObject(obj.collection as Record<string, unknown>),
+      (obj.collectionAttributes as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionAttribute => CollectionAttribute.fromObject(innerObj)),
+    );
+  };
+}
+
 export class TokenAttribute extends ResponseData {
   public constructor(
     readonly traitType: string,
@@ -403,6 +419,34 @@ export class CollectionOverlap extends ResponseData {
       String(obj.ownerAddress),
       Number(obj.registryTokenCount),
       Number(obj.otherRegistryTokenCount),
+    );
+  };
+}
+
+
+// class ApiSuperCollectionOverlap(BaseModel):
+//     ownerAddress: str
+//     otherRegistryAddress: str
+//     otherRegistryTokenCount: int
+//     registryTokenCountMap: Dict[str, int]
+
+export class SuperCollectionOverlap extends ResponseData {
+  public constructor(
+    readonly ownerAddress: string,
+    readonly otherRegistryAddress: string,
+    readonly otherRegistryTokenCount: number,
+    readonly registryTokenCountMap: Record<string, number>,
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): SuperCollectionOverlap => {
+    return new SuperCollectionOverlap(
+      String(obj.ownerAddress),
+      String(obj.otherRegistryAddress),
+      Number(obj.otherRegistryTokenCount),
+      Object.keys(obj.registryTokenCountMap as Record<string, unknown>).reduce((accumulator: Record<string, number>, current: string): Record<string, number> => {
+        accumulator[current] = Number((obj.registryTokenCountMap as Record<string, unknown>)[current]);
+        return accumulator;
+      }, {}),
     );
   };
 }

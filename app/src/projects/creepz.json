@@ -5,14 +5,15 @@
     "chain": "ethereum",
     "isCustomizationEnabled": false,
     "backgroundConfig": null,
-    "backgroundMusingFileUrl": null,
+    "backgroundMusicUrl": null,
     "logoImageUrl": "/assets/creepz/logo.png",
     "bannerImageUrl": "/assets/creepz/banner.png",
-    "iconImageUrl": null,
+    "iconImageUrl": "/assets/creepz/icon.png",
     "everyviewCode": null,
     "collectionAddress": "0xfE8C6d19365453D26af321D0e8c910428c23873F",
     "shouldUsePreviewImages": false,
-    "isBadgesEnabled": false,
     "defaultMembersSort": null,
-    "badges": []
+    "isBadgesEnabled": false,
+    "badges": [],
+    "isSuperCollection": true
   }

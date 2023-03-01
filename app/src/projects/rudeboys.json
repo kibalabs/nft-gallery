@@ -5,13 +5,14 @@
   "chain": "ethereum",
   "isCustomizationEnabled": false,
   "backgroundConfig": null,
-  "backgroundMusingFileUrl": null,
+  "backgroundMusicUrl": null,
   "logoImageUrl": "/assets/rudeboys/logo.png",
   "bannerImageUrl": "/assets/rudeboys/banner.png",
   "iconImageUrl": "/assets/rudeboys/icon.png",
   "everyviewCode": null,
   "collectionAddress": "0x5351105753Bdbc3Baa908A0c04F1468535749c3D",
   "shouldUsePreviewImages": true,
+  "defaultMembersSort": "UNIQUETOKENCOUNT_DESC",
   "isBadgesEnabled": true,
   "badges": [{
     "key": "NEVER_SOLD",
@@ -38,5 +39,5 @@
     "imageUrl": "/assets/rudeboys/badge-one.svg",
     "isTransient": false
   }],
-  "defaultMembersSort": "UNIQUETOKENCOUNT_DESC"
+  "isSuperCollection": false
 }

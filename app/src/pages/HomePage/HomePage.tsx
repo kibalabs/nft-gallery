@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, Dialog, Direction, EqualGrid,
 import { useWeb3Account } from '@kibalabs/web3-react';
 import { BigNumber } from 'ethers';
 
-import { CollectionToken, GalleryToken, TokenAttribute, TokenListing } from '../../client';
+import { Collection, CollectionToken, GalleryToken, TokenAttribute, TokenListing } from '../../client';
 import { InQueryParam } from '../../client/endpoints';
 import { Filter } from '../../components/Filter';
 import { FloatingView } from '../../components/FloatingView';
@@ -15,7 +15,7 @@ import { useGlobals } from '../../globalsContext';
 import { LooksrareClient } from '../../LooksrareClient';
 import { OpenseaClient } from '../../OpenseaClient';
 import { useWindowScroll } from '../../reactUtil';
-import { getBackgroundMusic, getBannerImageUrl, getChain, getCollectionAddress, getHost, getShouldUsePreviewImages, getTreasureHuntTokenId } from '../../util';
+import { getBackgroundMusic, getBannerImageUrl, getChain, getHost, getShouldUsePreviewImages, getTreasureHuntTokenId } from '../../util';
 
 
 export const useScrollListenerElement = <T extends HTMLElement>(handler: (event: Event) => void, dependencies: React.DependencyList = []): [element: T | null, setElement: ((element: T) => void)] => {
@@ -30,7 +30,8 @@ export const HomePage = (): React.ReactElement => {
   const navigator = useNavigator();
   const location = useLocation();
   const account = useWeb3Account();
-  const { notdClient, projectId, collection, collectionAttributes, allTokens } = useGlobals();
+  const { notdClient, projectId, collection, otherCollections, otherCollectionAttributes, allTokens } = useGlobals();
+  const [selectedCollectionAddress, setSelectedCollectionAddress] = useUrlQueryState('collection');
   const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
   const [showOwnedTokensOnly, setShowOwnedTokensOnly] = React.useState<boolean>(false);
   const [showListedTokensOnly, setShowListedTokensOnly] = React.useState<boolean>(false);
@@ -49,7 +50,8 @@ export const HomePage = (): React.ReactElement => {
   const backgroundMusic = React.useMemo((): HTMLAudioElement | null => {
     return getIsRunningOnBrowser() && backgroundMusicSource != null ? new Audio(backgroundMusicSource) : null;
   }, [backgroundMusicSource]);
-
+  const selectedCollection = !selectedCollectionAddress ? collection : (!otherCollections ? otherCollections : otherCollections.find((innerCollection: Collection): boolean => innerCollection.address === selectedCollectionAddress));
+  const selectedCollectionAttributes = (selectedCollection === undefined || otherCollectionAttributes === undefined) ? undefined : (selectedCollection === null || otherCollectionAttributes === null) ? null : otherCollectionAttributes[selectedCollection.address];
   const order = _order ?? DEFAULT_SORT;
 
   const isTokenSubpageShowing = location.pathname.includes('/tokens/');
@@ -61,7 +63,7 @@ export const HomePage = (): React.ReactElement => {
     bannerImageUrl = `${host}${bannerImageUrl}`;
   }
   const title = `${collection ? collection.name : 'Token'} Gallery`;
-  const description = collection?.description ? `The gallery of ${collection.name}. ${collection.description} built by https://www.tokenpage.xyz` : collection ? `The gallery of ${collection.name} built by https://www.tokenpage.xyz` : '';
+  const description = collection?.description ? `The ${collection.name} gallery. ${collection.description}. Built by https://www.tokenpage.xyz` : collection ? `The ${collection.name} gallery. Built by https://www.tokenpage.xyz` : '';
 
   React.useEffect((): void => {
     if (!backgroundMusic) {
@@ -76,7 +78,7 @@ export const HomePage = (): React.ReactElement => {
   }, [backgroundMusic, shouldPlayMusic]);
 
   const updateCollectionTokens = React.useCallback((): void => {
-    const collectionAddress = getCollectionAddress(projectId);
+    const collectionAddress = selectedCollection?.address;
     const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
     tokenLimitRef.current = 30;
     if (collectionAddress) {
@@ -126,7 +128,7 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [projectId, notdClient, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, previousQueryRef, account, allTokens]);
+  }, [selectedCollection, notdClient, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, previousQueryRef, account, allTokens]);
 
   React.useEffect((): void => {
     updateCollectionTokens();
@@ -136,7 +138,7 @@ export const HomePage = (): React.ReactElement => {
     if (!galleryTokens) {
       return;
     }
-    const collectionAddress = getCollectionAddress(projectId);
+    const collectionAddress = selectedCollection?.address;
     if (collectionAddress) {
       const attributeFilters = Object.keys(filters).filter((filterKey: string): boolean => filters[filterKey] && filters[filterKey].length > 0).map((filterKey: string): InQueryParam => new InQueryParam(filterKey, filters[filterKey]));
       notdClient.queryCollectionTokens(collectionAddress, 30, galleryTokens.length, showOwnedTokensOnly && account ? account.address : undefined, minPrice || undefined, maxPrice || undefined, showListedTokensOnly, undefined, attributeFilters, order).then((retrievedGalleryTokens: GalleryToken[]): void => {
@@ -164,7 +166,7 @@ export const HomePage = (): React.ReactElement => {
       }, []);
       setGalleryTokens(newTokens);
     }
-  }, [notdClient, projectId, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, galleryTokens, account, allTokens]);
+  }, [selectedCollection, notdClient, filters, order, showOwnedTokensOnly, showListedTokensOnly, minPrice, maxPrice, tokenLimitRef, galleryTokens, account, allTokens]);
 
   const onAttributeValueClicked = (attributeName: string, attributeValue: string | null | undefined): void => {
     const filtersCopy = { ...filters };
@@ -184,7 +186,7 @@ export const HomePage = (): React.ReactElement => {
   };
 
   const updateTokenListings = React.useCallback(async (): Promise<void> => {
-    if (!collection?.address || !galleryTokens) {
+    if (!selectedCollection?.address || !galleryTokens) {
       return;
     }
     const filteredTokenIds = galleryTokens.map((galleryToken: GalleryToken): string => galleryToken.collectionToken.tokenId);
@@ -198,8 +200,8 @@ export const HomePage = (): React.ReactElement => {
         newListingMap[tokenId] = null;
       });
     } else {
-      const openseaListingMap = await new OpenseaClient().getTokenListings(collection.address, tokenIdsToUpdate);
-      const looksrareListingMap = await new LooksrareClient().getTokenListings(collection.address, tokenIdsToUpdate);
+      const openseaListingMap = await new OpenseaClient().getTokenListings(selectedCollection.address, tokenIdsToUpdate);
+      const looksrareListingMap = await new LooksrareClient().getTokenListings(selectedCollection.address, tokenIdsToUpdate);
       tokenIdsToUpdate.forEach((tokenId: string): void => {
         const listings = [openseaListingMap[tokenId], looksrareListingMap[tokenId]].filter((listing: TokenListing | null): boolean => listing != null) as TokenListing[];
         if (listings.length === 0) {
@@ -210,26 +212,11 @@ export const HomePage = (): React.ReactElement => {
       });
     }
     setTokenListMap(newListingMap);
-  }, [projectId, collection?.address, galleryTokens, tokenListingMap]);
+  }, [projectId, selectedCollection?.address, galleryTokens, tokenListingMap]);
 
   React.useEffect((): void => {
     updateTokenListings();
   }, [updateTokenListings]);
-
-  // NOTE(krishan711): this is the old code for when a specific element scrolled
-  // const onScrolled = React.useCallback((event: Event): void => {
-  //   // const eventTarget = event.target as Document;
-  //   if (galleryTokens && tokenLimitRef.current > galleryTokens.length) {
-  //     return;
-  //   }
-  //   const size = eventTarget.scrollHeight - eventTarget.clientHeight;
-  //   const position = eventTarget.scrollTop;
-  //   if (size - position < 750) {
-  //     tokenLimitRef.current += 30;
-  //     loadMoreCollectionTokens();
-  //   }
-  // }, [galleryTokens, tokenLimitRef, loadMoreCollectionTokens]);
-  // const [scrollingRef, setScrollingRef] = useScrollListenerElement<HTMLDivElement>(onScrolled);
 
   const onWindowScrolled = React.useCallback((sizeScrolled: number, factorScrolled: number): void => {
     if (galleryTokenCountRef.current > 0 && tokenLimitRef.current > galleryTokenCountRef.current) {
@@ -243,12 +230,31 @@ export const HomePage = (): React.ReactElement => {
 
   useWindowScroll(onWindowScrolled);
 
-  const onCloseSubpageClicked = (): void => {
-    navigator.navigateTo('/');
-  };
-
   const onToggleResponsiveFilterClicked = (): void => {
     setIsResponsiveFilterShowing(!isResponsiveFilterShowing);
+  };
+
+  const onCollectionSelected = (newSelectedCollection: Collection): void => {
+    if (newSelectedCollection.address === collection?.address) {
+      setSelectedCollectionAddress(null);
+    } else {
+      setSelectedCollectionAddress(newSelectedCollection.address);
+    }
+  };
+
+  const getTokenTarget = (galleryToken: GalleryToken): string => {
+    if (selectedCollectionAddress) {
+      return `/tokens/${galleryToken.collectionToken.tokenId}?collection=${selectedCollectionAddress}`;
+    }
+    return `/tokens/${galleryToken.collectionToken.tokenId}`;
+  };
+
+  const onCloseSubpageClicked = (): void => {
+    if (selectedCollectionAddress) {
+      navigator.navigateTo(`/?collection=${selectedCollectionAddress}`);
+      return;
+    }
+    navigator.navigateTo('/');
   };
 
   return (
@@ -267,11 +273,11 @@ export const HomePage = (): React.ReactElement => {
           <meta name='twitter:card' content='summary' />
         )}
       </Head>
-      {collection === undefined || collectionAttributes === undefined ? (
+      {selectedCollection === undefined || selectedCollectionAttributes === undefined ? (
         <Stack isFullHeight={true} isFullWidth={true} contentAlignment={Alignment.Center} childAlignment={Alignment.Center}>
           <LoadingSpinner />
         </Stack>
-      ) : collection === null || collectionAttributes === null ? (
+      ) : selectedCollection === null || selectedCollectionAttributes === null ? (
         <Text variant='error'>Failed to load</Text>
       ) : (
         <Stack direction={Direction.Horizontal} isFullHeight={true} isFullWidth={true} childAlignment={Alignment.Start} contentAlignment={Alignment.Center} shouldAddGutters={false} paddingHorizontal={PaddingSize.Wide} paddingVertical={PaddingSize.Default}>
@@ -289,8 +295,10 @@ export const HomePage = (): React.ReactElement => {
                 shouldShowMusicOption={backgroundMusic != null}
                 shouldPlayMusic={shouldPlayMusic}
                 setShouldPlayMusic={setShouldPlayMusic}
-                collection={collection}
-                collectionAttributes={collectionAttributes}
+                collection={selectedCollection}
+                otherCollections={otherCollections}
+                onCollectionSelected={onCollectionSelected}
+                collectionAttributes={selectedCollectionAttributes}
                 shouldShowMarket={getChain(projectId) === 'ethereum'}
                 order={order}
                 setOrder={setOrder}
@@ -351,7 +359,7 @@ export const HomePage = (): React.ReactElement => {
                           tokenCustomization={galleryToken.tokenCustomization}
                           tokenListing={galleryToken.tokenListing ?? tokenListingMap[galleryToken.collectionToken.tokenId]}
                           tokenQuantity={galleryToken.quantity}
-                          target={`/tokens/${galleryToken.collectionToken.tokenId}`}
+                          target={getTokenTarget(galleryToken)}
                           shouldUsePreviewImages={shouldUsePreviewImages}
                         />
                       ))}
@@ -379,8 +387,10 @@ export const HomePage = (): React.ReactElement => {
                         shouldShowMusicOption={backgroundMusicSource != null}
                         shouldPlayMusic={shouldPlayMusic}
                         setShouldPlayMusic={setShouldPlayMusic}
-                        collection={collection}
-                        collectionAttributes={collectionAttributes}
+                        collection={selectedCollection}
+                        otherCollections={otherCollections}
+                        onCollectionSelected={onCollectionSelected}
+                        collectionAttributes={selectedCollectionAttributes}
                         shouldShowMarket={getChain(projectId) === 'ethereum'}
                         order={order}
                         setOrder={setOrder}

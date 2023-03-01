@@ -7,13 +7,14 @@
   "backgroundConfig": {
     "linearGradient": "180deg, rgba(89,190,144,1) 0%, rgba(211,163,181,1) 50%, rgba(220,137,117,1) 100%"
   },
-  "backgroundMusingFileUrl": "/assets/sprites/music.mp3",
+  "backgroundMusicUrl": "/assets/sprites/music.mp3",
   "logoImageUrl": "/assets/sprites/logo.png",
   "bannerImageUrl": "/assets/sprites/banner.png",
   "iconImageUrl": "/assets/sprites/icon.png",
   "everyviewCode": "23fecbad77194ba4aa49b4abb88c6131",
   "collectionAddress": "0x2744fE5e7776BCA0AF1CDEAF3bA3d1F5cae515d3",
   "shouldUsePreviewImages": false,
+  "defaultMembersSort": null,
   "isBadgesEnabled": false,
   "badges": [{
     "key": "NEVER_SOLD",
@@ -36,5 +37,5 @@
     "description": "I've held a 1/1 at some point in time",
     "imageUrl": "/assets/rudeboys/badge-one.svg"
   }],
-  "defaultMembersSort": null
+  "isSuperCollection": false
 }

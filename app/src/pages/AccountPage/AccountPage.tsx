@@ -6,14 +6,14 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import ReactTooltip from 'react-tooltip';
 
-import { CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, GalleryUserBadge, TokenTransfer } from '../../client/resources';
+import { Collection, CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, GalleryUserBadge, TokenTransfer } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
 import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { IpfsImage } from '../../components/IpfsImage';
 import { TokenCard } from '../../components/TokenCard';
 import { UserTokenTransferRow } from '../../components/TokenTransferRow';
 import { useGlobals } from '../../globalsContext';
-import { getBadges, IBadge, isBadgesEnabled } from '../../util';
+import { getBadges, IBadge, isBadgesEnabled, isSuperCollection } from '../../util';
 
 const TAB_KEY_OWNED = 'TAB_KEY_OWNED';
 const TAB_KEY_TRANSACTIONS = 'TAB_KEY_TRANSACTIONS';
@@ -64,14 +64,14 @@ export const BadgesView = (props: IBadgesViewProps): React.ReactElement => {
 };
 
 export const AccountPage = (): React.ReactElement => {
-  const { notdClient, collection, projectId } = useGlobals();
+  const { notdClient, collection, otherCollections, projectId } = useGlobals();
   const location = useLocation();
   const navigator = useNavigator();
   const account = useWeb3Account();
   const loginSignature = useWeb3LoginSignature();
   const onLoginClicked = useWeb3OnLoginClicked();
   const accountAddress = useStringRouteParam('accountAddress');
-  const [galleryTokens, setGalleryTokens] = React.useState<GalleryToken[] | null | undefined>(undefined);
+  const [galleryTokens, setGalleryTokens] = React.useState<Record<string, GalleryToken[]> | null | undefined>(undefined);
   const [ownedCollections, setOwnedCollections] = React.useState<GalleryOwnedCollection[] | null | undefined>(undefined);
   const [galleryUser, setGalleryUser] = React.useState<GalleryUser | null | undefined>(undefined);
   const [selectedTabKey, setSelectedTabKey] = React.useState<string>(TAB_KEY_OWNED);
@@ -91,17 +91,32 @@ export const AccountPage = (): React.ReactElement => {
     if (shouldClear) {
       setGalleryTokens(undefined);
     }
-    if (!accountAddress || !collection?.address) {
+    if (!accountAddress || !collection || !otherCollections) {
       setGalleryTokens(undefined);
       return;
     }
-    notdClient.queryCollectionTokens(collection.address, 100, 0, accountAddress).then((retrievedGalleryTokens: GalleryToken[]): void => {
-      setGalleryTokens(retrievedGalleryTokens);
-    }).catch((error: unknown): void => {
-      console.error(error);
-      setGalleryTokens(null);
-    });
-  }, [notdClient, collection?.address, accountAddress]);
+    if (isSuperCollection(projectId)) {
+      Promise.all(otherCollections.map(async (otherCollection: Collection): Promise<GalleryToken[]> => {
+        return notdClient.queryCollectionTokens(otherCollection.address, 1000, 0, accountAddress);
+      })).then((retrievedCollectionOwnedTokens: GalleryToken[][]): void => {
+        const newOtherGalleryTokens: Record<string, GalleryToken[]> = {};
+        for (let i = 0; i < otherCollections.length; i += 1) {
+          newOtherGalleryTokens[otherCollections[i].address] = retrievedCollectionOwnedTokens[i];
+        }
+        setGalleryTokens(newOtherGalleryTokens);
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setGalleryTokens(null);
+      });
+    } else {
+      notdClient.queryCollectionTokens(collection.address, 100, 0, accountAddress).then((retrievedGalleryTokens: GalleryToken[]): void => {
+        setGalleryTokens({ [collection.address]: retrievedGalleryTokens });
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setGalleryTokens(null);
+      });
+    }
+  }, [projectId, notdClient, collection, otherCollections, accountAddress]);
 
   React.useEffect((): void => {
     updateTokens();
@@ -131,17 +146,18 @@ export const AccountPage = (): React.ReactElement => {
     if (shouldClear) {
       setOwnedCollections(undefined);
     }
-    if (!accountAddress || !collection?.address) {
+    if (!accountAddress || !collection?.address || !otherCollections) {
       setOwnedCollections(undefined);
       return;
     }
+    const otherCollectionAddresses = otherCollections.map((otherCollection: Collection): string => otherCollection.address);
     notdClient.listUserOwnedCollections(collection.address, accountAddress).then((retrievedOwnedCollections: GalleryOwnedCollection[]): void => {
-      setOwnedCollections(retrievedOwnedCollections);
+      setOwnedCollections(retrievedOwnedCollections.filter((retrievedOwnedCollection: GalleryOwnedCollection): boolean => !otherCollectionAddresses.includes(retrievedOwnedCollection.collection.address)));
     }).catch((error: unknown): void => {
       console.error(error);
       setOwnedCollections(null);
     });
-  }, [notdClient, collection?.address, accountAddress]);
+  }, [notdClient, collection?.address, otherCollections, accountAddress]);
 
   React.useEffect((): void => {
     updateOwnedCollections();
@@ -214,6 +230,13 @@ export const AccountPage = (): React.ReactElement => {
     setSelectedTabKey(newSelectedTabKey);
   };
 
+  const getTokenTarget = (galleryToken: GalleryToken): string => {
+    if (galleryToken.collectionToken.registryAddress !== collection?.address) {
+      return `/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}?collection=${galleryToken.collectionToken.registryAddress}`;
+    }
+    return `/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`;
+  };
+
   return (
     <React.Fragment>
       <Head>
@@ -238,7 +261,7 @@ export const AccountPage = (): React.ReactElement => {
             )}
           </React.Fragment>
           <React.Fragment>
-            { galleryUser === undefined || galleryTokens?.length === 0 ? (
+            { galleryUser === undefined ? (
               null
             ) : galleryUser?.twitterProfile ? (
               <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Center}>
@@ -292,25 +315,57 @@ export const AccountPage = (): React.ReactElement => {
           </ResponsiveHidingView>
           <Stack.Item growthFactor={1} shrinkFactor={1}>
             {selectedTabKey === TAB_KEY_OWNED ? (
-              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true}>
-                { galleryTokens === undefined ? (
+              <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
+                { collection === undefined || otherCollections === undefined || galleryTokens === undefined ? (
                   <LoadingSpinner />
-                ) : galleryTokens === null ? (
+                ) : collection === null || otherCollections === null || galleryTokens === null ? (
                   <Text variant='error' alignment={TextAlignment.Center}>Failed to load account tokens</Text>
-                ) : galleryTokens.length === 0 ? (
-                  <Text alignment={TextAlignment.Center}>No tokens owned</Text>
-                ) : (
-                  <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
-                    {galleryTokens.map((galleryToken: GalleryToken, index: number): React.ReactElement => (
-                      <TokenCard
-                        key={index}
-                        token={galleryToken.collectionToken}
-                        tokenCustomization={galleryToken.tokenCustomization}
-                        tokenQuantity={galleryToken.quantity}
-                        target={`/members/${accountAddress}/tokens/${galleryToken.collectionToken.tokenId}`}
-                      />
+                ) : isSuperCollection(projectId) ? (
+                  <React.Fragment>
+                    {otherCollections.map((otherCollection: Collection): React.ReactElement => (
+                      <StatefulCollapsibleBox
+                        key={otherCollection.address}
+                        isCollapsedInitially={true}
+                        headerView={(
+                          <Stack direction={Direction.Horizontal} shouldAddGutters={true}>
+                            <IpfsImage source={otherCollection.imageUrl || ''} height='1.5em' width='1.5em' alternativeText='' />
+                            <Text>{otherCollection.name}</Text>
+                            <Text variant='bold'>{`x${galleryTokens[otherCollection.address].length}`}</Text>
+                          </Stack>
+                        )}
+                      >
+                        <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                          {galleryTokens[otherCollection.address].map((galleryToken: GalleryToken, index: number): React.ReactElement => (
+                            <TokenCard
+                              key={index}
+                              token={galleryToken.collectionToken}
+                              tokenCustomization={galleryToken.tokenCustomization}
+                              tokenQuantity={galleryToken.quantity}
+                              target={getTokenTarget(galleryToken)}
+                            />
+                          ))}
+                        </EqualGrid>
+                      </StatefulCollapsibleBox>
                     ))}
-                  </EqualGrid>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    {galleryTokens[collection.address].length === 0 ? (
+                      <Text alignment={TextAlignment.Center}>No tokens owned</Text>
+                    ) : (
+                      <EqualGrid childSizeResponsive={{ base: 6, medium: 4, large: 3, extraLarge: 2 }} contentAlignment={Alignment.Center} childAlignment={Alignment.Start} shouldAddGutters={true}>
+                        {galleryTokens[collection.address].map((galleryToken: GalleryToken, index: number): React.ReactElement => (
+                          <TokenCard
+                            key={index}
+                            token={galleryToken.collectionToken}
+                            tokenCustomization={galleryToken.tokenCustomization}
+                            tokenQuantity={galleryToken.quantity}
+                            target={getTokenTarget(galleryToken)}
+                          />
+                        ))}
+                      </EqualGrid>
+                    )}
+                  </React.Fragment>
                 )}
               </Stack>
             ) : selectedTabKey === TAB_KEY_BADGES ? (
@@ -357,7 +412,7 @@ export const AccountPage = (): React.ReactElement => {
                   </React.Fragment>
                 )}
               </Stack>
-            ) : (
+            ) : /* selectedTabKey === TAB_KEY_OTHER */ (
               <Stack direction={Direction.Vertical} childAlignment={Alignment.Center} isScrollableVertically={false} isFullHeight={true} isFullWidth={true} shouldAddGutters={true}>
                 { ownedCollections === undefined ? (
                   <LoadingSpinner />
