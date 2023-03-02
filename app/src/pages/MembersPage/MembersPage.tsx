@@ -1,124 +1,22 @@
 import React from 'react';
 
-import { dateToRelativeString, dateToString, getClassName, RecursivePartial } from '@kibalabs/core';
+import { dateToRelativeString, dateToString, RecursivePartial } from '@kibalabs/core';
 import { SubRouterOutlet, useIntegerUrlQueryState, useLocation, useNavigator, useUrlQueryState } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, Head, IBoxTheme, IconButton, ITextTheme, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, themeToCss, ThemeType, useBuiltTheme, useColors, useResponsiveScreenSize } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, Head, IconButton, KibaIcon, LinkBase, List, LoadingSpinner, OptionSelect, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, Text, TextAlignment, useColors, useResponsiveScreenSize } from '@kibalabs/ui-react';
 import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import ReactTooltip from 'react-tooltip';
-import styled from 'styled-components';
 
 import { Collection, CollectionToken, GalleryUser, GalleryUserBadge, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
 import { NumberPager } from '../../components/NumberPager';
+import { Table } from '../../components/Table';
+import { ITableCellTheme, TableCell } from '../../components/TableCell';
+import { TableRow } from '../../components/TableRow';
 import { useGlobals } from '../../globalsContext';
 import { getBadges, getChain, getDefaultMembersSort, IBadge, isBadgesEnabled } from '../../util';
 
-
-interface ITableTheme extends ThemeType {
-  background: IBoxTheme;
-  // NOTE(krishan711): this could have header, body, row background fields too
-}
-
-interface IStyledTableProps {
-  $theme: ITableTheme;
-}
-
-const StyledTable = styled.table<IStyledTableProps>`
-  ${(props: IStyledTableProps): string => themeToCss(props.$theme.background)};
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-`;
-
-export interface ITableCellThemeBase extends ThemeType {
-  text: ITextTheme;
-  background: IBoxTheme;
-}
-
-export interface ITableCellThemeState extends ThemeType {
-  default: ITableCellThemeBase;
-  hover: RecursivePartial<ITableCellThemeBase>;
-  press: RecursivePartial<ITableCellThemeBase>;
-  focus: RecursivePartial<ITableCellThemeBase>;
-}
-
-export interface ITableCellTheme extends ThemeType {
-  normal: ITableCellThemeState;
-  disabled: RecursivePartial<ITableCellThemeState>;
-}
-
-
-interface IStyledTableHeadProps {
-
-}
-
-const StyledTableHead = styled.thead<IStyledTableHeadProps>`
-
-`;
-
-interface IStyledTableHeadRowProps {
-
-}
-
-const StyledTableHeadRow = styled.tr<IStyledTableHeadRowProps>`
-`;
-
-interface IStyledTableHeadRowItemProps {
-  $theme: ITableCellTheme;
-}
-
-const StyledTableHeadRowItem = styled.td<IStyledTableHeadRowItemProps>`
-  ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.text)};
-  ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.background)};
-  /* TODO(krishan711): add the disabled styles */
-
-  &.clickable {
-    cursor: pointer;
-    &:hover {
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.hover?.text)};
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.hover?.background)};
-    }
-    &:active {
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.press?.text)};
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.press?.background)};
-    }
-    &:focus {
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.focus?.text)};
-      ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.focus?.background)};
-    }
-  }
-`;
-
-interface IStyledTableBodyProps {
-
-}
-
-const StyledTableBody = styled.tbody<IStyledTableBodyProps>`
-
-`;
-
-interface IStyledTableBodyRowProps {
-  backgroundColor?: string;
-}
-
-const StyledTableBodyRow = styled.tr<IStyledTableBodyRowProps>`
-  overflow: hidden;
-  ${(props: IStyledTableBodyRowProps): string => (props.backgroundColor ? `background-color: ${props.backgroundColor}` : '')};
-`;
-
-interface IStyledTableBodyRowItemProps {
-  $theme: ITableCellTheme;
-}
-
-const StyledTableBodyRowItem = styled.td<IStyledTableBodyRowItemProps>`
-  overflow: hidden;
-  vertical-align: middle;
-  ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.text)};
-  ${(props: IStyledTableHeadRowItemProps): string => themeToCss(props.$theme.normal.default.background)};
-  /* TODO(krishan711): add the clickable styles */
-`;
 
 interface IUserCellContentProps {
   row: GalleryUserRow;
@@ -239,11 +137,13 @@ const BadgesCellContent = (props: IBadgesCellContentProps): React.ReactElement =
 };
 
 interface IHeaderCellProps {
+  id?: string;
+  className?: string;
   headerId: string;
   title: string;
   isOrderable?: boolean;
   orderDirection?: -1 | 1 | null;
-  theme: ITableCellTheme;
+  theme?: RecursivePartial<ITableCellTheme>;
   onClicked?: (headerId: string) => void;
 }
 
@@ -253,17 +153,14 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
     throw Error('onClicked must be provided if isOrderable=true');
   }
 
-  const onClicked = (): void => {
-    if (props.onClicked) {
-      props.onClicked(props.headerId);
-    }
-  };
-
   return (
-    <StyledTableHeadRowItem
+    <TableCell
+      id={props.id}
+      className={props.className}
       $theme={props.theme}
-      className={getClassName(props.onClicked != null && 'clickable')}
-      onClick={onClicked}
+      variant='header'
+      headerId={props.headerId}
+      onClicked={props.onClicked}
     >
       <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
         <Text variant='bold' tag='span' alignment={TextAlignment.Left}>{props.title}</Text>
@@ -273,7 +170,7 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
           <KibaIcon variant='small' iconId={'ion-caret-forward'} _color={colors.textClear75} />
         )}
       </Stack>
-    </StyledTableHeadRowItem>
+    </TableCell>
   );
 };
 
@@ -384,9 +281,9 @@ export const DEFAULT_SORT = 'FOLLOWERCOUNT_DESC';
 
 export const MembersPageReal = (): React.ReactElement => {
   const screenSize = useResponsiveScreenSize();
-  const tableTheme = useBuiltTheme<ITableTheme>('tables');
-  const tableHeaderCellTheme = useBuiltTheme<ITableCellTheme>('tableCells', 'header');
-  const tableCellTheme = useBuiltTheme<ITableCellTheme>('tableCells');
+  // const tableTheme = useBuiltTheme<ITableTheme>('tables');
+  // const tableHeaderCellTheme = useBuiltTheme<ITableCellTheme>('tableCells', 'header');
+  // const tableCellTheme = useBuiltTheme<ITableCellTheme>('tableCells');
   const { collection, notdClient, projectId } = useGlobals();
   const defaultMembersSort = getDefaultMembersSort(projectId) || DEFAULT_SORT;
   const navigator = useNavigator();
@@ -540,48 +437,48 @@ export const MembersPageReal = (): React.ReactElement => {
                       ))}
                     </List>
                   ) : (
-                    <StyledTable $theme={tableTheme}>
-                      <StyledTableHead>
-                        <StyledTableHeadRow>
-                          <HeaderCell theme={tableHeaderCellTheme} headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
-                          <HeaderCell theme={tableHeaderCellTheme} headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
-                          <HeaderCell theme={tableHeaderCellTheme} headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                          <HeaderCell theme={tableHeaderCellTheme} headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                    <Table>
+                      <thead>
+                        <TableRow>
+                          <HeaderCell headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
+                          <HeaderCell headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
+                          <HeaderCell headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          <HeaderCell headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                           {collection.doesSupportErc1155 && (
-                            <HeaderCell theme={tableHeaderCellTheme} headerId='UNIQUETOKENCOUNT' title='Unique' isOrderable={true} orderDirection={orderField === 'UNIQUETOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                            <HeaderCell headerId='UNIQUETOKENCOUNT' title='Unique' isOrderable={true} orderDirection={orderField === 'UNIQUETOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                           )}
                           {isBadgesEnabled(projectId) && (
-                            <HeaderCell theme={tableHeaderCellTheme} headerId='BADGES' title='Badges' isOrderable={false} orderDirection={null} />
+                            <HeaderCell headerId='BADGES' title='Badges' isOrderable={false} orderDirection={null} />
                           )}
-                          <HeaderCell theme={tableHeaderCellTheme} headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                        </StyledTableHeadRow>
-                      </StyledTableHead>
-                      <StyledTableBody>
+                          <HeaderCell headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                        </TableRow>
+                      </thead>
+                      <tbody>
                         {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
-                          <StyledTableBodyRow key={`${index}-${row.galleryUser.address}`} backgroundColor={(pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined}>
-                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                          <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
+                            <TableCell>
                               <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
-                            </StyledTableBodyRowItem>
-                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                            </TableCell>
+                            <TableCell>
                               <UserCellContent row={row} />
-                            </StyledTableBodyRowItem>
-                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                            </TableCell>
+                            <TableCell>
                               <JoinedCellContent row={row} />
-                            </StyledTableBodyRowItem>
-                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                            </TableCell>
+                            <TableCell>
                               <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
-                            </StyledTableBodyRowItem>
+                            </TableCell>
                             {collection.doesSupportErc1155 && (
-                              <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              <TableCell>
                                 <Text alignment={TextAlignment.Center}>{row.galleryUser.uniqueOwnedTokenCount}</Text>
-                              </StyledTableBodyRowItem>
+                              </TableCell>
                             )}
                             {isBadgesEnabled(projectId) && (
-                              <StyledTableBodyRowItem $theme={tableCellTheme}>
+                              <TableCell>
                                 <BadgesCellContent projectId={projectId} row={row} />
-                              </StyledTableBodyRowItem>
+                              </TableCell>
                             )}
-                            <StyledTableBodyRowItem $theme={tableCellTheme}>
+                            <TableCell>
                               {row.galleryUser.twitterProfile != null ? (
                                 <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
                                   <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
@@ -594,11 +491,11 @@ export const MembersPageReal = (): React.ReactElement => {
                               ) : (
                                 <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
                               )}
-                            </StyledTableBodyRowItem>
-                          </StyledTableBodyRow>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </StyledTableBody>
-                    </StyledTable>
+                      </tbody>
+                    </Table>
                   )}
                 </Box>
               </Stack.Item>

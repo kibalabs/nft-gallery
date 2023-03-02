@@ -3,7 +3,7 @@ import React from 'react';
 import { LocalStorageClient, Requester } from '@kibalabs/core';
 import { IRoute, MockStorage, Router, SubRouter, useFavicon, useInitialization } from '@kibalabs/core-react';
 import { EveryviewTracker } from '@kibalabs/everyview-tracker';
-import { Alignment, BackgroundView, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
+import { Alignment, BackgroundView, ComponentDefinition, Direction, Head, IHeadRootProviderProps, KibaApp, ResponsiveHidingView, ScreenSize, Stack } from '@kibalabs/ui-react';
 import { Web3AccountControlProvider } from '@kibalabs/web3-react';
 import { ToastContainer } from 'react-toastify';
 
@@ -12,6 +12,10 @@ import { NotdClient } from './client/client';
 import { FloatingView } from './components/FloatingView';
 import { Footer } from './components/Footer';
 import { NavBar } from './components/NavBar';
+import { NumberPagerItem, NumberPagerItemThemedStyle } from './components/NumberPager';
+import { Table, TableThemedStyle } from './components/Table';
+import { TableCell, TableCellThemedStyle } from './components/TableCell';
+import { TableRow, TableRowThemedStyle } from './components/TableRow';
 import { GlobalsProvider, IGlobals } from './globalsContext';
 import { IGalleryPageData, PageDataProvider } from './PageDataContext';
 import { AccountPage } from './pages/AccountPage';
@@ -83,6 +87,13 @@ export const routes: IRoute<IGlobals>[] = [
     subRoutes: [
       { path: 'tokens/:tokenId', page: TokenPage },
     ] },
+];
+
+export const EXTRA_COMPONENT_DEFINITIONS: ComponentDefinition[] = [
+  { component: NumberPagerItem, themeMap: theme.numberPagerItems, themeCssFunction: NumberPagerItemThemedStyle },
+  { component: Table, themeMap: theme.tables, themeCssFunction: TableThemedStyle },
+  { component: TableRow, themeMap: theme.tableRows, themeCssFunction: TableRowThemedStyle },
+  { component: TableCell, themeMap: theme.tableCells, themeCssFunction: TableCellThemedStyle },
 ];
 
 export interface IAppProps extends IHeadRootProviderProps {
@@ -158,7 +169,7 @@ export const App = (props: IAppProps): React.ReactElement => {
   };
 
   return (
-    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={false}>
+    <KibaApp theme={theme} setHead={props.setHead} isFullPageApp={false} extraComponentDefinitions={EXTRA_COMPONENT_DEFINITIONS}>
       <Head headId='app'>
         <title>Token Gallery</title>
       </Head>

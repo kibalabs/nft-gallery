@@ -1,13 +1,14 @@
 import { RecursivePartial } from '@kibalabs/core';
-import { buildTheme, IBoxTheme, ITextTheme, ITheme, mergeTheme, mergeThemePartial } from '@kibalabs/ui-react';
+import { buildTheme, IBoxTheme, ITextTheme, ITheme, mergeTheme, mergeThemePartial, ThemeMap } from '@kibalabs/ui-react';
 
+import { INumberPagerItemTheme } from './components/NumberPager';
+import { ITableTheme } from './components/Table';
+import { ITableCellTheme } from './components/TableCell';
+import { ITableRowTheme } from './components/TableRow';
 
-// NOTE(krishan711): the ordering here is wrong cos buildOverrideTheme uses baseTheme many times
-// but that doesn't take into account anything changed in this function.
-export const buildProjectTheme = (projectId: string): ITheme => {
-  const overrideTheme = buildOverrideTheme();
+export const getProjectTheme = (projectId: string): RecursivePartial<ITheme> => {
   if (projectId === 'sprites') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       colors: {
         brandPrimary: '#ffffff',
         brandSecondary: 'rgb(89,190,144)',
@@ -61,10 +62,10 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'background-color': '$colors.spriteGreenClear20',
         },
       },
-    }));
+    };
   }
   if (projectId === 'pepes') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       colors: {
         background: '#606455',
       },
@@ -84,10 +85,10 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'font-weight': '500',
         },
       },
-    }));
+    };
   }
   if (projectId === 'goblintown') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       colors: {
         brandPrimary: 'rgb(245, 91, 32)',
         brandSecondary: 'rgb(158, 143, 160)',
@@ -108,17 +109,17 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'font-size': '0.8em',
         },
       },
-    }));
+    };
   }
   if (projectId === 'mdtp') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       dimensions: {
         borderRadius: '1px',
       },
-    }));
+    };
   }
   if (projectId === 'rudeboys') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       dimensions: {
         borderRadius: '1rem',
       },
@@ -132,22 +133,23 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           'font-weight': '500',
         },
       },
-    }));
+    };
   }
   if (projectId === 'creepz') {
-    return buildTheme(mergeThemePartial(overrideTheme, {
+    return {
       colors: {
         brandPrimary: '#ffffff',
         brandSecondary: 'rgb(89,190,144)',
       },
-    }));
+    };
   }
-  return buildTheme(overrideTheme);
+  return {};
 };
 
-export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
-  const baseTheme = buildTheme();
-  const theme: RecursivePartial<ITheme> = {
+export const buildProjectTheme = (projectId: string): ITheme => {
+  const projectTheme = getProjectTheme(projectId);
+  const baseTheme = buildTheme(projectTheme);
+  const theme: ITheme = buildTheme(mergeThemePartial({
     colors: {
       brandPrimary: '#B3C7F8',
       brandSecondary: '#2D86A3',
@@ -433,6 +435,21 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
+    collapsibleBoxes: {
+      default: {
+        normal: {
+          default: {
+            background: {
+              'border-color': '$colors.inputWrapperBorder',
+              'border-width': '2px',
+            },
+            headerBackground: {
+              'background-color': '$colors.inputWrapperBackground',
+            },
+          },
+        },
+      },
+    },
     titledCollapsibleBoxes: {
       default: {
         normal: {
@@ -524,15 +541,16 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
-  };
-  theme.tables = {
+  }, projectTheme));
+  const tableThemes: ThemeMap<ITableTheme> = mergeTheme({
     default: {
       background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
         'border-width': '0',
       }),
     },
-  };
-  theme.tableCells = {
+  }, projectTheme.tables);
+  theme.tables = tableThemes;
+  const tableCellThemes: ThemeMap<ITableCellTheme> = mergeTheme({
     default: {
       normal: {
         default: {
@@ -593,8 +611,72 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
-  };
-  theme.numberPagerItems = {
+  }, projectTheme.tableCells);
+  theme.tableCells = tableCellThemes;
+  const tableRowThemes: ThemeMap<ITableRowTheme> = mergeTheme({
+    default: {
+      normal: {
+        default: {
+          background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+            'border-radius': '0',
+            'border-width': '1px 0px',
+            'border-style': 'solid',
+            'border-color': 'rgba(255, 255, 255, 0.2)',
+            'background-color': 'rgba(255, 255, 255, 0)',
+            padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+          }),
+          text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+          }),
+        },
+        hover: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.2)',
+          },
+        },
+        press: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.3)',
+          },
+        },
+        focus: {
+          background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+          }),
+        },
+      },
+    },
+    header: {
+      normal: {
+        default: {
+          background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
+            'border-radius': '0',
+            'border-width': '1px 0px',
+            'border-style': 'solid',
+            'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.2)',
+            'background-color': 'rgba(255, 255, 255, 0.1)',
+            padding: `${baseTheme.dimensions.padding} ${baseTheme.dimensions.paddingWide}`,
+          }),
+          text: mergeTheme<ITextTheme>(baseTheme.texts.default, {
+          }),
+        },
+        hover: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.2)',
+          },
+        },
+        press: {
+          background: {
+            'background-color': 'rgba(255, 255, 255, 0.3)',
+          },
+        },
+        focus: {
+          background: mergeThemePartial<IBoxTheme>(baseTheme.boxes.focussable, {
+          }),
+        },
+      },
+    },
+  }, projectTheme.tableRows);
+  theme.tableRows = tableRowThemes;
+  const numberPagerItemThemes: ThemeMap<INumberPagerItemTheme> = mergeTheme({
     default: {
       normal: {
         default: {
@@ -651,6 +733,7 @@ export const buildOverrideTheme = (): RecursivePartial<ITheme> => {
         },
       },
     },
-  };
+  }, projectTheme.numberPagerItems);
+  theme.numberPagerItems = numberPagerItemThemes;
   return theme;
 };

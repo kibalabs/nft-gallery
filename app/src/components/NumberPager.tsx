@@ -1,9 +1,59 @@
 import React from 'react';
 
 import { getClassName, RecursivePartial } from '@kibalabs/core';
-import { defaultComponentProps, IBoxTheme, IComponentProps, ITextTheme, KibaIcon, themeToCss, ThemeType, useBuiltTheme } from '@kibalabs/ui-react';
+import { defaultComponentProps, IBoxTheme, IComponentProps, IMoleculeProps, ITextTheme, KibaIcon, themeToCss, ThemeType } from '@kibalabs/ui-react';
 import styled from 'styled-components';
+import { ISingleAnyChildProps } from '@kibalabs/core-react';
 
+export const NumberPagerItemThemedStyle = (theme: RecursivePartial<INumberPagerItemTheme>): string => `
+  ${themeToCss(theme.normal?.default?.background)};
+  ${themeToCss(theme.normal?.default?.text)};
+
+  &:hover {
+    ${themeToCss(theme.normal?.hover?.background)};
+    ${themeToCss(theme.normal?.hover?.text)};
+  }
+  &:active {
+    ${themeToCss(theme.normal?.press?.background)};
+    ${themeToCss(theme.normal?.press?.text)};
+  }
+  &:focus {
+    ${themeToCss(theme.normal?.focus?.background)};
+    ${themeToCss(theme.normal?.focus?.text)};
+  }
+  &.active {
+    ${themeToCss(theme.active?.default?.background)};
+    ${themeToCss(theme.active?.default?.text)};
+    &:hover {
+      ${themeToCss(theme.active?.hover?.background)};
+      ${themeToCss(theme.active?.hover?.text)};
+    }
+    &:active {
+      ${themeToCss(theme.active?.press?.background)};
+      ${themeToCss(theme.active?.press?.text)};
+    }
+    &:focus {
+      ${themeToCss(theme.active?.focus?.background)};
+      ${themeToCss(theme.active?.focus?.text)};
+    }
+  }
+  &.disabled {
+    ${themeToCss(theme.disabled?.default?.background)};
+    ${themeToCss(theme.disabled?.default?.text)};
+    &:hover {
+      ${themeToCss(theme.disabled?.hover?.background)};
+      ${themeToCss(theme.disabled?.hover?.text)};
+    }
+    &:active {
+      ${themeToCss(theme.disabled?.press?.background)};
+      ${themeToCss(theme.disabled?.press?.text)};
+    }
+    &:focus {
+      ${themeToCss(theme.disabled?.focus?.background)};
+      ${themeToCss(theme.disabled?.focus?.text)};
+    }
+  }
+`;
 
 export interface INumberPagerItemThemeBase extends ThemeType {
   background: IBoxTheme;
@@ -24,20 +74,10 @@ export interface INumberPagerItemTheme extends ThemeType {
 }
 
 interface IStyledNumberPagerItemProps {
-  $theme: INumberPagerItemTheme;
+  $theme?: RecursivePartial<INumberPagerItemTheme>;
 }
 
-const StyledNumberPager = styled.ul`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  list-style-type: none;
-  margin: 0;
-`;
-
 const StyledNumberPagerItem = styled.li<IStyledNumberPagerItemProps>`
-  ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.default.background)};
-  ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.default.text)};
   cursor: pointer;
   outline: none;
   transition-duration: 0.3s;
@@ -47,68 +87,51 @@ const StyledNumberPagerItem = styled.li<IStyledNumberPagerItemProps>`
   align-items: center;
   justify-content: center;
 
-  /* padding: 0 12px;
-  height: 32px;
-  text-align: center;
-  margin: auto 4px;
-  color: rgba(0, 0, 0, 0.87);
-  display: flex;
-  box-sizing: border-box;
-  align-items: center;
-  letter-spacing: 0.01071em; */
-
   &::before {
     content: none;
   }
-
-  &:hover {
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.hover?.background)};
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.hover?.text)};
-  }
-  &:active {
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.press?.background)};
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.press?.text)};
-  }
-  &:focus {
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.focus?.background)};
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.normal.focus?.text)};
-  }
-  &.active {
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.default?.background)};
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.default?.text)};
-    &:hover {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.hover?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.hover?.text)};
-    }
-    &:active {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.press?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.press?.text)};
-    }
-    &:focus {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.focus?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.active?.focus?.text)};
-    }
-  }
   &.disabled {
     pointer-events: none;
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.default?.background)};
-    ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.default?.text)};
-    &:hover {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.hover?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.hover?.text)};
-    }
-    &:active {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.press?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.press?.text)};
-    }
-    &:focus {
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.focus?.background)};
-      ${(props: IStyledNumberPagerItemProps): string => themeToCss(props.$theme.disabled?.focus?.text)};
-    }
+  }
+
+  && {
+    ${(props: IStyledNumberPagerItemProps): string => (props.$theme ? NumberPagerItemThemedStyle(props.$theme) : '')};
   }
 `;
 
-interface INumberPagerProps extends IComponentProps<INumberPagerItemTheme> {
+interface INumberPagerItemProps extends IComponentProps<INumberPagerItemTheme>, ISingleAnyChildProps {
+  isActive?: boolean;
+  isDisabled?: boolean;
+  onClicked: () => void;
+}
+
+export const NumberPagerItem = (props: INumberPagerItemProps): React.ReactElement => {
+  return (
+    <StyledNumberPagerItem
+      id={props.id}
+      className={getClassName(props.className, NumberPagerItem.displayName, props.isDisabled && 'disabled', props.isActive && 'active')}
+      $theme={props.theme}
+      onClick={props.onClicked}
+    >
+      {props.children}
+    </StyledNumberPagerItem>
+  );
+};
+NumberPagerItem.displayName = 'KibaNumberPagerItem';
+
+const StyledNumberPager = styled.ul`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+`;
+
+interface INumberPagerTheme {
+  itemTheme: INumberPagerItemTheme;
+}
+
+interface INumberPagerProps extends IMoleculeProps<INumberPagerTheme> {
   pageCount: number;
   activePage: number;
   siblingPageCount?: number;
@@ -122,41 +145,6 @@ const createRange = (start: number, end: number): number[] => {
 };
 
 export const NumberPager = (props: INumberPagerProps): React.ReactElement => {
-  const itemTheme = useBuiltTheme('numberPagerItems', props.variant, props.theme);
-  // if (props.pageCount == null && props.pageCountResponsive?.base == null) {
-  //   throw new Error(`One of {pageCount, pageCountResponsive.base} must be passed to ${NumberPager.displayName}`);
-  // }
-
-  // const pageCount = props.pageCountResponsive?.base || props.pageCount || 12;
-  // const pageCountSmall = props.pageCountResponsive?.small || pageCount;
-  // const pageCountMedium = props.pageCountResponsive?.medium || pageCountSmall;
-  // const pageCountLarge = props.pageCountResponsive?.large || pageCountMedium;
-  // const pageCountExtraLarge = props.pageCountResponsive?.extraLarge || pageCountLarge;
-  // const pageCounts = [pageCount, pageCountSmall, pageCountMedium, pageCountLarge, pageCountExtraLarge];
-  // const maxPageCount = Math.max(...(pageCounts.filter((candidatePageCount?: number): boolean => candidatePageCount !== undefined)));
-
-  // const onPageClicked = (pageIndex: number): void => {
-  //   if (props.onPageClicked) {
-  //     props.onPageClicked(pageIndex);
-  //   }
-  // };
-
-  // const getHiddenAboveSize = (index: number): ScreenSize | undefined => {
-  //   if (index >= pageCountSmall) {
-  //     return ScreenSize.Small;
-  //   }
-  //   if (index >= pageCountMedium) {
-  //     return ScreenSize.Medium;
-  //   }
-  //   if (index >= pageCountLarge) {
-  //     return ScreenSize.Large;
-  //   }
-  //   if (index >= pageCountExtraLarge) {
-  //     return ScreenSize.ExtraLarge;
-  //   }
-  //   return undefined;
-  // };
-
   const DOTS = '...';
   const siblingPageCount = props.siblingPageCount ?? 5;
   const paginationRange = React.useMemo((): (string | number)[] => {
@@ -220,28 +208,28 @@ export const NumberPager = (props: INumberPagerProps): React.ReactElement => {
       id={props.id}
       className={getClassName(NumberPager.displayName, props.className)}
     >
-      <StyledNumberPagerItem $theme={itemTheme} className={getClassName(props.activePage === 0 && 'disabled')} onClick={onPreviousClicked}>
+      <NumberPagerItem theme={props.theme?.itemTheme} isDisabled={props.activePage === 0} onClicked={onPreviousClicked}>
         <KibaIcon variant='small' iconId='ion-caret-back' />
-      </StyledNumberPagerItem>
-      {paginationRange.map((page: string | number): React.ReactElement => (
-        <React.Fragment key={String(page)}>
+      </NumberPagerItem>
+      {paginationRange.map((page: string | number, index: number): React.ReactElement => (
+        <React.Fragment key={`${page}-${index}`}>
           { page === DOTS ? (
-            <StyledNumberPagerItem $theme={itemTheme} className='dots'>&#8230;</StyledNumberPagerItem>
+            <NumberPagerItem theme={props.theme?.itemTheme}>&#8230;</NumberPagerItem>
           ) : (
-            <StyledNumberPagerItem $theme={itemTheme} className={getClassName(props.activePage === page && 'active')} onClick={(): void => onPageClicked(page as number)}>
+            <NumberPagerItem theme={props.theme?.itemTheme} isActive={props.activePage === page} onClicked={(): void => onPageClicked(page as number)}>
               {(page as number) + 1}
-            </StyledNumberPagerItem>
+            </NumberPagerItem>
           )}
         </React.Fragment>
       ))}
-      <StyledNumberPagerItem $theme={itemTheme} className={getClassName(props.activePage === props.pageCount - 1 && 'disabled')} onClick={onNextClicked}>
+      <NumberPagerItem theme={props.theme?.itemTheme} isDisabled={props.activePage === props.pageCount - 1} onClicked={onNextClicked}>
         <KibaIcon variant='small' iconId='ion-caret-forward' />
-      </StyledNumberPagerItem>
+      </NumberPagerItem>
     </StyledNumberPager>
   );
 };
 
-NumberPager.displayName = 'NumberPager';
+NumberPager.displayName = 'KibaNumberPager';
 NumberPager.defaultProps = {
   ...defaultComponentProps,
 };

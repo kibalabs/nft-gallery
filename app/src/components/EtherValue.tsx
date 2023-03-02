@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { getClassName } from '@kibalabs/core';
-import { Alignment, Direction, PaddingSize, Spacing, Stack, Text, useBuiltTheme } from '@kibalabs/ui-react';
+import { Alignment, Direction, PaddingSize, Spacing, Stack, Text, useTheme } from '@kibalabs/ui-react';
 
 interface IEtherValueProps {
   id?: string;
@@ -12,7 +12,9 @@ interface IEtherValueProps {
 
 export const EtherValue = (props: IEtherValueProps): React.ReactElement => {
   const textVariant = props.textVariant || 'default';
-  const textTheme = useBuiltTheme('texts', textVariant);
+  // const textTheme = useBuiltTheme('texts', textVariant);
+  const theme = useTheme();
+  const textTheme = theme.texts.default;
   const height = textTheme['line-height'] || '1em';
   return (
     <Stack

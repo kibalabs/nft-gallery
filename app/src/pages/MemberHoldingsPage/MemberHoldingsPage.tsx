@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { SubRouterOutlet, useLocation, useNavigator } from '@kibalabs/core-react';
-import { Alignment, ColorSettingView, ContainingView, Dialog, Direction, Head, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
+import { Alignment, CollapsibleBox, ColorSettingView, ContainingView, Dialog, Direction, Head, KibaIcon, LoadingSpinner, PaddingSize, Spacing, Stack, Text, TextAlignment } from '@kibalabs/ui-react';
 
 import { Collection, CollectionOverlap, CollectionOverlapSummary, SuperCollectionOverlap } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
-import { CollapsibleBox } from '../../components/CollapsibleBox';
 import { IpfsImage } from '../../components/IpfsImage';
 import { useGlobals } from '../../globalsContext';
 import { isSuperCollection } from '../../util';

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { getClassName } from '@kibalabs/core';
-import { Alignment, defaultMoleculeProps, Direction, HidingView, IBoxTheme, Image, InputFrame, KibaIcon, List, Stack, Text, themeToCss, useBuiltTheme } from '@kibalabs/ui-react';
+import { Alignment, Box, defaultMoleculeProps, Direction, HidingView, Image, InputFrame, KibaIcon, List, Stack, Text } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
 import { Collection } from '../client';
@@ -21,24 +21,11 @@ const CollectionView = (props: ICollectionViewProps): React.ReactElement => {
   );
 };
 
-interface IStyledOptionsContainer {
-  $theme: IBoxTheme;
-}
-
-const StyledOptionsContainer = styled.div<IStyledOptionsContainer>`
-  ${(props: IStyledOptionsContainer): string => themeToCss(props.$theme)};
-  position: absolute;
-  display: block;
-  z-index: 999;
-  width: 100%;
-`;
-
 const StyledCollectionSelect = styled.div`
   width: 100%;
   position: relative;
   display: block;
 `;
-
 
 export interface ICollectionSelectProps {
   id?: string;
@@ -50,7 +37,6 @@ export interface ICollectionSelectProps {
 
 export const CollectionSelect = (props: ICollectionSelectProps): React.ReactElement => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const optionsContainerTheme = useBuiltTheme<IBoxTheme>('boxes', 'card-unpadded-unmargined');
   const selectedCollection = props.collections.find((option: Collection): boolean => option.address === props.selectedCollectionAddress) as Collection;
 
   const onItemClicked = (itemKey: string) => {
@@ -88,7 +74,7 @@ export const CollectionSelect = (props: ICollectionSelectProps): React.ReactElem
         </Stack>
       </InputFrame>
       <HidingView isHidden={!isOpen}>
-        <StyledOptionsContainer $theme={optionsContainerTheme}>
+        <Box variant='card-unpadded-unmargined' isFullWidth={true} zIndex={999} position='absolute'>
           <List onItemClicked={onItemClicked} shouldShowDividers={true} isFullWidth={true}>
             {props.collections.map((option: Collection): React.ReactElement => (
               <List.Item
@@ -102,7 +88,7 @@ export const CollectionSelect = (props: ICollectionSelectProps): React.ReactElem
               </List.Item>
             ))}
           </List>
-        </StyledOptionsContainer>
+        </Box>
       </HidingView>
     </StyledCollectionSelect>
   );
