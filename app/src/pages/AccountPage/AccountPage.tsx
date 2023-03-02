@@ -2,13 +2,12 @@ import React from 'react';
 
 import { dateToString } from '@kibalabs/core';
 import { SubRouterOutlet, useLocation, useNavigator, useStringRouteParam } from '@kibalabs/core-react';
-import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, getVariant, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
+import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direction, EqualGrid, getVariant, Head, IconButton, KibaIcon, Link, List, LoadingSpinner, PaddingSize, ResponsiveHidingView, ScreenSize, Spacing, Stack, StatefulCollapsibleBox, TabBar, Text, TextAlignment, useColors } from '@kibalabs/ui-react';
 import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import ReactTooltip from 'react-tooltip';
 
 import { Collection, CollectionToken, GalleryOwnedCollection, GalleryToken, GalleryUser, GalleryUserBadge, TokenTransfer } from '../../client/resources';
 import { AccountView } from '../../components/AccountView';
-import { StatefulCollapsibleBox } from '../../components/CollapsibleBox';
 import { IpfsImage } from '../../components/IpfsImage';
 import { TokenCard } from '../../components/TokenCard';
 import { UserTokenTransferRow } from '../../components/TokenTransferRow';
