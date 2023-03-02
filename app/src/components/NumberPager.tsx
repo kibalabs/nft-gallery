@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { getClassName, RecursivePartial } from '@kibalabs/core';
+import { ISingleAnyChildProps } from '@kibalabs/core-react';
 import { defaultComponentProps, IBoxTheme, IComponentProps, IMoleculeProps, ITextTheme, KibaIcon, themeToCss, ThemeType } from '@kibalabs/ui-react';
 import styled from 'styled-components';
-import { ISingleAnyChildProps } from '@kibalabs/core-react';
 
 export const NumberPagerItemThemedStyle = (theme: RecursivePartial<INumberPagerItemTheme>): string => `
   ${themeToCss(theme.normal?.default?.background)};
@@ -102,7 +102,7 @@ const StyledNumberPagerItem = styled.li<IStyledNumberPagerItemProps>`
 interface INumberPagerItemProps extends IComponentProps<INumberPagerItemTheme>, ISingleAnyChildProps {
   isActive?: boolean;
   isDisabled?: boolean;
-  onClicked: () => void;
+  onClicked?: () => void;
 }
 
 export const NumberPagerItem = (props: INumberPagerItemProps): React.ReactElement => {

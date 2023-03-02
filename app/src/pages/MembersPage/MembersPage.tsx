@@ -157,7 +157,7 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
     <TableCell
       id={props.id}
       className={props.className}
-      $theme={props.theme}
+      theme={props.theme}
       variant='header'
       headerId={props.headerId}
       onClicked={props.onClicked}

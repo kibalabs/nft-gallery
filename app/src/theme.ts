@@ -542,16 +542,18 @@ export const buildProjectTheme = (projectId: string): ITheme => {
       },
     },
   }, projectTheme));
-  const tableThemes: ThemeMap<ITableTheme> = mergeTheme({
-    default: {
+  const tableThemes: ThemeMap<ITableTheme> = {
+    ...projectTheme.tables,
+    default: mergeTheme<ITableTheme>({
       background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
         'border-width': '0',
       }),
-    },
-  }, projectTheme.tables);
+    }, projectTheme.tables?.default as (ITableTheme | undefined)),
+  };
   theme.tables = tableThemes;
-  const tableCellThemes: ThemeMap<ITableCellTheme> = mergeTheme({
-    default: {
+  const tableCellThemes: ThemeMap<ITableCellTheme> = {
+    ...projectTheme.tableCells,
+    default: mergeTheme<ITableCellTheme>({
       normal: {
         default: {
           background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
@@ -580,8 +582,10 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           }),
         },
       },
-    },
-    header: {
+      disabled: {
+      },
+    }, projectTheme.tableCells?.default as (RecursivePartial<ITableCellTheme> | undefined)),
+    header: mergeThemePartial<ITableCellTheme>({
       normal: {
         default: {
           background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
@@ -610,11 +614,11 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           }),
         },
       },
-    },
-  }, projectTheme.tableCells);
+    }, projectTheme.tableCells?.header as (RecursivePartial<ITableCellTheme> | undefined)),
+  };
   theme.tableCells = tableCellThemes;
-  const tableRowThemes: ThemeMap<ITableRowTheme> = mergeTheme({
-    default: {
+  const tableRowThemes: ThemeMap<ITableRowTheme> = {
+    default: mergeTheme<ITableRowTheme>({
       normal: {
         default: {
           background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
@@ -643,8 +647,10 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           }),
         },
       },
-    },
-    header: {
+      disabled: {
+      },
+    }, projectTheme.tableRows?.default as (RecursivePartial<ITableRowTheme> | undefined)),
+    header: mergeThemePartial<ITableRowTheme>({
       normal: {
         default: {
           background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
@@ -673,11 +679,11 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           }),
         },
       },
-    },
-  }, projectTheme.tableRows);
+    }, projectTheme.tableRows?.header as (RecursivePartial<ITableRowTheme> | undefined)),
+  };
   theme.tableRows = tableRowThemes;
-  const numberPagerItemThemes: ThemeMap<INumberPagerItemTheme> = mergeTheme({
-    default: {
+  const numberPagerItemThemes: ThemeMap<INumberPagerItemTheme> = {
+    default: mergeTheme<INumberPagerItemTheme>({
       normal: {
         default: {
           background: mergeTheme(baseTheme.boxes.default, baseTheme.boxes.focusable, {
@@ -732,8 +738,8 @@ export const buildProjectTheme = (projectId: string): ITheme => {
           },
         },
       },
-    },
-  }, projectTheme.numberPagerItems);
+    }, projectTheme.numberPagerItems?.default as (RecursivePartial<INumberPagerItemTheme> | undefined)),
+  };
   theme.numberPagerItems = numberPagerItemThemes;
   return theme;
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { getClassName, IMultiAnyChildProps, RecursivePartial } from '@kibalabs/core';
+import { getClassName, RecursivePartial } from '@kibalabs/core';
+import { IMultiAnyChildProps } from '@kibalabs/core-react';
 import { defaultComponentProps, IBoxTheme, IComponentProps, ITextTheme, themeToCss, ThemeType } from '@kibalabs/ui-react';
 import styled from 'styled-components';
 
@@ -22,8 +23,8 @@ export interface ITableRowTheme extends ThemeType {
 }
 
 export const TableRowThemedStyle = (theme: RecursivePartial<ITableRowTheme>): string => `
-  ${themeToCss(theme.normal?.default.text)};
-  ${themeToCss(theme.normal?.default.background)};
+  ${themeToCss(theme.normal?.default?.text)};
+  ${themeToCss(theme.normal?.default?.background)};
 
   &.clickable {
     &:hover {

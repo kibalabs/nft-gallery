@@ -23,8 +23,8 @@ export interface ITableCellTheme extends ThemeType {
 }
 
 export const TableCellThemedStyle = (theme: RecursivePartial<ITableCellTheme>): string => `
-  ${themeToCss(theme.normal?.default.text)};
-  ${themeToCss(theme.normal?.default.background)};
+  ${themeToCss(theme.normal?.default?.text)};
+  ${themeToCss(theme.normal?.default?.background)};
 
   &.clickable {
     &:hover {
@@ -60,13 +60,13 @@ export const StyledTableCell = styled.td<IStyledTableCellProps>`
 `;
 
 export interface ITableCellProps extends IComponentProps<ITableCellTheme>, IMultiAnyChildProps {
-  headerId: string;
+  headerId?: string;
   onClicked?: (headerId: string) => void;
 }
 
 export const TableCell = (props: ITableCellProps): React.ReactElement => {
   const onClicked = (): void => {
-    if (props.onClicked) {
+    if (props.onClicked && props.headerId) {
       props.onClicked(props.headerId);
     }
   };
