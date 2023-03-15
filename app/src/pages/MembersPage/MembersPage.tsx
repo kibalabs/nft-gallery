@@ -74,7 +74,7 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
   const maxTokenCount = props.maxTokenCount ?? 5;
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-      <Text alignment={TextAlignment.Center}>{props.row.galleryUser.ownedTokenCount}</Text>
+      <Text alignment={TextAlignment.Center}>{props.row.ownedTokenCount}</Text>
       <Spacing variant={PaddingSize.Default} />
       {!props.shouldHideTokens && (
         <React.Fragment>
@@ -210,11 +210,11 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
         <Box width='3em'>
           <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
             <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
-              <Text>{props.row.galleryUser.ownedTokenCount}</Text>
+              <Text>{props.row.ownedTokenCount}</Text>
               {props.collection.doesSupportErc1155 && (
                 <React.Fragment>
                   <Spacing variant={PaddingSize.Narrow} />
-                  <Text>{`(${props.row.galleryUser.uniqueOwnedTokenCount})`}</Text>
+                  <Text>{`(${props.row.uniqueOwnedTokenCount})`}</Text>
                 </React.Fragment>
               )}
               <Spacing variant={PaddingSize.Narrow} />
@@ -266,7 +266,9 @@ export const MembersPage = (): React.ReactElement => {
 };
 
 const DUMMY_ROW = new GalleryUserRow(
-  new GalleryUser('0x0000000000000000000000000000000000000000', '', null, null, 0, 0, new Date()),
+  new GalleryUser('0x0000000000000000000000000000000000000000', '', null, null, new Date()),
+  0,
+  0,
   [
     new CollectionToken('', '', '', '', null, null, null, []),
     new CollectionToken('', '', '', '', null, null, null, []),
@@ -470,7 +472,7 @@ export const MembersPageReal = (): React.ReactElement => {
                             </TableCell>
                             {collection.doesSupportErc1155 && (
                               <TableCell>
-                                <Text alignment={TextAlignment.Center}>{row.galleryUser.uniqueOwnedTokenCount}</Text>
+                                <Text alignment={TextAlignment.Center}>{row.uniqueOwnedTokenCount}</Text>
                               </TableCell>
                             )}
                             {isBadgesEnabled(projectId) && (
