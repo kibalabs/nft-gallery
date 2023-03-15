@@ -333,8 +333,6 @@ export class GalleryUser extends ResponseData {
     readonly registryAddress: string,
     readonly userProfile: UserProfile | null,
     readonly twitterProfile: TwitterProfile | null,
-    readonly ownedTokenCount: number,
-    readonly uniqueOwnedTokenCount: number,
     readonly joinDate: Date | null,
   ) { super(); }
 
@@ -344,8 +342,6 @@ export class GalleryUser extends ResponseData {
       String(obj.registryAddress),
       obj.userProfile ? UserProfile.fromObject(obj.userProfile as Record<string, unknown>) : null,
       obj.twitterProfile ? TwitterProfile.fromObject(obj.twitterProfile as Record<string, unknown>) : null,
-      Number(obj.ownedTokenCount),
-      Number(obj.uniqueOwnedTokenCount),
       obj.joinDate ? dateFromString(obj.joinDate as string) : null,
     );
   };
@@ -355,6 +351,8 @@ export class GalleryUser extends ResponseData {
 export class GalleryUserRow extends ResponseData {
   public constructor(
     readonly galleryUser: GalleryUser,
+    readonly ownedTokenCount: number,
+    readonly uniqueOwnedTokenCount: number,
     readonly chosenOwnedTokens: CollectionToken[],
     readonly galleryUserBadges: GalleryUserBadge[],
   ) { super(); }
@@ -362,6 +360,8 @@ export class GalleryUserRow extends ResponseData {
   public static fromObject = (obj: Record<string, unknown>): GalleryUserRow => {
     return new GalleryUserRow(
       GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
+      Number(obj.ownedTokenCount),
+      Number(obj.uniqueOwnedTokenCount),
       (obj.chosenOwnedTokens as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj)),
       (obj.galleryUserBadges as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): GalleryUserBadge => GalleryUserBadge.fromObject(innerObj)),
     );
