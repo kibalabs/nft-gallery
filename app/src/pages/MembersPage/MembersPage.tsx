@@ -72,6 +72,7 @@ interface IOwnedTokensCellContentProps {
   chosenOwnedTokens: CollectionToken[];
   shouldHideTokens?: boolean;
   maxTokenCount?: number;
+  isPrimaryCollection: boolean;
 }
 
 const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.ReactElement => {
@@ -84,7 +85,7 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
         <React.Fragment>
           {props.chosenOwnedTokens.slice(0, maxTokenCount).map((token: CollectionToken): React.ReactElement => (
             <MarginView key={token.tokenId} marginLeft='inverseWide'>
-              <LinkBase target={`/members/tokens/${token.tokenId}`}>
+              <LinkBase target={props.isPrimaryCollection ? `/members/tokens/${token.tokenId}` : `/members/tokens/${token.tokenId}?collection=${token.registryAddress}`}>
                 <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
                   <IpfsImage variant='unrounded' isLazyLoadable={true} source={(token.resizableImageUrl ?? token.imageUrl ?? '')} alternativeText={token.name} width='1.4em' height='1.4em' />
                 </Box>
@@ -448,15 +449,15 @@ export const MembersPageReal = (): React.ReactElement => {
         {projectId === 'creepz' ? (
           <React.Fragment>
             <TableCell>
-              <OwnedTokensCellContent ownedTokenCount={primaryOwnedCount} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
+              <OwnedTokensCellContent isPrimaryCollection={true} ownedTokenCount={primaryOwnedCount} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
             </TableCell>
             <TableCell>
-              <OwnedTokensCellContent ownedTokenCount={secondaryOwnedCount} chosenOwnedTokens={secondaryChosenTokens} maxTokenCount={3} />
+              <OwnedTokensCellContent isPrimaryCollection={false} ownedTokenCount={secondaryOwnedCount} chosenOwnedTokens={secondaryChosenTokens} maxTokenCount={3} />
             </TableCell>
           </React.Fragment>
         ) : (
           <TableCell>
-            <OwnedTokensCellContent ownedTokenCount={row.ownedTokenCountMap[collection.address] || 0} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
+            <OwnedTokensCellContent isPrimaryCollection={true} ownedTokenCount={row.ownedTokenCountMap[collection.address] || 0} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
           </TableCell>
         )}
         {collection?.doesSupportErc1155 && (
