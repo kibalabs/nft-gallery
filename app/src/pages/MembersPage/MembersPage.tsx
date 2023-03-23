@@ -424,7 +424,7 @@ export const MembersPageReal = (): React.ReactElement => {
       ] : []),
       {headerId: 'FOLLOWERCOUNT', title: 'Followers', isOrderable: true},
     ];
-  }, [projectConfig, isBadgesEnabled, orderField, orderDirection]);
+  }, [projectConfig, isBadgesEnabled, orderField, orderDirection, collection]);
 
   const getRowElement = (row: GallerySuperCollectionUserRow, index: number): React.ReactElement => {
     if (!collection?.address) {
