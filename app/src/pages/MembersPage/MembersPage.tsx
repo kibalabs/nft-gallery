@@ -337,9 +337,9 @@ export const MembersPageReal = (): React.ReactElement => {
         setRows(retrievedGalleryUserRows.items.map((row: GalleryUserRow): GallerySuperCollectionUserRow => {
           const convertedRow = new GallerySuperCollectionUserRow(
             row.galleryUser,
-            {[collection.address]: row.ownedTokenCount},
-            {[collection.address]: row.uniqueOwnedTokenCount},
-            {[collection.address]: row.chosenOwnedTokens},
+            { [collection.address]: row.ownedTokenCount },
+            { [collection.address]: row.uniqueOwnedTokenCount },
+            { [collection.address]: row.chosenOwnedTokens },
             row.galleryUserBadges,
           );
           return convertedRow;
@@ -350,7 +350,7 @@ export const MembersPageReal = (): React.ReactElement => {
         setRows(null);
       });
     }
-  }, [collection?.address, notdClient, order, page, pageSize]);
+  }, [collection?.address, projectId, notdClient, order, page, pageSize]);
 
   React.useEffect((): void => {
     updateRows();
@@ -407,29 +407,29 @@ export const MembersPageReal = (): React.ReactElement => {
   const projectConfig = getProjectConfig(projectId);
   const columns: IHeaderCellProps[] = React.useMemo((): IHeaderCellProps[] => {
     return [
-      {headerId: 'INDEX', title: '#', isOrderable: false},
-      {headerId: 'MEMBER', title: 'Member', isOrderable: false},
-      {headerId: 'JOINDATE', title: 'Joined', isOrderable: true},
+      { headerId: 'INDEX', title: '#', isOrderable: false },
+      { headerId: 'MEMBER', title: 'Member', isOrderable: false },
+      { headerId: 'JOINDATE', title: 'Joined', isOrderable: true },
       ...(projectId === 'creepz' ? [
-        {headerId: 'TOKENCOUNT', title: 'Creepz', isOrderable: true},
-        {headerId: 'OTHERTOKENCOUNT', title: 'Army', isOrderable: false},
+        { headerId: 'TOKENCOUNT', title: 'Creepz', isOrderable: true },
+        { headerId: 'OTHERTOKENCOUNT', title: 'Army', isOrderable: false },
       ] : [
-        {headerId: 'TOKENCOUNT', title: 'Tokens', isOrderable: true},
+        { headerId: 'TOKENCOUNT', title: 'Tokens', isOrderable: true },
       ]),
       ...(collection?.doesSupportErc1155 ? [
-        {headerId: 'UNIQUETOKENCOUNT', title: 'Unique', isOrderable: true},
+        { headerId: 'UNIQUETOKENCOUNT', title: 'Unique', isOrderable: true },
       ] : []),
       ...(projectConfig.isBadgesEnabled ? [
-        {headerId: 'BADGES', title: 'Badges', isOrderable: false}
+        { headerId: 'BADGES', title: 'Badges', isOrderable: false },
       ] : []),
-      {headerId: 'FOLLOWERCOUNT', title: 'Followers', isOrderable: true},
+      { headerId: 'FOLLOWERCOUNT', title: 'Followers', isOrderable: true },
     ];
-  }, [projectConfig, isBadgesEnabled, orderField, orderDirection, collection]);
+  }, [projectConfig, projectId, collection]);
 
   const getRowElement = (row: GallerySuperCollectionUserRow, index: number): React.ReactElement => {
     if (!collection?.address) {
       return (
-        <React.Fragment></React.Fragment>
+        <React.Fragment />
       );
     }
     // NOTE(krishan711): this is creepz sepcific
@@ -497,7 +497,7 @@ export const MembersPageReal = (): React.ReactElement => {
         </TableCell>
       </React.Fragment>
     );
-  }
+  };
 
   return (
     <React.Fragment>
@@ -560,7 +560,7 @@ export const MembersPageReal = (): React.ReactElement => {
                 <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
                   {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
                     <List shouldShowDividers={true}>
-                      {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
+                      {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
                         <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
                           <MemberRowContent projectId={projectId} row={row} collection={collection} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                         </List.Item>
@@ -594,11 +594,11 @@ export const MembersPageReal = (): React.ReactElement => {
                         </TableRow>
                       </thead>
                       <tbody>
-                      {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
-                        <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
-                          {getRowElement(row, index)}
-                        </TableRow>
-                      ))}
+                        {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
+                          <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
+                            {getRowElement(row, index)}
+                          </TableRow>
+                        ))}
                       </tbody>
                     </Table>
                   )}
