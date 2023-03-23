@@ -34,6 +34,7 @@ export interface IProjectConfig {
   isBadgesEnabled: boolean;
   badges: IBadge[];
   isSuperCollection: boolean;
+  superCollectionMembersTableAddressMapping: Record<string, string[]> | null;
 }
 
 const CREEPZ_CONFIG = CreepzConfigJson as IProjectConfig;
@@ -55,6 +56,11 @@ const PROJECT_CONFIGS = {
 // eslint-disable-next-line unused-imports/no-unused-vars
 export const getTreasureHuntTokenId = (projectId: string): string | null => {
   return null;
+};
+
+
+export const getProjectConfig = (projectId: string): IProjectConfig => {
+  return PROJECT_CONFIGS[projectId] as IProjectConfig;
 };
 
 

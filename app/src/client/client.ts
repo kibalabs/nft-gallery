@@ -190,4 +190,12 @@ export class NotdClient extends ServiceClient {
     const response = await this.makeRequest(method, path, request, Endpoints.ListGallerySuperCollectionOverlapsResponse);
     return response.superCollectionOverlaps;
   };
+
+  public querySuperCollectionUsers = async (superCollectionName: string, limit?: number, offset?: number, order?: string): Promise<Resources.ListResponse<Resources.GallerySuperCollectionUserRow>> => {
+    const method = RestMethod.POST;
+    const path = `gallery/v1/super-collections/${superCollectionName}/users/query`;
+    const request = new Endpoints.QuerySuperCollectionUsersRequest(limit, offset, order);
+    const response = await this.makeRequest(method, path, request, Endpoints.QuerySuperCollectionUsersResponse);
+    return response.galleryUserRowListResponse;
+  };
 }

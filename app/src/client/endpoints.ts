@@ -582,3 +582,40 @@ export class ListGallerySuperCollectionOverlapsResponse extends ResponseData {
     );
   };
 }
+
+
+export class QuerySuperCollectionUsersRequest extends RequestData {
+  readonly limit?: number;
+  readonly offset?: number;
+  readonly order?: string;
+
+  public constructor(limit?: number, offset?: number, order?: string) {
+    super();
+    this.limit = limit;
+    this.offset = offset;
+    this.order = order;
+  }
+
+  public toObject = (): Record<string, unknown> => {
+    return {
+      limit: this.limit,
+      offset: this.offset,
+      order: this.order,
+    };
+  };
+}
+
+export class QuerySuperCollectionUsersResponse extends ResponseData {
+  readonly galleryUserRowListResponse: Resources.ListResponse<Resources.GallerySuperCollectionUserRow>;
+
+  public constructor(galleryUserRowListResponse: Resources.ListResponse<Resources.GallerySuperCollectionUserRow>) {
+    super();
+    this.galleryUserRowListResponse = galleryUserRowListResponse;
+  }
+
+  public static fromObject = (obj: Record<string, unknown>): QuerySuperCollectionUsersResponse => {
+    return new QuerySuperCollectionUsersResponse(
+      Resources.ListResponse.fromObject(obj.galleryUserRowListResponse as Record<string, unknown>, Resources.GallerySuperCollectionUserRow),
+    );
+  };
+}

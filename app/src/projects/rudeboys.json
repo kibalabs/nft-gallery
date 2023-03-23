@@ -39,5 +39,6 @@
     "imageUrl": "/assets/rudeboys/badge-one.svg",
     "isTransient": false
   }],
-  "isSuperCollection": false
+  "isSuperCollection": false,
+  "superCollectionMembersTableAddressMapping": null
 }
