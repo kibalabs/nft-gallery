@@ -20,5 +20,6 @@
   "defaultMembersSort": null,
   "isBadgesEnabled": false,
   "badges": [],
-  "isSuperCollection": false
+  "isSuperCollection": false,
+  "superCollectionMembersTableAddressMapping": null
 }

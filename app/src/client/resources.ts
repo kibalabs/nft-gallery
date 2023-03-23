@@ -368,6 +368,30 @@ export class GalleryUserRow extends ResponseData {
   };
 }
 
+
+export class GallerySuperCollectionUserRow extends ResponseData {
+  public constructor(
+    readonly galleryUser: GalleryUser,
+    readonly ownedTokenCountMap: Record<string, number>,
+    readonly uniqueOwnedTokenCountMap: Record<string, number>,
+    readonly chosenOwnedTokensMap: Record<string, CollectionToken[]>,
+    readonly galleryUserBadges: GalleryUserBadge[],
+  ) { super(); }
+
+  public static fromObject = (obj: Record<string, unknown>): GallerySuperCollectionUserRow => {
+    return new GallerySuperCollectionUserRow(
+      GalleryUser.fromObject(obj.galleryUser as Record<string, unknown>),
+      (obj.ownedTokenCountMap as Record<string, number>),
+      (obj.uniqueOwnedTokenCountMap as Record<string, number>),
+      Object.keys((obj.chosenOwnedTokensMap as Record<string, unknown>)).reduce((accumulator: Record<string, CollectionToken[]>, current: string): Record<string, CollectionToken[]> => {
+        accumulator[current] = ((obj.chosenOwnedTokensMap as Record<string, Record<string, unknown>[]>)[current]).map((innerObj: Record<string, unknown>): CollectionToken => CollectionToken.fromObject(innerObj));
+        return accumulator;
+      }, {}),
+      (obj.galleryUserBadges as Record<string, unknown>[]).map((innerObj: Record<string, unknown>): GalleryUserBadge => GalleryUserBadge.fromObject(innerObj)),
+    );
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Constructor<T = Record<string, unknown>> = new (...args: any[]) => T;
 

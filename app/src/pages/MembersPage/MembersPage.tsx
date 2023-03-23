@@ -6,7 +6,7 @@ import { Alignment, Box, Button, ColorSettingView, ContainingView, Dialog, Direc
 import { useWeb3Account, useWeb3LoginSignature, useWeb3OnLoginClicked } from '@kibalabs/web3-react';
 import ReactTooltip from 'react-tooltip';
 
-import { Collection, CollectionToken, GalleryUser, GalleryUserBadge, GalleryUserRow, ListResponse } from '../../client';
+import { Collection, CollectionToken, GallerySuperCollectionUserRow, GalleryUser, GalleryUserBadge, GalleryUserRow, ListResponse } from '../../client';
 import { AccountViewLink } from '../../components/AccountView';
 import { IpfsImage } from '../../components/IpfsImage';
 import { MarginView } from '../../components/MarginView';
@@ -15,26 +15,29 @@ import { Table } from '../../components/Table';
 import { ITableCellTheme, TableCell } from '../../components/TableCell';
 import { TableRow } from '../../components/TableRow';
 import { useGlobals } from '../../globalsContext';
-import { getBadges, getChain, getDefaultMembersSort, IBadge, isBadgesEnabled } from '../../util';
+import { getBadges, getChain, getCollectionAddress, getDefaultMembersSort, getProjectConfig, IBadge, isBadgesEnabled, isSuperCollection } from '../../util';
 
 
 interface IUserCellContentProps {
-  row: GalleryUserRow;
+  userAddress: string;
+  twitterUsername: string | null;
 }
 
 const UserCellContent = (props: IUserCellContentProps): React.ReactElement => {
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} isFullHeight={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
-      <AccountViewLink address={props.row.galleryUser.address} target={`/members/${props.row.galleryUser.address}`} />
-      {props.row.galleryUser.twitterProfile && (
-        <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.row.galleryUser.twitterProfile.username}`} />
+      <AccountViewLink address={props.userAddress} target={`/members/${props.userAddress}`} />
+      {props.twitterUsername && (
+        <IconButton variant='small' icon={<KibaIcon variant='small' iconId='ion-logo-twitter' /> } target={`https://twitter.com/${props.twitterUsername}`} />
       )}
     </Stack>
   );
 };
 
 interface IJoinedCellContentProps {
-  row: GalleryUserRow;
+  userAddress: string;
+  joinDate: Date | null;
+  // row: GalleryUserRow;
 }
 
 const JoinedCellContent = (props: IJoinedCellContentProps): React.ReactElement => {
@@ -42,18 +45,18 @@ const JoinedCellContent = (props: IJoinedCellContentProps): React.ReactElement =
 
   return (
     <React.Fragment>
-      <div data-tip data-for={`joinedcell-${props.row.galleryUser.address}`}>
-        {props.row.galleryUser.joinDate ? (
-          <Text alignment={TextAlignment.Center}>{dateToRelativeString(props.row.galleryUser.joinDate)}</Text>
+      <div data-tip data-for={`joinedcell-${props.userAddress}`}>
+        {props.joinDate ? (
+          <Text alignment={TextAlignment.Center}>{dateToRelativeString(props.joinDate)}</Text>
         ) : (
           <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
         )}
       </div>
-      <ReactTooltip id={`joinedcell-${props.row.galleryUser.address}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
+      <ReactTooltip id={`joinedcell-${props.userAddress}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
         <Box maxWidth='300px'>
           <Stack direction={Direction.Vertical} shouldAddGutters={true}>
-            {props.row.galleryUser.joinDate ? (
-              <Text>{`Joined on ${dateToString(props.row.galleryUser.joinDate, 'yyyy-MM-dd HH:mm')}`}</Text>
+            {props.joinDate ? (
+              <Text>{`Joined on ${dateToString(props.joinDate, 'yyyy-MM-dd HH:mm')}`}</Text>
             ) : (
               <Text>Never joined</Text>
             )}
@@ -65,7 +68,8 @@ const JoinedCellContent = (props: IJoinedCellContentProps): React.ReactElement =
 };
 
 interface IOwnedTokensCellContentProps {
-  row: GalleryUserRow;
+  ownedTokenCount: number;
+  chosenOwnedTokens: CollectionToken[];
   shouldHideTokens?: boolean;
   maxTokenCount?: number;
 }
@@ -74,11 +78,11 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
   const maxTokenCount = props.maxTokenCount ?? 5;
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
-      <Text alignment={TextAlignment.Center}>{props.row.ownedTokenCount}</Text>
+      <Text alignment={TextAlignment.Center}>{props.ownedTokenCount}</Text>
       <Spacing variant={PaddingSize.Default} />
       {!props.shouldHideTokens && (
         <React.Fragment>
-          {props.row.chosenOwnedTokens.slice(0, maxTokenCount).map((token: CollectionToken): React.ReactElement => (
+          {props.chosenOwnedTokens.slice(0, maxTokenCount).map((token: CollectionToken): React.ReactElement => (
             <MarginView key={token.tokenId} marginLeft='inverseWide'>
               <LinkBase target={`/members/tokens/${token.tokenId}`}>
                 <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
@@ -94,18 +98,20 @@ const OwnedTokensCellContent = (props: IOwnedTokensCellContentProps): React.Reac
 };
 
 interface IBadgesCellContentProps {
-  row: GalleryUserRow;
+  userAddress: string;
   projectId: string;
   maxBadgeCount?: number;
+  galleryUserBadges: GalleryUserBadge[];
+  // row: GalleryUserRow;
 }
 
 const BadgesCellContent = (props: IBadgesCellContentProps): React.ReactElement => {
   const colors = useColors();
   const maxBadgeCount = props.maxBadgeCount ?? 5;
   const badges = React.useMemo((): IBadge[] => {
-    const userBadgeKeys = props.row.galleryUserBadges.map((badge: GalleryUserBadge): string => badge.badgeKey);
+    const userBadgeKeys = props.galleryUserBadges.map((badge: GalleryUserBadge): string => badge.badgeKey);
     return getBadges(props.projectId).filter((badge: IBadge): boolean => userBadgeKeys.includes(badge.key));
-  }, [props.projectId, props.row.galleryUserBadges]);
+  }, [props.projectId, props.galleryUserBadges]);
 
   return (
     <Stack direction={Direction.Horizontal} isFullWidth={false} contentAlignment={Alignment.Start} shouldAddGutters={true}>
@@ -114,14 +120,14 @@ const BadgesCellContent = (props: IBadgesCellContentProps): React.ReactElement =
       <React.Fragment>
         {badges.slice(0, maxBadgeCount).map((badge: IBadge): React.ReactElement => (
           <React.Fragment key={badge.key}>
-            <div data-tip data-for={`${props.row.galleryUser.address}-${badge.key}`}>
+            <div data-tip data-for={`${props.userAddress}-${badge.key}`}>
               <MarginView marginLeft='inverseWide'>
                 <Box variant='memberToken' isFullWidth={false} shouldClipContent={true}>
                   <IpfsImage variant='unrounded' isLazyLoadable={true} source={badge.imageUrl} alternativeText={badge.name} width='1.4em' height='1.4em' />
                 </Box>
               </MarginView>
             </div>
-            <ReactTooltip id={`${props.row.galleryUser.address}-${badge.key}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
+            <ReactTooltip id={`${props.userAddress}-${badge.key}`} effect='solid' backgroundColor={colors.backgroundLight10} border={true} borderColor={colors.backgroundDark10}>
               <Box maxWidth='300px'>
                 <Stack direction={Direction.Vertical} shouldAddGutters={true}>
                   <Text variant='bold'>{badge.name}</Text>
@@ -176,7 +182,7 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
 
 interface IMemberRowContentProps {
   index: number;
-  row: GalleryUserRow;
+  row: GallerySuperCollectionUserRow;
   projectId: string;
   isFollowing: boolean;
   collection: Collection;
@@ -184,6 +190,8 @@ interface IMemberRowContentProps {
 }
 
 const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => {
+  const collectionAddress = getCollectionAddress(props.projectId) as string;
+
   const badges = React.useMemo((): IBadge[] => {
     const userBadgeKeys = props.row.galleryUserBadges.map((badge: GalleryUserBadge): string => badge.badgeKey);
     return getBadges(props.projectId).filter((badge: IBadge): boolean => userBadgeKeys.includes(badge.key));
@@ -192,6 +200,14 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
   const onFollowClicked = (): void => {
     props.onFollowClicked(props.row.galleryUser);
   };
+
+  // NOTE(krishan711): this is here because of creepz
+  const allOwnedCount = Object.keys(props.row.ownedTokenCountMap).reduce((accumulator: number, current: string): number => {
+    return accumulator + (props.row.ownedTokenCountMap[current] || 0);
+  }, 0);
+  const allChosenTokens = Object.keys(props.row.ownedTokenCountMap).reduce((accumulator: CollectionToken[], current: string): CollectionToken[] => {
+    return [...accumulator, ...(props.row.chosenOwnedTokensMap[current] || [])];
+  }, []);
 
   return (
     <Stack direction={Direction.Vertical} isFullWidth={true} contentAlignment={Alignment.Start} shouldAddGutters={true}>
@@ -210,18 +226,18 @@ const MemberRowContent = (props: IMemberRowContentProps): React.ReactElement => 
         <Box width='3em'>
           <Stack direction={Direction.Vertical} contentAlignment={Alignment.Start} childAlignment={Alignment.End}>
             <Stack direction={Direction.Horizontal} contentAlignment={Alignment.End}>
-              <Text>{props.row.ownedTokenCount}</Text>
+              <Text>{allOwnedCount}</Text>
               {props.collection.doesSupportErc1155 && (
                 <React.Fragment>
                   <Spacing variant={PaddingSize.Narrow} />
-                  <Text>{`(${props.row.uniqueOwnedTokenCount})`}</Text>
+                  <Text>{`(${props.row.uniqueOwnedTokenCountMap[collectionAddress] || 0})`}</Text>
                 </React.Fragment>
               )}
               <Spacing variant={PaddingSize.Narrow} />
-              {props.row.chosenOwnedTokens.length > 0 && (
-                <LinkBase target={`/members/tokens/${props.row.chosenOwnedTokens[0].tokenId}`}>
+              {allChosenTokens.length > 0 && (
+                <LinkBase target={`/members/tokens/${allChosenTokens[0].tokenId}`}>
                   <Box variant='memberToken-unbordered' isFullWidth={false} shouldClipContent={true}>
-                    <IpfsImage variant='unrounded' isLazyLoadable={true} source={props.row.chosenOwnedTokens[0].resizableImageUrl ?? props.row.chosenOwnedTokens[0].imageUrl ?? ''} alternativeText={props.row.chosenOwnedTokens[0].name} width='1.4em' height='1.4em' />
+                    <IpfsImage variant='unrounded' isLazyLoadable={true} source={allChosenTokens[0].resizableImageUrl ?? allChosenTokens[0].imageUrl ?? ''} alternativeText={allChosenTokens[0].name} width='1.4em' height='1.4em' />
                   </Box>
                 </LinkBase>
               )}
@@ -265,20 +281,6 @@ export const MembersPage = (): React.ReactElement => {
   return <MembersPageReal />;
 };
 
-const DUMMY_ROW = new GalleryUserRow(
-  new GalleryUser('0x0000000000000000000000000000000000000000', '', null, null, new Date()),
-  0,
-  0,
-  [
-    new CollectionToken('', '', '', '', null, null, null, []),
-    new CollectionToken('', '', '', '', null, null, null, []),
-    new CollectionToken('', '', '', '', null, null, null, []),
-    new CollectionToken('', '', '', '', null, null, null, []),
-    new CollectionToken('', '', '', '', null, null, null, []),
-  ],
-  [],
-);
-
 export const DEFAULT_SORT = 'FOLLOWERCOUNT_DESC';
 
 export const MembersPageReal = (): React.ReactElement => {
@@ -297,7 +299,7 @@ export const MembersPageReal = (): React.ReactElement => {
   const [queryOrder, setOrder] = useUrlQueryState('order', undefined, defaultMembersSort);
   const [queryPage, setPage] = useIntegerUrlQueryState('page', undefined);
   const [pageCount, setPageCount] = React.useState<number>(0);
-  const [rows, setRows] = React.useState<GalleryUserRow[] | undefined | null>(undefined);
+  const [rows, setRows] = React.useState<GallerySuperCollectionUserRow[] | undefined | null>(undefined);
 
   const order = queryOrder ?? DEFAULT_SORT;
   const page = queryPage ?? 0;
@@ -310,13 +312,44 @@ export const MembersPageReal = (): React.ReactElement => {
     if (!collection?.address) {
       return;
     }
-    notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
-      setRows(retrievedGalleryUserRows.items);
-      setPageCount(Math.ceil(retrievedGalleryUserRows.totalCount / pageSize));
-    }).catch((error: unknown): void => {
-      console.error(error);
-      setRows(null);
-    });
+    if (isSuperCollection(projectId)) {
+      notdClient.querySuperCollectionUsers(projectId, pageSize, pageSize * page, `${collection.address}_${order}`).then((retrievedGalleryUserRows: ListResponse<GallerySuperCollectionUserRow>): void => {
+        // setRows(retrievedGalleryUserRows.items.map((row: GallerySuperCollectionUserRow): GalleryUserRow => {
+        //   const convertedRow = new GalleryUserRow(
+        //     row.galleryUser,
+        //     row.ownedTokenCountMap[collection.address] || 0,
+        //     row.uniqueOwnedTokenCountMap[collection.address] || 0,
+        //     row.chosenOwnedTokensMap[collection.address] || [],
+        //     row.galleryUserBadges,
+        //   );
+        //   console.log('convertedRow', convertedRow);
+        //   return convertedRow;
+        // }));
+        setRows(retrievedGalleryUserRows.items);
+        setPageCount(Math.ceil(retrievedGalleryUserRows.totalCount / pageSize));
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setRows(null);
+      });
+    } else {
+      notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
+        // setRows(retrievedGalleryUserRows.items);
+        setRows(retrievedGalleryUserRows.items.map((row: GalleryUserRow): GallerySuperCollectionUserRow => {
+          const convertedRow = new GallerySuperCollectionUserRow(
+            row.galleryUser,
+            {[collection.address]: row.ownedTokenCount},
+            {[collection.address]: row.uniqueOwnedTokenCount},
+            {[collection.address]: row.chosenOwnedTokens},
+            row.galleryUserBadges,
+          );
+          return convertedRow;
+        }));
+        setPageCount(Math.ceil(retrievedGalleryUserRows.totalCount / pageSize));
+      }).catch((error: unknown): void => {
+        console.error(error);
+        setRows(null);
+      });
+    }
   }, [collection?.address, notdClient, order, page, pageSize]);
 
   React.useEffect((): void => {
@@ -370,6 +403,101 @@ export const MembersPageReal = (): React.ReactElement => {
       window.open(`https://twitter.com/${galleryUser.twitterProfile.username}`);
     }
   };
+
+  const projectConfig = getProjectConfig(projectId);
+  const columns: IHeaderCellProps[] = React.useMemo((): IHeaderCellProps[] => {
+    return [
+      {headerId: 'INDEX', title: '#', isOrderable: false},
+      {headerId: 'MEMBER', title: 'Member', isOrderable: false},
+      {headerId: 'JOINDATE', title: 'Joined', isOrderable: true},
+      ...(projectId === 'creepz' ? [
+        {headerId: 'TOKENCOUNT', title: 'Creepz', isOrderable: true},
+        {headerId: 'OTHERTOKENCOUNT', title: 'Army', isOrderable: false},
+      ] : [
+        {headerId: 'TOKENCOUNT', title: 'Tokens', isOrderable: true},
+      ]),
+      ...(collection?.doesSupportErc1155 ? [
+        {headerId: 'UNIQUETOKENCOUNT', title: 'Unique', isOrderable: true},
+      ] : []),
+      ...(projectConfig.isBadgesEnabled ? [
+        {headerId: 'BADGES', title: 'Badges', isOrderable: false}
+      ] : []),
+      {headerId: 'FOLLOWERCOUNT', title: 'Followers', isOrderable: true},
+    ];
+  }, [projectConfig, isBadgesEnabled, orderField, orderDirection]);
+
+  const getRowElement = (row: GallerySuperCollectionUserRow, index: number): React.ReactElement => {
+    if (!collection?.address) {
+      return (
+        <React.Fragment></React.Fragment>
+      );
+    }
+    // NOTE(krishan711): this is creepz sepcific
+    const primaryOwnedCount = row.ownedTokenCountMap[collection.address] || 0;
+    const secondaryOwnedCount = Object.keys(row.ownedTokenCountMap).reduce((accumulator: number, current: string): number => {
+      if (current === collection.address) {
+        return accumulator;
+      }
+      return accumulator + (row.ownedTokenCountMap[current] || 0);
+    }, 0);
+    const secondaryChosenTokens = Object.keys(row.ownedTokenCountMap).reduce((accumulator: CollectionToken[], current: string): CollectionToken[] => {
+      if (current === collection.address) {
+        return accumulator;
+      }
+      return [...accumulator, ...(row.chosenOwnedTokensMap[current] || [])];
+    }, []);
+    return (
+      <React.Fragment>
+        <TableCell>
+          <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
+        </TableCell>
+        <TableCell>
+          <UserCellContent userAddress={row.galleryUser.address} twitterUsername={row.galleryUser.twitterProfile?.username || null} />
+        </TableCell>
+        <TableCell>
+          <JoinedCellContent userAddress={row.galleryUser.address} joinDate={row.galleryUser.joinDate} />
+        </TableCell>
+        {projectId === 'creepz' ? (
+          <React.Fragment>
+            <TableCell>
+              <OwnedTokensCellContent ownedTokenCount={primaryOwnedCount} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
+            </TableCell>
+            <TableCell>
+              <OwnedTokensCellContent ownedTokenCount={secondaryOwnedCount} chosenOwnedTokens={secondaryChosenTokens} maxTokenCount={3} />
+            </TableCell>
+          </React.Fragment>
+        ) : (
+          <TableCell>
+            <OwnedTokensCellContent ownedTokenCount={row.ownedTokenCountMap[collection.address] || 0} chosenOwnedTokens={row.chosenOwnedTokensMap[collection.address] || []} maxTokenCount={3} />
+          </TableCell>
+        )}
+        {collection?.doesSupportErc1155 && (
+          <TableCell>
+            <Text alignment={TextAlignment.Center}>{row.uniqueOwnedTokenCountMap[collection.address]}</Text>
+          </TableCell>
+        )}
+        {isBadgesEnabled(projectId) && (
+          <TableCell>
+            <BadgesCellContent projectId={projectId} userAddress={row.galleryUser.address} galleryUserBadges={row.galleryUserBadges} />
+          </TableCell>
+        )}
+        <TableCell>
+          {row.galleryUser.twitterProfile != null ? (
+            <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
+              <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
+              {followedUsers.includes(row.galleryUser.address) ? (
+                <Text variant='note'>Following</Text>
+              ) : (
+                <Button variant='small' text='Follow' onClicked={(): Promise<void> => onFollowClicked(row.galleryUser)} />
+              )}
+            </Stack>
+          ) : (
+            <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
+          )}
+        </TableCell>
+      </React.Fragment>
+    );
+  }
 
   return (
     <React.Fragment>
@@ -432,7 +560,7 @@ export const MembersPageReal = (): React.ReactElement => {
                 <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
                   {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
                     <List shouldShowDividers={true}>
-                      {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
+                      {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
                         <List.Item key={`${index}-${row.galleryUser.address}`} itemKey={`${index}-${row.galleryUser.address}`}>
                           <MemberRowContent projectId={projectId} row={row} collection={collection} index={(pageSize * page) + index + 1} onFollowClicked={onFollowClicked} isFollowing={followedUsers.includes(row.galleryUser.address)} />
                         </List.Item>
@@ -442,7 +570,17 @@ export const MembersPageReal = (): React.ReactElement => {
                     <Table>
                       <thead>
                         <TableRow>
-                          <HeaderCell headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
+                          {columns.map((column: IHeaderCellProps): React.ReactElement => (
+                            <HeaderCell
+                              key={column.headerId}
+                              headerId={column.headerId}
+                              title={column.title}
+                              isOrderable={column.isOrderable}
+                              orderDirection={column.isOrderable ? (orderField === column.headerId ? (orderDirection === 'DESC' ? -1 : 1) : null) : undefined}
+                              onClicked={onHeaderClicked}
+                            />
+                          ))}
+                          {/* <HeaderCell headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
                           <HeaderCell headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
                           <HeaderCell headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
                           <HeaderCell headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
@@ -452,50 +590,15 @@ export const MembersPageReal = (): React.ReactElement => {
                           {isBadgesEnabled(projectId) && (
                             <HeaderCell headerId='BADGES' title='Badges' isOrderable={false} orderDirection={null} />
                           )}
-                          <HeaderCell headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
+                          <HeaderCell headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} /> */}
                         </TableRow>
                       </thead>
                       <tbody>
-                        {(rows || Array(pageSize).fill(DUMMY_ROW)).map((row: GalleryUserRow, index: number): React.ReactElement => (
-                          <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
-                            <TableCell>
-                              <Text alignment={TextAlignment.Center}>{(pageSize * page) + index + 1}</Text>
-                            </TableCell>
-                            <TableCell>
-                              <UserCellContent row={row} />
-                            </TableCell>
-                            <TableCell>
-                              <JoinedCellContent row={row} />
-                            </TableCell>
-                            <TableCell>
-                              <OwnedTokensCellContent row={row} maxTokenCount={projectId === 'rudeboys' ? 3 : undefined} />
-                            </TableCell>
-                            {collection.doesSupportErc1155 && (
-                              <TableCell>
-                                <Text alignment={TextAlignment.Center}>{row.uniqueOwnedTokenCount}</Text>
-                              </TableCell>
-                            )}
-                            {isBadgesEnabled(projectId) && (
-                              <TableCell>
-                                <BadgesCellContent projectId={projectId} row={row} />
-                              </TableCell>
-                            )}
-                            <TableCell>
-                              {row.galleryUser.twitterProfile != null ? (
-                                <Stack direction={Direction.Horizontal} shouldAddGutters={true} childAlignment={Alignment.Fill}>
-                                  <Text alignment={TextAlignment.Center}>{row.galleryUser.twitterProfile.followerCount}</Text>
-                                  {followedUsers.includes(row.galleryUser.address) ? (
-                                    <Text variant='note'>Following</Text>
-                                  ) : (
-                                    <Button variant='small' text='Follow' onClicked={(): Promise<void> => onFollowClicked(row.galleryUser)} />
-                                  )}
-                                </Stack>
-                              ) : (
-                                <Text alignment={TextAlignment.Center} variant='note'>{'-'}</Text>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                      {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
+                        <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
+                          {getRowElement(row, index)}
+                        </TableRow>
+                      ))}
                       </tbody>
                     </Table>
                   )}
