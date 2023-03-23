@@ -313,18 +313,7 @@ export const MembersPageReal = (): React.ReactElement => {
       return;
     }
     if (isSuperCollection(projectId)) {
-      notdClient.querySuperCollectionUsers(projectId, pageSize, pageSize * page, `${collection.address}_${order}`).then((retrievedGalleryUserRows: ListResponse<GallerySuperCollectionUserRow>): void => {
-        // setRows(retrievedGalleryUserRows.items.map((row: GallerySuperCollectionUserRow): GalleryUserRow => {
-        //   const convertedRow = new GalleryUserRow(
-        //     row.galleryUser,
-        //     row.ownedTokenCountMap[collection.address] || 0,
-        //     row.uniqueOwnedTokenCountMap[collection.address] || 0,
-        //     row.chosenOwnedTokensMap[collection.address] || [],
-        //     row.galleryUserBadges,
-        //   );
-        //   console.log('convertedRow', convertedRow);
-        //   return convertedRow;
-        // }));
+      notdClient.querySuperCollectionUsers(projectId, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GallerySuperCollectionUserRow>): void => {
         setRows(retrievedGalleryUserRows.items);
         setPageCount(Math.ceil(retrievedGalleryUserRows.totalCount / pageSize));
       }).catch((error: unknown): void => {
@@ -333,7 +322,6 @@ export const MembersPageReal = (): React.ReactElement => {
       });
     } else {
       notdClient.queryCollectionUsers(collection.address, pageSize, pageSize * page, order).then((retrievedGalleryUserRows: ListResponse<GalleryUserRow>): void => {
-        // setRows(retrievedGalleryUserRows.items);
         setRows(retrievedGalleryUserRows.items.map((row: GalleryUserRow): GallerySuperCollectionUserRow => {
           const convertedRow = new GallerySuperCollectionUserRow(
             row.galleryUser,
