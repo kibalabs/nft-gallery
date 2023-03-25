@@ -4,7 +4,12 @@
   "host": "https://rudeboys-gallery.tokenpage.xyz",
   "chain": "ethereum",
   "isCustomizationEnabled": false,
-  "backgroundConfig": null,
+  "backgroundConfig": {
+    "layers": [
+      { "imageUrl": "/assets/rudeboys/background.png" },
+      { "color": "rgba(0, 0, 0, 0.75)" }
+    ]
+  },
   "backgroundMusicUrl": null,
   "logoImageUrl": "/assets/rudeboys/logo.png",
   "bannerImageUrl": "/assets/rudeboys/banner.png",
@@ -21,8 +26,8 @@
     "imageUrl": "/assets/rudeboys/badges/NEVER_SOLD.svg",
     "isTransient": true
   }, {
-    "key": "DIAMOND_HANDS",
-    "name": "Diamonds Hands",
+    "key": "OG_HOLDER",
+    "name": "OG Holder",
     "description": "I've held at least one RudeBoy ever since mint",
     "imageUrl": "/assets/rudeboys/badges/OG_HOLDER.svg",
     "isTransient": true
