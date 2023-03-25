@@ -7,9 +7,9 @@ import styled from 'styled-components';
 
 export interface ITableTheme extends ThemeType {
   background: IBoxTheme;
-  // NOTE(krishan711): should this have header, body, row background fields too?
 }
 
+// NOTE(krishan711): table can't have border-radius if border-collapse: collapse is set
 export const TableThemedStyle = (theme: RecursivePartial<ITableTheme>): string => `
   ${themeToCss(theme.background)};
 `;
@@ -22,6 +22,13 @@ export const StyledTable = styled.table<IStyledTableProps>`
   width: 100%;
   height: 100%;
   overflow: auto;
+  border-collapse: separate;
+  & > thead {
+    border-collapse: collapse;
+  }
+  & > tbody {
+    border-collapse: collapse;
+  }
 
   && {
     ${(props: IStyledTableProps): string => (props.$theme ? TableThemedStyle(props.$theme) : '')};

@@ -120,8 +120,13 @@ export const getProjectTheme = (projectId: string): RecursivePartial<ITheme> => 
   }
   if (projectId === 'rudeboys') {
     return {
+      colors: {
+        brandPrimary: 'rgb(58,147,247)',
+        inputWrapperBackground: 'rgba(58,147,247, 0.1)',
+        inputWrapperBorder: 'rgba(58,147,247, 0.1)',
+      },
       dimensions: {
-        borderRadius: '1rem',
+        borderRadius: '1.5rem',
       },
       texts: {
         default: {
@@ -131,6 +136,85 @@ export const getProjectTheme = (projectId: string): RecursivePartial<ITheme> => 
         header1: {
           'font-family': '"RudeScript", sans-serif',
           'font-weight': '500',
+        },
+      },
+      tabBarItems: {
+        default: {
+          normal: {
+            default: {
+              text: {
+                color: '$colors.text',
+              },
+            },
+            hover: {
+              background: {
+                'background-color': '$colors.brandPrimaryClear80',
+              },
+            },
+          },
+          selected: {
+            default: {
+              background: {
+                'background-color': '$colors.brandPrimaryClear90',
+              },
+              text: {
+                color: '$colors.brandPrimary',
+              },
+            },
+          },
+        },
+      },
+      boxes: {
+        borderedLight: {
+          'border-color': '$colors.brandPrimaryClear50',
+        },
+      },
+      tables: {
+        default: {
+          background: {
+            'border-color': '$colors.brandPrimaryClear50',
+          },
+        },
+      },
+      tableRows: {
+        default: {
+          normal: {
+            default: {
+              background: {
+                'border-color': '$colors.brandPrimaryClear50',
+              },
+            },
+          },
+        },
+        header: {
+          normal: {
+            default: {
+              background: {
+                'border-color': '$colors.brandPrimaryClear50',
+              },
+            },
+          },
+        },
+      },
+      tableCells: {
+        default: {
+          normal: {
+            default: {
+              background: {
+                'border-color': '$colors.brandPrimaryClear50',
+              },
+            },
+          },
+        },
+        header: {
+          normal: {
+            default: {
+              background: {
+                'border-color': '$colors.brandPrimaryClear50',
+                'background-color': '$colors.brandPrimaryClear90',
+              },
+            },
+          },
         },
       },
     };
@@ -546,7 +630,8 @@ export const buildProjectTheme = (projectId: string): ITheme => {
     ...projectTheme.tables,
     default: mergeTheme<ITableTheme>({
       background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
-        'border-width': '0',
+        'border-width': '1px',
+        padding: '0',
       }),
     }, projectTheme.tables?.default as (ITableTheme | undefined)),
   };
@@ -590,7 +675,7 @@ export const buildProjectTheme = (projectId: string): ITheme => {
         default: {
           background: mergeTheme<IBoxTheme>(baseTheme.boxes.default, baseTheme.boxes.transparent, {
             'border-radius': '0',
-            'border-width': '1px 0px',
+            'border-width': '0px 0px 1px 0px',
             'border-style': 'solid',
             'border-color': 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.2)',
             'background-color': 'rgba(255, 255, 255, 0.1)',

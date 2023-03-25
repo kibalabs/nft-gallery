@@ -167,7 +167,7 @@ const HeaderCell = (props: IHeaderCellProps): React.ReactElement => {
       theme={props.theme}
       variant='header'
       headerId={props.headerId}
-      onClicked={props.onClicked}
+      onClicked={props.isOrderable ? props.onClicked : undefined}
     >
       <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Start} childAlignment={Alignment.Center} shouldAddGutters={true}>
         <Text variant='bold' tag='span' alignment={TextAlignment.Left}>{props.title}</Text>
@@ -546,7 +546,7 @@ export const MembersPageReal = (): React.ReactElement => {
                 </ResponsiveHidingView>
               </Stack>
               <Stack.Item growthFactor={1} shrinkFactor={1} isHidden={rows == null}>
-                <Box variant='borderedLight-unpadded' isScrollableVertically={true}>
+                <Box variant='unpadded' isScrollableVertically={true}>
                   {screenSize === ScreenSize.Base || screenSize === ScreenSize.Small ? (
                     <List shouldShowDividers={true}>
                       {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
@@ -569,22 +569,11 @@ export const MembersPageReal = (): React.ReactElement => {
                               onClicked={onHeaderClicked}
                             />
                           ))}
-                          {/* <HeaderCell headerId='INDEX' title='#' isOrderable={false} orderDirection={null} />
-                          <HeaderCell headerId='MEMBER' title='Member' isOrderable={false} orderDirection={null} />
-                          <HeaderCell headerId='JOINDATE' title='Joined' isOrderable={true} orderDirection={orderField === 'JOINDATE' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                          <HeaderCell headerId='TOKENCOUNT' title='Tokens' isOrderable={true} orderDirection={orderField === 'TOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                          {collection.doesSupportErc1155 && (
-                            <HeaderCell headerId='UNIQUETOKENCOUNT' title='Unique' isOrderable={true} orderDirection={orderField === 'UNIQUETOKENCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} />
-                          )}
-                          {isBadgesEnabled(projectId) && (
-                            <HeaderCell headerId='BADGES' title='Badges' isOrderable={false} orderDirection={null} />
-                          )}
-                          <HeaderCell headerId='FOLLOWERCOUNT' title='Followers' isOrderable={true} orderDirection={orderField === 'FOLLOWERCOUNT' ? (orderDirection === 'DESC' ? -1 : 1) : null} onClicked={onHeaderClicked} /> */}
                         </TableRow>
                       </thead>
                       <tbody>
                         {(rows || []).map((row: GallerySuperCollectionUserRow, index: number): React.ReactElement => (
-                          <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.25 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
+                          <TableRow key={`${index}-${row.galleryUser.address}`} theme={{ normal: { default: { background: { 'background-color': (pageSize * page) + index + 1 <= 10 ? `rgba(255, 209, 5, ${0.1 * (1 - (((pageSize * page) + index + 1) / 10.0))})` : undefined } } } }}>
                             {getRowElement(row, index)}
                           </TableRow>
                         ))}
