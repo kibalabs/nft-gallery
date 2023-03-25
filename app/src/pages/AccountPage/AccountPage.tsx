@@ -35,7 +35,7 @@ export const BadgesView = (props: IBadgesViewProps): React.ReactElement => {
   }, [props.userBadges]);
 
   return (
-    <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} shouldAddGutters={true} shouldWrapItems={true} defaultGutter={PaddingSize.Wide}>
+    <Stack direction={Direction.Horizontal} isFullWidth={true} contentAlignment={Alignment.Center} shouldAddGutters={false} shouldWrapItems={true} defaultGutter={PaddingSize.Wide}>
       {props.badges.map((badge: IBadge): React.ReactElement => (
         <React.Fragment key={badge.key}>
           <div data-tip data-for={`BadgesView-${badge.key}`}>
@@ -56,6 +56,7 @@ export const BadgesView = (props: IBadgesViewProps): React.ReactElement => {
               </Stack>
             </Box>
           </ReactTooltip>
+          <Spacing />
         </React.Fragment>
       ))}
     </Stack>
