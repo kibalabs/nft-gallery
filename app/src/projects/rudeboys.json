@@ -18,26 +18,74 @@
     "key": "NEVER_SOLD",
     "name": "Never Sold",
     "description": "I've never sold a RudeBoy",
-    "imageUrl": "/assets/rudeboys/badge-sold.svg",
+    "imageUrl": "/assets/rudeboys/badges/NEVER_SOLD.svg",
     "isTransient": true
   }, {
     "key": "DIAMOND_HANDS",
     "name": "Diamonds Hands",
     "description": "I've held at least one RudeBoy ever since mint",
-    "imageUrl": "/assets/rudeboys/badge-diamond.svg",
+    "imageUrl": "/assets/rudeboys/badges/OG_HOLDER.svg",
     "isTransient": true
   }, {
     "key": "MINTER",
     "name": "Minter",
     "description": "I've minted a RudeBoy directly from source",
-    "imageUrl": "/assets/rudeboys/badge-pick.svg",
+    "imageUrl": "/assets/rudeboys/badges/MINTER.svg",
     "isTransient": false
   }, {
     "key": "ONE_OF_ONE",
     "name": "One of One Holder",
     "description": "I've held a 1/1 at some point in time",
-    "imageUrl": "/assets/rudeboys/badge-one.svg",
+    "imageUrl": "/assets/rudeboys/badges/ONE_OF_ONE_HOLDER.svg",
     "isTransient": false
+  }, {
+    "key": "COLLECTOR",
+    "name": "Collector",
+    "description": "Owns 1-10 Rude Boys",
+    "imageUrl": "/assets/rudeboys/badges/COLLECTOR.svg",
+    "isTransient": true
+  }, {
+    "key": "HODLER",
+    "name": "Hodler",
+    "description": "Owns 11-20 Rude Boys",
+    "imageUrl": "/assets/rudeboys/badges/HODLER.svg",
+    "isTransient": true
+  }, {
+    "key": "DIAMOND_HANDS",
+    "name": "Diamonds Hands",
+    "description": "Owns 21-50 Rude Boys",
+    "imageUrl": "/assets/rudeboys/badges/DIAMOND_HANDS.svg",
+    "isTransient": true
+  }, {
+    "key": "ENTHUSIAST",
+    "name": "Enthusiast",
+    "description": "Owns more than 50 Rude Boys",
+    "imageUrl": "/assets/rudeboys/badges/ENTHUSIAST.svg",
+    "isTransient": true
+  }, {
+    "key": "SEEING_DOUBLE",
+    "name": "Seeing Double",
+    "description": "Owns 2 (or more) of the same Rude Boy",
+    "imageUrl": "/assets/rudeboys/badges/SEEING_DOUBLE.svg",
+    "isTransient": true
+  }, {
+    "key": "FIRST_TEN",
+    "name": "First Ten",
+    "description": "Owns 1 of the first 10 rude boys minted",
+    "imageUrl": "/assets/rudeboys/badges/FIRST_TEN.svg",
+    "isTransient": true
+  }, {
+    "key": "MEMBER_OF_MONTH",
+    "name": "Member Of The Month",
+    "description": "Member went above and beyond that month",
+    "imageUrl": "/assets/rudeboys/badges/MEMBER_OF_MONTH.svg",
+    "isTransient": true
+  }, {
+    "key": "SPECIAL_EDITION",
+    "name": "Special Edition",
+    "description": "Owns 1 or more special edition rude boys",
+    "imageUrl": "/assets/rudeboys/badges/SPECIAL_EDITION.svg",
+    "isTransient": true
   }],
   "isSuperCollection": false,
   "superCollectionMembersTableAddressMapping": null
